@@ -1,0 +1,12 @@
+# Supabase CLI configuration.
+# Link this repo to a project with:  supabase link --project-ref <ref>
+# Then apply schema with:            supabase db push
+# And seed with:                     supabase db reset   (local)  — runs seed.sql
+
+project_id = "vanguard-fashion"
+
+[db]
+major_version = 17
+
+[functions.validate-promo]
+verify_jwt = false

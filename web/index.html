@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+
+  <!-- Primary SEO meta. These defaults are overwritten per-route at runtime by
+       the SeoService (see lib/core/utils/seo_service.dart) so crawlers that do
+       execute JS receive product-specific titles/descriptions. -->
+  <title>Vanguard Fashion — Premium Designer Apparel</title>
+  <meta name="description"
+        content="Discover Vanguard Fashion: curated premium apparel with a seamless, responsive shopping experience across every device.">
+  <meta name="keywords"
+        content="fashion, premium clothing, designer apparel, cashmere, luxury e-commerce">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://vanguard.fashion/">
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Vanguard Fashion">
+  <meta property="og:title" content="Vanguard Fashion — Premium Designer Apparel">
+  <meta property="og:description"
+        content="Curated premium apparel with a seamless, responsive shopping experience.">
+  <meta property="og:image" content="icons/Icon-512.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- iOS meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Vanguard Fashion">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Preconnect to the Supabase Storage CDN for faster first image paint.
+       Replace with your project host, e.g. https://YOUR_PROJECT.supabase.co -->
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+  <link rel="preconnect" href="https://picsum.photos" crossorigin>
+
+  <style>
+    /* Brand splash shown while the Flutter engine boots. */
+    html, body { height: 100%; margin: 0; background: #0E0E10; }
+    #boot {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #F5F3EF; transition: opacity .4s ease;
+    }
+    #boot .brand { font-size: 28px; letter-spacing: 8px; font-weight: 300; text-transform: uppercase; }
+    #boot .rule { width: 48px; height: 1px; background: #C9A24B; }
+    #boot .spinner {
+      width: 26px; height: 26px; border: 2px solid rgba(201,162,75,.25);
+      border-top-color: #C9A24B; border-radius: 50%; animation: spin 900ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    body.flutter-ready #boot { opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id="boot">
+    <div class="brand">Vanguard</div>
+    <div class="rule"></div>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // Remove the boot splash once Flutter's first frame is rendered.
+    window.addEventListener('flutter-first-frame', function () {
+      document.body.classList.add('flutter-ready');
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

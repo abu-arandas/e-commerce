@@ -1,0 +1,52 @@
+name: vanguard_fashion
+description: >-
+  Vanguard Fashion — a premium, responsive Flutter Web e-commerce platform with
+  nested product variants, a dynamic promotions engine, and a Supabase backend.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  # Floor aligned to Flutter 3.24 (Dart 3.5): the theme APIs used here
+  # (CardThemeData, etc.) landed in 3.24. Caret ranges let `pub` resolve newer
+  # compatible package versions against whatever Flutter the developer has.
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: '>=3.24.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management & routing (GetX) — reactive Rx state + GetMaterialApp routing.
+  get: ^4.6.6
+
+  # Null-safe firstWhereOrNull / firstOrNull collection helpers.
+  collection: ^1.18.0
+
+  # Backend: Supabase (Auth, PostgreSQL, Storage, Edge Functions).
+  supabase_flutter: ^2.5.0
+
+  # Premium typography.
+  google_fonts: ^6.2.1
+
+  # High-resolution imagery with CDN caching (Supabase Storage / .webp).
+  cached_network_image: ^3.3.1
+
+  # Currency / date formatting.
+  intl: ^0.19.0
+
+  # Cupertino icon set used by the default template.
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Fashion imagery is served from Supabase Storage CDN in production; the
+  # assets folder is reserved for static brand marks and placeholders.
+  assets:
+    - assets/images/
+    - assets/icons/
