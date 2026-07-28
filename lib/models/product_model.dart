@@ -41,15 +41,24 @@ class Product {
 
   /// Lowest effective price across all variants (for "from $X" display).
   double get fromPrice {
-    final prices = allItems.map((i) => i.effectivePrice(basePrice)).toList();
-    if (prices.isEmpty) return basePrice;
-    return prices.reduce((a, b) => a < b ? a : b);
+    // ⚡ Bolt: Use a single loop to avoid allocating multiple iterables and lists
+    // especially important since this is called frequently during sorting.
+    double? min;
+    for (final i in allItems) {
+      final p = i.effectivePrice(basePrice);
+      if (min == null || p < min) min = p;
+    }
+    return min ?? basePrice;
   }
 
   double get maxPrice {
-    final prices = allItems.map((i) => i.effectivePrice(basePrice)).toList();
-    if (prices.isEmpty) return basePrice;
-    return prices.reduce((a, b) => a > b ? a : b);
+    // ⚡ Bolt: Single loop optimization without extra allocations
+    double? max;
+    for (final i in allItems) {
+      final p = i.effectivePrice(basePrice);
+      if (max == null || p > max) max = p;
+    }
+    return max ?? basePrice;
   }
 
   bool get hasPriceRange => (maxPrice - fromPrice).abs() > 0.001;
