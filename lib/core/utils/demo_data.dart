@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 
+import '../../models/order_model.dart';
 import '../../models/product_model.dart';
 import '../../models/promotion_model.dart';
 import '../../models/variant_model.dart';
@@ -214,35 +215,119 @@ abstract final class DemoData {
     ];
   }
 
+  /// Demo order fixtures for the fulfillment grid and dashboard. Lines carry a
+  /// category so revenue reporting behaves exactly as it does against Postgres.
+  static List<Order> orders() {
+    final now = DateTime.now();
+    return [
+      Order(
+        id: '0d1e5a10-1001-4aaa-8aaa-aaaaaaaaaaaa',
+        status: OrderStatus.paid,
+        subtotal: 434,
+        discountTotal: 86.8,
+        shippingTotal: 0,
+        grandTotal: 347.2,
+        promoCode: 'FALL20',
+        contactEmail: 'ada@example.com',
+        createdAt: now.subtract(const Duration(hours: 3)),
+        lines: const [
+          OrderLine(id: 'l1', productTitle: 'Cashmere Turtleneck', variantName: 'Midnight Blue', sizeLabel: 'M', sku: 'CASH-TURT-BLU-M', unitPrice: 245, quantity: 1, lineTotal: 245, category: 'Knitwear'),
+          OrderLine(id: 'l2', productTitle: 'Tailored Wool Trouser', variantName: 'Charcoal', sizeLabel: '32', sku: 'WOOL-TROU-CHR-32', unitPrice: 189, quantity: 1, lineTotal: 189, category: 'Trousers'),
+        ],
+      ),
+      Order(
+        id: '0d1e5a10-1002-4bbb-8bbb-bbbbbbbbbbbb',
+        status: OrderStatus.processing,
+        subtotal: 320,
+        discountTotal: 0,
+        shippingTotal: 12,
+        grandTotal: 332,
+        contactEmail: 'grace@example.com',
+        createdAt: now.subtract(const Duration(days: 1, hours: 2)),
+        lines: const [
+          OrderLine(id: 'l3', productTitle: 'Bias-Cut Silk Slip Dress', variantName: 'Onyx', sizeLabel: 'S', sku: 'SILK-SLIP-ONX-S', unitPrice: 320, quantity: 1, lineTotal: 320, category: 'Dresses'),
+        ],
+      ),
+      Order(
+        id: '0d1e5a10-1003-4ccc-8ccc-cccccccccccc',
+        status: OrderStatus.shipped,
+        subtotal: 410,
+        discountTotal: 0,
+        shippingTotal: 0,
+        grandTotal: 410,
+        contactEmail: 'linus@example.com',
+        trackingNumber: 'VF-TRACK-88213',
+        createdAt: now.subtract(const Duration(days: 2, hours: 5)),
+        lines: const [
+          OrderLine(id: 'l4', productTitle: 'Structured Cotton Trench', variantName: 'Sand', sizeLabel: 'M', sku: 'TRENCH-SND-M', unitPrice: 410, quantity: 1, lineTotal: 410, category: 'Outerwear'),
+        ],
+      ),
+      Order(
+        id: '0d1e5a10-1004-4ddd-8ddd-dddddddddddd',
+        status: OrderStatus.delivered,
+        subtotal: 490,
+        discountTotal: 15,
+        shippingTotal: 0,
+        grandTotal: 475,
+        promoCode: 'WELCOME15',
+        contactEmail: 'edsger@example.com',
+        createdAt: now.subtract(const Duration(days: 4)),
+        lines: const [
+          OrderLine(id: 'l5', productTitle: 'Cashmere Turtleneck', variantName: 'Crimson', sizeLabel: 'L', sku: 'CASH-TURT-CRM-L', unitPrice: 245, quantity: 2, lineTotal: 490, category: 'Knitwear'),
+        ],
+      ),
+    ];
+  }
+
   /// Local mirror of the SQL `validate_promotion` function for demo mode.
-  static PromoValidation validatePromo(String code, double subtotal, List<String> categories) {
-    final promo = promotions().where((p) => p.code.toUpperCase() == code.toUpperCase()).firstOrNull;
+  ///
+  /// Kept deliberately in lock-step with `supabase/migrations/0004_hardening.sql`
+  /// — in particular, a category-targeted promotion discounts only the lines in
+  /// those categories, never the whole bag.
+  static PromoValidation validatePromo(String code, List<PromoLine> lines) {
+    final promo = promotions()
+        .where((p) => p.code.toUpperCase() == code.toUpperCase())
+        .firstOrNull;
     if (promo == null) return PromoValidation.invalid('Code not found');
     if (!promo.isActive) return PromoValidation.invalid('Promotion inactive');
     if (promo.isScheduled) return PromoValidation.invalid('Promotion not yet active');
     if (promo.isExpired) return PromoValidation.invalid('Promotion expired');
     if (promo.usageExhausted) return PromoValidation.invalid('Usage limit reached');
+
+    final subtotal = lines.fold(0.0, (sum, l) => sum + l.lineTotal);
     if (subtotal < promo.minOrderValue) {
-      return PromoValidation.invalid('Requires a minimum order of \$${promo.minOrderValue.toStringAsFixed(0)}');
+      return PromoValidation.invalid(
+          'Requires a minimum order of \$${promo.minOrderValue.toStringAsFixed(0)}');
     }
-    if (promo.includedCategories.isNotEmpty &&
-        !categories.any(promo.includedCategories.contains)) {
-      return PromoValidation.invalid('No eligible items in cart');
-    }
+
+    // Excluded categories disqualify the promotion outright.
     if (promo.excludedCategories.isNotEmpty &&
-        categories.any(promo.excludedCategories.contains)) {
+        lines.any((l) => l.category != null &&
+            promo.excludedCategories.contains(l.category))) {
       return PromoValidation.invalid('Cart contains excluded items');
+    }
+
+    // The discount base is the eligible lines only, not the whole subtotal.
+    final eligibleBase = promo.includedCategories.isEmpty
+        ? subtotal
+        : lines
+            .where((l) =>
+                l.category != null && promo.includedCategories.contains(l.category))
+            .fold(0.0, (sum, l) => sum + l.lineTotal);
+
+    if (promo.includedCategories.isNotEmpty && eligibleBase <= 0) {
+      return PromoValidation.invalid('No eligible items in cart');
     }
 
     double discount = 0;
     bool freeShip = false;
     switch (promo.discountType) {
       case DiscountType.percentage:
-        discount = (subtotal * promo.discountValue / 100);
-        discount = double.parse(discount.toStringAsFixed(2));
+        discount = _round2(eligibleBase * promo.discountValue / 100);
         break;
       case DiscountType.fixedAmount:
-        discount = promo.discountValue < subtotal ? promo.discountValue : subtotal;
+        discount = _round2(
+            promo.discountValue < eligibleBase ? promo.discountValue : eligibleBase);
         break;
       case DiscountType.freeShipping:
         freeShip = true;
@@ -258,4 +343,6 @@ abstract final class DemoData {
       description: promo.description,
     );
   }
+
+  static double _round2(double v) => (v * 100).roundToDouble() / 100;
 }

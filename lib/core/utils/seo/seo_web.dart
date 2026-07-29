@@ -45,7 +45,9 @@ void _setCanonical(String path) {
 
 _Element? _appendHead(String tag, Map<String, String> attrs) {
   final el = _document.createElement(tag);
-  attrs.forEach(el.setAttribute);
+  // Called through an explicit closure: tearing off an external extension-type
+  // interop member (`attrs.forEach(el.setAttribute)`) is rejected by dart2js.
+  attrs.forEach((name, value) => el.setAttribute(name, value));
   _document.head?.appendChild(el);
   return el;
 }

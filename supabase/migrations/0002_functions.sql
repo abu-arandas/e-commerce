@@ -2,6 +2,11 @@
 -- Vanguard Fashion — 0002 business-logic functions
 -- Server-authoritative pricing, promo validation, and atomic checkout so the
 -- exact nested SKU stock decrements when an order is placed (PRD §3.2).
+--
+-- NOTE: `validate_promotion`, `place_order` and `restock_order` below are
+-- SUPERSEDED by 0004_hardening.sql, which fixes client-controlled shipping,
+-- category-scoped discounts, the usage-limit race, lock ordering, and restock
+-- idempotency. Apply 0004; do not treat the definitions here as current.
 -- ============================================================================
 
 -- Role helper used by RLS policies (0003). SECURITY DEFINER so it can read the

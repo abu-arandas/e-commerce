@@ -6,8 +6,10 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/app_constants.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/uuid.dart';
 import '../../models/product_model.dart';
 import '../../models/variant_model.dart';
+import '../shared/ui_kit.dart';
 import 'admin_scaffold.dart';
 
 /// Catalog CMS (PRD §3.2 "Complex Catalog Entry"): list products, toggle
@@ -32,29 +34,38 @@ class ProductManagerView extends StatelessWidget {
       ],
       child: Obx(() {
         final products = admin.products;
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.inkSoft,
-            borderRadius: const BorderRadius.all(AppSpacing.rMd),
-            border: Border.all(color: const Color(0xFF2A2A30)),
-          ),
-          child: Column(
-            children: [
-              const _HeaderRow(),
-              for (final p in products)
-                _ProductRow(
-                  product: p,
-                  onToggle: () => admin.toggleProductActive(p),
-                  onEdit: () => _openEditor(context, admin, p),
-                  onDelete: () => _confirmDelete(context, admin, p),
-                ),
-              if (products.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(AppSpacing.xl),
-                  child: Text('No products yet.', style: TextStyle(color: AppColors.textMutedOnInk)),
-                ),
-            ],
-          ),
+        return Column(
+          children: [
+            ErrorBanner(
+              message: admin.error.value,
+              onDismiss: () => admin.error.value = '',
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.inkSoft,
+                borderRadius: const BorderRadius.all(AppSpacing.rMd),
+                border: Border.all(color: AppColors.inkLine),
+              ),
+              child: Column(
+                children: [
+                  const _HeaderRow(),
+                  for (final p in products)
+                    _ProductRow(
+                      product: p,
+                      onToggle: () => admin.toggleProductActive(p),
+                      onEdit: () => _openEditor(context, admin, p),
+                      onDelete: () => _confirmDelete(context, admin, p),
+                    ),
+                  if (products.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(AppSpacing.xl),
+                      child: Text('No products yet.',
+                          style: TextStyle(color: AppColors.textMutedOnInk)),
+                    ),
+                ],
+              ),
+            ),
+          ],
         );
       }),
     );
@@ -67,26 +78,30 @@ class ProductManagerView extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, AdminController admin, Product p) {
-    showDialog<void>(
+  Future<void> _confirmDelete(
+      BuildContext context, AdminController admin, Product p) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.inkSoft,
         title: const Text('Delete product?'),
         content: Text('“${p.title}” and all its variants will be removed.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
           ElevatedButton(
-            onPressed: () {
-              admin.deleteProduct(p.id);
-              Navigator.pop(ctx);
-            },
+            onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
             child: const Text('Delete'),
           ),
         ],
       ),
     );
+    if (confirmed == true) {
+      // Failures surface through `admin.error` in the banner above the table.
+      await admin.deleteProduct(p.id);
+    }
   }
 }
 
@@ -99,7 +114,7 @@ class _HeaderRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF2A2A30))),
+        border: Border(bottom: BorderSide(color: AppColors.inkLine)),
       ),
       child: Row(
         children: [
@@ -133,7 +148,7 @@ class _ProductRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF23232A))),
+        border: Border(bottom: BorderSide(color: AppColors.inkLineSoft)),
       ),
       child: Row(
         children: [
@@ -160,7 +175,6 @@ class _ProductRow extends StatelessWidget {
             flex: 2,
             child: Switch(
               value: product.isActive,
-              activeColor: AppColors.gold,
               onChanged: (_) => onToggle(),
             ),
           ),
@@ -199,6 +213,7 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
   late TextEditingController _price;
   late TextEditingController _description;
   late List<VariantGroup> _groups;
+  String _formError = '';
 
   @override
   void initState() {
@@ -222,22 +237,46 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
 
   String _slugify(String s) => s.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 
-  void _save() {
-    final base = double.tryParse(_price.text.trim()) ?? 0;
+  String? _validate() {
+    if (_title.text.trim().isEmpty) return 'A title is required.';
+    if (double.tryParse(_price.text.trim()) == null) {
+      return 'Base price must be a number.';
+    }
+    final slug = _slug.text.trim().isEmpty ? _slugify(_title.text) : _slug.text.trim();
+    if (slug.isEmpty) return 'Could not derive a URL slug from that title.';
+    return null;
+  }
+
+  Future<void> _save() async {
+    final problem = _validate();
+    if (problem != null) {
+      setState(() => _formError = problem);
+      return;
+    }
+    setState(() => _formError = '');
+
     final slug = _slug.text.trim().isEmpty ? _slugify(_title.text) : _slug.text.trim();
     final product = Product(
-      id: widget.existing?.id ?? 'new-${DateTime.now().microsecondsSinceEpoch}',
+      // New rows get a real UUID: `products.id` is a uuid column, so an
+      // arbitrary string would be rejected outright by Postgres.
+      id: widget.existing?.id ?? Uuid.v4(),
       slug: slug,
       title: _title.text.trim(),
       description: _description.text.trim(),
       category: _category.text.trim().isEmpty ? null : _category.text.trim(),
-      basePrice: base,
+      basePrice: double.parse(_price.text.trim()),
       isActive: widget.existing?.isActive ?? true,
       isFeatured: widget.existing?.isFeatured ?? false,
       groups: _groups,
     );
-    widget.admin.saveProduct(product);
-    Navigator.pop(context);
+
+    final saved = await widget.admin.saveProduct(product);
+    if (!mounted) return;
+    if (saved) {
+      Navigator.pop(context);
+    } else {
+      setState(() => _formError = widget.admin.error.value);
+    }
   }
 
   Future<void> _addGroup() async {
@@ -254,13 +293,16 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
       context: context,
       builder: (_) => const _BulkVariantDialog(),
     );
-    if (result == null) return;
+    if (result == null || !mounted) return;
+    // Additive: existing sizes are kept and colliding SKUs skipped, so running
+    // the generator a second time tops up rather than wipes the group.
     final items = widget.admin.generateVariants(
       groupId: group.id,
       skuPrefix: result.skuPrefix,
       sizes: result.sizes,
       stockPerSize: result.stock,
       priceOverride: result.priceOverride,
+      existing: group.items,
     );
     setState(() => _groups[groupIndex] = group.copyWith(items: items));
   }
@@ -328,16 +370,26 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
+              ErrorBanner(message: _formError),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
                   const SizedBox(width: AppSpacing.sm),
-                  ElevatedButton(
-                    onPressed: _save,
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.gold, foregroundColor: AppColors.ink),
-                    child: const Text('Save product'),
-                  ),
+                  Obx(() => ElevatedButton(
+                        onPressed: widget.admin.isSaving.value ? null : _save,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.gold,
+                            foregroundColor: AppColors.ink),
+                        child: widget.admin.isSaving.value
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: AppColors.ink),
+                              )
+                            : const Text('Save product'),
+                      )),
                 ],
               ),
             ],
@@ -355,7 +407,7 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
       decoration: BoxDecoration(
         color: AppColors.ink,
         borderRadius: const BorderRadius.all(AppSpacing.rSm),
-        border: Border.all(color: const Color(0xFF2A2A30)),
+        border: Border.all(color: AppColors.inkLine),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,9 +417,9 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
               Container(
                 width: 18, height: 18,
                 decoration: BoxDecoration(
-                  color: _hexColor(g.colorHex),
+                  color: AppColors.fromHex(g.colorHex),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF2A2A30)),
+                  border: Border.all(color: AppColors.inkLine),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -408,12 +460,6 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
     );
   }
 
-  Color _hexColor(String? hex) {
-    final h = hex?.replaceFirst('#', '');
-    if (h == null || h.length != 6) return AppColors.mist;
-    final v = int.tryParse('FF$h', radix: 16);
-    return v == null ? AppColors.mist : Color(v);
-  }
 }
 
 class _ColorGroupDialog extends StatefulWidget {
@@ -455,7 +501,8 @@ class _ColorGroupDialogState extends State<_ColorGroupDialog> {
             Navigator.pop(
               context,
               VariantGroup(
-                id: 'grp-${DateTime.now().microsecondsSinceEpoch}',
+                // A real UUID: `variant_groups.id` is a uuid column.
+                id: Uuid.v4(),
                 productId: '',
                 name: _name.text.trim(),
                 colorHex: _hex.text.trim(),

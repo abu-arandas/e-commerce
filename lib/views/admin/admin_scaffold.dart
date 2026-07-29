@@ -86,7 +86,7 @@ class _TopBar extends StatelessWidget {
       height: 68,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFF2A2A30))),
+        border: Border(bottom: BorderSide(color: AppColors.inkLine)),
       ),
       child: Row(
         children: [
@@ -109,7 +109,7 @@ class _NavList extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.inkSoft,
-        border: Border(right: BorderSide(color: Color(0xFF2A2A30))),
+        border: Border(right: BorderSide(color: AppColors.inkLine)),
       ),
       child: SafeArea(
         child: Column(
@@ -133,7 +133,7 @@ class _NavList extends StatelessWidget {
             for (final item in _adminNav)
               _NavTile(item: item, active: current.startsWith(item.route) && (item.route != AppRoutes.adminDashboard || current == item.route)),
             const Spacer(),
-            const Divider(color: Color(0xFF2A2A30)),
+            const Divider(color: AppColors.inkLine),
             Obx(() => ListTile(
                   leading: const Icon(Icons.person_outline, color: AppColors.textMutedOnInk),
                   title: Text(auth.user.value?.displayName ?? 'Staff',
@@ -185,7 +185,10 @@ class _NavTile extends StatelessWidget {
             if (Scaffold.maybeOf(context)?.hasDrawer ?? false) {
               Navigator.of(context).maybePop();
             }
-            if (Get.currentRoute != item.route) Get.toNamed(item.route);
+            // Lateral moves within the back-office replace rather than stack:
+            // Dashboard → Products → Orders should leave one entry to go back
+            // to, not four.
+            if (Get.currentRoute != item.route) Get.offNamed(item.route);
           },
         ),
       ),

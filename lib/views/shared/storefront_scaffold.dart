@@ -147,17 +147,17 @@ class AppFooter extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                       Row(
                         children: [
-                          Expanded(
+                          const Expanded(
                             child: TextField(
-                              style: const TextStyle(color: AppColors.textOnInk),
+                              style: TextStyle(color: AppColors.textOnInk),
                               decoration: InputDecoration(
                                 hintText: 'Email address',
-                                hintStyle: const TextStyle(color: AppColors.textMutedOnInk),
+                                hintStyle: TextStyle(color: AppColors.textMutedOnInk),
                                 filled: true,
                                 fillColor: AppColors.inkSoft,
-                                enabledBorder: const OutlineInputBorder(
+                                enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.all(AppSpacing.rSm),
-                                  borderSide: BorderSide(color: Color(0xFF2A2A30)),
+                                  borderSide: BorderSide(color: AppColors.inkLine),
                                 ),
                               ),
                             ),
@@ -178,7 +178,7 @@ class AppFooter extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
-            const Divider(color: Color(0xFF2A2A30)),
+            const Divider(color: AppColors.inkLine),
             const SizedBox(height: AppSpacing.md),
             Text('© $year ${AppConstants.appName}. All rights reserved.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),

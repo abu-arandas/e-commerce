@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:get/get.dart';
 
+import '../core/routes/app_routes.dart';
 import '../core/utils/app_constants.dart';
+import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/product_model.dart';
@@ -43,7 +45,7 @@ class CatalogController extends GetxController {
       if (SupabaseService.isReady) {
         final rows = await SupabaseService.client
             .from(AppConstants.tblProducts)
-            .select('*, variant_groups(*, variant_items(*))')
+            .select(AppConstants.productTree)
             .eq('is_active', true)
             .order('created_at');
         products.assignAll(
@@ -126,13 +128,21 @@ class CatalogController extends GetxController {
   /// the variant selection. [preselectColorSlug] supports deep links
   /// (`?color=midnight-blue`).
   Future<Product?> loadProduct(String slug, {String? preselectColorSlug}) async {
+    // Drop the previous product first, otherwise navigating between two product
+    // pages renders the old one until the new one resolves.
+    if (selected.value?.slug != slug) {
+      selected.value = null;
+      selectedGroup.value = null;
+      selectedItem.value = null;
+    }
+
     Product? product = products.firstWhereOrNull((p) => p.slug == slug);
 
     if (product == null && SupabaseService.isReady) {
       try {
         final row = await SupabaseService.client
             .from(AppConstants.tblProducts)
-            .select('*, variant_groups(*, variant_items(*))')
+            .select(AppConstants.productTree)
             .eq('slug', slug)
             .maybeSingle();
         if (row != null) {
@@ -163,8 +173,22 @@ class CatalogController extends GetxController {
         items.firstWhereOrNull((i) => i.inStock) ?? items.firstOrNull;
   }
 
-  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1).
-  void selectGroup(VariantGroup group) => _applyGroup(group);
+  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1)
+  /// and reflect the choice in the address bar so the exact colour is
+  /// shareable, matching the `?color=` link the page accepts on the way in.
+  ///
+  /// `replaceState` is used rather than a route push: the selection is not a
+  /// separate destination, and pushing would trap the shopper behind one back
+  /// press per swatch they tried.
+  void selectGroup(VariantGroup group) {
+    _applyGroup(group);
+    final product = selected.value;
+    if (product != null) {
+      Browser.replaceUrl(
+        AppRoutes.productPath(product.slug, colorSlug: group.slug),
+      );
+    }
+  }
 
   /// User picked a size within the current colour.
   void selectSize(VariantItem item) {

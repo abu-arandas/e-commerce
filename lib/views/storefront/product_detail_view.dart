@@ -7,9 +7,11 @@ import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/utils/app_constants.dart';
 import '../../core/utils/bootstrap5.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/seo/seo_service.dart';
+import '../../core/utils/store_settings.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
 import '../shared/variant_selector.dart';
@@ -275,15 +277,19 @@ class _AssuranceRow extends StatelessWidget {
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
         );
-    return Wrap(
-      spacing: AppSpacing.lg,
-      runSpacing: AppSpacing.xs,
-      children: [
-        item(Icons.local_shipping_outlined, 'Free shipping over \$150'),
-        item(Icons.autorenew, '30-day returns'),
-        item(Icons.verified_outlined, 'Authenticity guaranteed'),
-      ],
-    );
+    return Obx(() => Wrap(
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.xs,
+          children: [
+            item(
+              Icons.local_shipping_outlined,
+              'Free shipping over '
+              '${Formatters.priceTrim(StoreSettings.freeShippingThreshold.value)}',
+            ),
+            item(Icons.autorenew, '${AppConstants.freeReturnsDays}-day returns'),
+            item(Icons.verified_outlined, 'Authenticity guaranteed'),
+          ],
+        ));
   }
 }
 
@@ -313,11 +319,13 @@ class _Accordion extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Text(
-                  'Complimentary carbon-neutral shipping on orders over \$150. Returns accepted '
-                  'within 30 days in original condition.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                child: Obx(() => Text(
+                      'Complimentary carbon-neutral shipping on orders over '
+                      '${Formatters.priceTrim(StoreSettings.freeShippingThreshold.value)}. '
+                      'Returns accepted within ${AppConstants.freeReturnsDays} days '
+                      'in original condition.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    )),
               ),
             ],
           ),

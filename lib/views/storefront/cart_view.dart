@@ -6,8 +6,8 @@ import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/bootstrap5.dart';
-import '../../core/utils/env.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/store_settings.dart';
 import '../../models/cart_item_model.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
@@ -173,7 +173,9 @@ class _OrderSummaryState extends State<_OrderSummary> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
-                  value: (cart.subtotal / Env.freeShippingThreshold).clamp(0, 1).toDouble(),
+                  value: (cart.subtotal / StoreSettings.freeShippingThreshold.value)
+                      .clamp(0, 1)
+                      .toDouble(),
                   minHeight: 6,
                   backgroundColor: AppColors.surfaceAlt,
                   color: AppColors.gold,

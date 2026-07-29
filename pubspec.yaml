@@ -6,14 +6,22 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  # Floor aligned to Flutter 3.24 (Dart 3.5): the theme APIs used here
-  # (CardThemeData, etc.) landed in 3.24. Caret ranges let `pub` resolve newer
+  # Floor aligned to Flutter 3.35 (Dart 3.9). That is where the non-deprecated
+  # forms of the APIs used here are available — `DropdownButtonFormField
+  # .initialValue`, the `WidgetStateProperty` switch theming, and the
+  # wide-gamut `Color` model — so the project analyzes clean rather than
+  # carrying deprecation warnings. Caret ranges let `pub` resolve newer
   # compatible package versions against whatever Flutter the developer has.
-  sdk: '>=3.5.0 <4.0.0'
-  flutter: '>=3.24.0'
+  sdk: '>=3.9.0 <4.0.0'
+  flutter: '>=3.35.0'
 
 dependencies:
   flutter:
+    sdk: flutter
+
+  # Path-based (hash-free) URL strategy for web. Ships with the SDK but must
+  # still be declared explicitly to be importable.
+  flutter_web_plugins:
     sdk: flutter
 
   # State management & routing (GetX) — reactive Rx state + GetMaterialApp routing.
@@ -23,7 +31,8 @@ dependencies:
   collection: ^1.18.0
 
   # Backend: Supabase (Auth, PostgreSQL, Storage, Edge Functions).
-  supabase_flutter: ^2.5.0
+  # 2.16+ for `Supabase.initialize(publishableKey:)`; `anonKey` is deprecated.
+  supabase_flutter: ^2.16.0
 
   # Premium typography.
   google_fonts: ^6.2.1

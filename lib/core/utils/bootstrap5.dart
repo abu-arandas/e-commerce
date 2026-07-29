@@ -1,15 +1,14 @@
-import 'package:flutter/widgets.dart';
-
 /// A faithful, Dart-3 / Wasm-compatible re-implementation of the Bootstrap 5
 /// responsive grid (container / row / column) used throughout Vanguard Fashion.
 ///
 /// ─────────────────────────────────────────────────────────────────────────
 /// Why this exists instead of the `flutter_bootstrap5` pub package
 /// ─────────────────────────────────────────────────────────────────────────
-/// The PRD names `flutter_bootstrap5`, but that package (v1.1.1) is pinned to
-/// Dart `>=2.17 <3.0.0`, which is irreconcilable with `supabase_flutter` 2.x
-/// and modern GetX (both require Dart 3) and with the PRD's Wasm-compilation
-/// requirement (§6.1). Rather than ship a project that cannot even `pub get`,
+/// The PRD names `flutter_bootstrap5`, but that package (v1.1.1) carries an SDK
+/// constraint that stops below Dart 3, which is irreconcilable with
+/// `supabase_flutter` 2.x and modern GetX (both require Dart 3) and with the
+/// PRD's Wasm-compilation requirement (§6.1). Rather than ship a project that
+/// cannot even `pub get`,
 /// the grid is implemented here with the same public API (`FB5Container`,
 /// `FB5Row`, `FB5Col`), the same 12-column semantics, the same `col-{bp}-{n}`
 /// className grammar, and the exact PRD breakpoints (§6.2).
@@ -17,6 +16,8 @@ import 'package:flutter/widgets.dart';
 /// Breakpoints (min viewport width, PRD §6.2):
 ///   xs < 576 · sm ≥ 576 · md ≥ 768 · lg ≥ 992 · xl ≥ 1200 · xxl ≥ 1400
 library;
+
+import 'package:flutter/widgets.dart';
 
 /// The six Bootstrap breakpoints, ordered smallest → largest.
 enum Fb5Breakpoint {
@@ -32,8 +33,8 @@ enum Fb5Breakpoint {
   /// Inclusive lower bound of the breakpoint band, in logical pixels.
   final double minWidth;
 
-  bool operator >=(Fb5Breakpoint other) => index >= other.index;
-  bool operator <=(Fb5Breakpoint other) => index <= other.index;
+  /// Whether this band is at least as wide as [other] (`>= md` etc.).
+  bool atLeast(Fb5Breakpoint other) => index >= other.index;
 }
 
 /// Static helpers for resolving breakpoints and responsive values.
@@ -92,9 +93,9 @@ abstract final class Fb5 {
     return resolved;
   }
 
-  static bool isMobile(BuildContext context) => of(context).index < Fb5Breakpoint.md.index;
+  static bool isMobile(BuildContext context) => !of(context).atLeast(Fb5Breakpoint.md);
   static bool isTablet(BuildContext context) => of(context) == Fb5Breakpoint.md;
-  static bool isDesktop(BuildContext context) => of(context).index >= Fb5Breakpoint.lg.index;
+  static bool isDesktop(BuildContext context) => of(context).atLeast(Fb5Breakpoint.lg);
 }
 
 /// Convenience extension mirroring `BootstrapTheme.of(context)` ergonomics.
@@ -323,15 +324,4 @@ class FB5Container extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Rebuilds when the viewport breakpoint changes — handy for swapping whole
-/// layouts (e.g. hamburger vs. inline nav) rather than resizing columns.
-class Fb5BreakpointBuilder extends StatelessWidget {
-  const Fb5BreakpointBuilder({super.key, required this.builder});
-
-  final Widget Function(BuildContext context, Fb5Breakpoint breakpoint) builder;
-
-  @override
-  Widget build(BuildContext context) => builder(context, context.breakpoint);
 }

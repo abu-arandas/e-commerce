@@ -98,6 +98,14 @@ class Product {
         'is_featured': isFeatured,
       };
 
+  /// Full payload for the `save_product` RPC: the product plus its entire
+  /// nested variant tree, saved in one transaction. A plain table upsert would
+  /// silently drop colour groups and SKUs, since [toJson] carries neither.
+  Map<String, dynamic> toRpcJson() => {
+        ...toJson(),
+        'groups': groups.map((g) => g.toRpcJson()).toList(),
+      };
+
   Product copyWith({
     String? title,
     String? description,

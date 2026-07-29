@@ -9,6 +9,12 @@ import '../models/user_model.dart';
 /// configured; in demo mode it supports a "Preview as…" path so the role-gated
 /// admin panels remain reachable.
 class AuthController extends GetxController {
+  AuthController({this.onSignedOut});
+
+  /// Invoked whenever the session ends, so per-account state (order history)
+  /// can be discarded without this controller depending on it.
+  final void Function()? onSignedOut;
+
   final Rxn<AppUser> user = Rxn<AppUser>();
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
@@ -34,6 +40,7 @@ class AuthController extends GetxController {
         _loadProfile(session!.user.id, session.user.email);
       } else {
         user.value = null;
+        onSignedOut?.call();
       }
     });
   }
@@ -118,6 +125,7 @@ class AuthController extends GetxController {
       await SupabaseService.auth.signOut();
     }
     user.value = null;
+    onSignedOut?.call();
   }
 
   /// Demo-only: preview a staff persona without a backend so the admin panels

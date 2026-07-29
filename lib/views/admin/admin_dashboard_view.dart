@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/utils/bootstrap5.dart';
 import '../../core/utils/formatters.dart';
 import '../../models/order_model.dart';
+import '../shared/ui_kit.dart';
 import 'admin_scaffold.dart';
 
 class AdminDashboardView extends StatelessWidget {
@@ -25,7 +26,7 @@ class AdminDashboardView extends StatelessWidget {
           label: const Text('Refresh'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textOnInk,
-            side: const BorderSide(color: Color(0xFF2A2A30)),
+            side: const BorderSide(color: AppColors.inkLine),
           ),
         ),
       ],
@@ -33,6 +34,10 @@ class AdminDashboardView extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            ErrorBanner(
+              message: admin.error.value,
+              onDismiss: () => admin.error.value = '',
+            ),
             // KPI row.
             FB5Row(
               classNames: 'gx-3 gy-3',
@@ -72,7 +77,7 @@ class AdminDashboardView extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.inkSoft,
             borderRadius: const BorderRadius.all(AppSpacing.rMd),
-            border: Border.all(color: const Color(0xFF2A2A30)),
+            border: Border.all(color: AppColors.inkLine),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +107,7 @@ class _Panel extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.inkSoft,
         borderRadius: const BorderRadius.all(AppSpacing.rMd),
-        border: Border.all(color: const Color(0xFF2A2A30)),
+        border: Border.all(color: AppColors.inkLine),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -262,29 +267,46 @@ class _StatusPill extends StatelessWidget {
   const _StatusPill({required this.status});
   final OrderStatus status;
 
-  Color get _color => switch (status) {
-        OrderStatus.pending => AppColors.warning,
-        OrderStatus.paid => AppColors.info,
-        OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped => AppColors.gold,
-        OrderStatus.delivered => AppColors.success,
-        OrderStatus.cancelled => AppColors.danger,
-        OrderStatus.refunded => AppColors.danger,
+  /// (text, fill, border) per status — see [AppColors] for why the translucent
+  /// values are constants rather than derived at runtime.
+  (Color, Color, Color) get _palette => switch (status) {
+        OrderStatus.pending => (
+            AppColors.warning,
+            AppColors.warningTint,
+            AppColors.warningEdge
+          ),
+        OrderStatus.paid ||
+        OrderStatus.processing =>
+          (AppColors.info, AppColors.infoTint, AppColors.infoEdge),
+        OrderStatus.shipped => (
+            AppColors.gold,
+            AppColors.goldTint,
+            AppColors.goldEdge
+          ),
+        OrderStatus.delivered => (
+            AppColors.success,
+            AppColors.successTint,
+            AppColors.successEdge
+          ),
+        OrderStatus.cancelled ||
+        OrderStatus.refunded =>
+          (AppColors.danger, AppColors.dangerTint, AppColors.dangerEdge),
       };
 
   @override
   Widget build(BuildContext context) {
+    final (text, fill, border) = _palette;
     return Align(
       alignment: Alignment.center,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
         decoration: BoxDecoration(
-          color: _color.withOpacity(0.16),
+          color: fill,
           borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          border: Border.all(color: _color.withOpacity(0.5)),
+          border: Border.all(color: border),
         ),
         child: Text(status.label,
-            style: TextStyle(color: _color, fontSize: 11, fontWeight: FontWeight.w600)),
+            style: TextStyle(color: text, fontSize: 11, fontWeight: FontWeight.w600)),
       ),
     );
   }

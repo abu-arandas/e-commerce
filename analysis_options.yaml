@@ -1,11 +1,6 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  errors:
-    # Treat unused imports/elements as warnings, not build-blockers, during
-    # active development of the storefront and admin panels.
-    unused_import: warning
-    unused_element: warning
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"

@@ -7,7 +7,9 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/utils/bootstrap5.dart';
+import '../../core/utils/formatters.dart';
 import '../../core/utils/seo/seo_service.dart';
+import '../../core/utils/store_settings.dart';
 import '../shared/product_grid.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
@@ -94,11 +96,14 @@ class _AnnouncementBar extends StatelessWidget {
       width: double.infinity,
       color: AppColors.ink,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Text(
-        'Complimentary shipping over \$150  ·  Use code FALL20 for 20% off',
-        textAlign: TextAlign.center,
-        style: AppTypography.eyebrow(color: AppColors.goldSoft).copyWith(letterSpacing: 1.6),
-      ),
+      child: Obx(() => Text(
+            'Complimentary shipping over '
+            '${Formatters.priceTrim(StoreSettings.freeShippingThreshold.value)}'
+            '  ·  Use code FALL20 for 20% off',
+            textAlign: TextAlign.center,
+            style: AppTypography.eyebrow(color: AppColors.goldSoft)
+                .copyWith(letterSpacing: 1.6),
+          )),
     );
   }
 }
@@ -238,11 +243,11 @@ class _EditorialBand extends StatelessWidget {
       classNames: 'gx-5 gy-4',
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        FB5Col(
+        const FB5Col(
           classNames: 'col-12 col-lg-6',
           child: ClipRRect(
-            borderRadius: const BorderRadius.all(AppSpacing.rMd),
-            child: const VfImage(
+            borderRadius: BorderRadius.all(AppSpacing.rMd),
+            child: VfImage(
                 url: 'https://picsum.photos/seed/vf-editorial-craft/1000/800', aspectRatio: 5 / 4),
           ),
         ),

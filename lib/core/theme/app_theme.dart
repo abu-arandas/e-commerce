@@ -7,7 +7,7 @@ import 'app_typography.dart';
 /// Assembles the light (storefront) and dark (admin ink) [ThemeData].
 abstract final class AppTheme {
   static ThemeData get light {
-    final colorScheme = const ColorScheme.light(
+    const colorScheme = ColorScheme.light(
       primary: AppColors.ink,
       onPrimary: AppColors.textOnInk,
       secondary: AppColors.gold,
@@ -67,17 +67,17 @@ abstract final class AppTheme {
         filled: true,
         fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
-        border: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.line),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.line),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.line),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.line),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.gold, width: 1.5),
         ),
         labelStyle: base.textTheme.bodyMedium,
         hintStyle: base.textTheme.bodyMedium?.copyWith(color: AppColors.mist),
@@ -99,7 +99,7 @@ abstract final class AppTheme {
 
   /// Ink theme used for the admin panel — a focused, low-glare dark surface.
   static ThemeData get dark {
-    final colorScheme = const ColorScheme.dark(
+    const colorScheme = ColorScheme.dark(
       primary: AppColors.gold,
       onPrimary: AppColors.ink,
       secondary: AppColors.goldSoft,
@@ -116,7 +116,7 @@ abstract final class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.ink,
       textTheme: AppTypography.textTheme(AppColors.textOnInk, AppColors.textMutedOnInk),
-      dividerColor: const Color(0xFF2A2A30),
+      dividerColor: AppColors.inkLine,
     );
 
     return base.copyWith(
@@ -131,7 +131,42 @@ abstract final class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(AppSpacing.rMd)),
       ),
-      dividerTheme: const DividerThemeData(color: Color(0xFF2A2A30), thickness: 1, space: 1),
+      dividerTheme: const DividerThemeData(color: AppColors.inkLine, thickness: 1, space: 1),
+      // Themed here rather than per-widget: `Switch.activeColor` is deprecated
+      // on newer SDKs, and the theme route works across the supported range.
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.selected)
+                ? AppColors.gold
+                : AppColors.mist),
+        trackColor: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.selected)
+                ? AppColors.goldTint
+                : AppColors.inkSoft),
+        trackOutlineColor:
+            WidgetStateProperty.all(AppColors.inkLine),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.textOnInk,
+          side: const BorderSide(color: AppColors.inkLine),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(AppSpacing.rSm)),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.gold,
+          foregroundColor: AppColors.ink,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(AppSpacing.rSm)),
+        ),
+      ),
     );
   }
 }

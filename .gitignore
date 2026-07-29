@@ -34,7 +34,6 @@ unlinked.ds
 unlinked_spec.ds
 
 # Web
-lib/generated_plugin_registrant.dart
 
 # Environment / secrets — never commit real Supabase keys.
 .env

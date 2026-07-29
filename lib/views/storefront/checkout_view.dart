@@ -7,6 +7,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/bootstrap5.dart';
+import '../../models/user_model.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
 import 'cart_view.dart';
@@ -31,6 +32,11 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   late final CartController cart = Get.find<CartController>();
 
+  /// Set once an order succeeds. Placing an order empties the cart, which would
+  /// otherwise flash the "nothing to check out" state during the hand-off to
+  /// the confirmation page.
+  bool _placed = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,23 +57,40 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   Future<void> _placeOrder() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final address = Address(
+      id: '',
+      label: 'Shipping',
+      line1: _line1.text.trim(),
+      line2: _line2.text.trim().isEmpty ? null : _line2.text.trim(),
+      city: _city.text.trim(),
+      region: _region.text.trim().isEmpty ? null : _region.text.trim(),
+      postalCode: _postal.text.trim(),
+      country: _country.text.trim(),
+    );
+
     final order = await cart.placeOrder(
       contactEmail: _email.text.trim(),
       shippingAddress: {
+        ...address.toJson(),
         'full_name': _name.text.trim(),
-        'line1': _line1.text.trim(),
-        'line2': _line2.text.trim(),
-        'city': _city.text.trim(),
-        'region': _region.text.trim(),
-        'postal_code': _postal.text.trim(),
-        'country': _country.text.trim(),
       },
     );
+    if (!mounted) return;
     if (order != null) {
+      setState(() => _placed = true);
       Get.offNamed(AppRoutes.orderConfirmation, arguments: order);
     } else {
-      Get.snackbar('Checkout failed', cart.promoError.value.isNotEmpty ? cart.promoError.value : 'Please try again',
-          snackPosition: SnackPosition.BOTTOM, backgroundColor: AppColors.danger, colorText: Colors.white);
+      Get.snackbar(
+        'Checkout failed',
+        cart.checkoutError.value.isNotEmpty
+            ? cart.checkoutError.value
+            : 'Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.danger,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(AppSpacing.md),
+      );
     }
   }
 
@@ -78,7 +101,7 @@ class _CheckoutViewState extends State<CheckoutView> {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
         child: FB5Container(
           child: Obx(() {
-            if (cart.isEmpty) {
+            if (cart.isEmpty && !_placed) {
               return EmptyState(
                 icon: Icons.shopping_bag_outlined,
                 title: 'Nothing to check out',
@@ -101,6 +124,10 @@ class _CheckoutViewState extends State<CheckoutView> {
                         children: [
                           OrderSummaryPanel(cart: cart),
                           const SizedBox(height: AppSpacing.md),
+                          Obx(() => ErrorBanner(
+                                message: cart.checkoutError.value,
+                                onDismiss: () => cart.checkoutError.value = '',
+                              )),
                           Obx(() => GoldButton(
                                 label: 'Place order',
                                 expand: true,

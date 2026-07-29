@@ -25,17 +25,11 @@ abstract final class SupabaseService {
     }
     await Supabase.initialize(
       url: Env.supabaseUrl,
-      anonKey: Env.supabaseAnonKey,
+      publishableKey: Env.supabaseAnonKey,
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
       ),
     );
     _ready = true;
-  }
-
-  /// Public URL for an object in the products storage bucket.
-  static String? storageUrl(String path) {
-    if (!_ready) return null;
-    return client.storage.from('products').getPublicUrl(path);
   }
 }
