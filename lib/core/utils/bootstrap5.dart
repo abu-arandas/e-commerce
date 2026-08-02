@@ -1,3 +1,5 @@
+library;
+
 import 'package:flutter/widgets.dart';
 
 /// A faithful, Dart-3 / Wasm-compatible re-implementation of the Bootstrap 5
@@ -16,7 +18,6 @@ import 'package:flutter/widgets.dart';
 ///
 /// Breakpoints (min viewport width, PRD §6.2):
 ///   xs < 576 · sm ≥ 576 · md ≥ 768 · lg ≥ 992 · xl ≥ 1200 · xxl ≥ 1400
-library;
 
 /// The six Bootstrap breakpoints, ordered smallest → largest.
 enum Fb5Breakpoint {
@@ -253,8 +254,12 @@ class FB5Row extends StatelessWidget {
 
         final laidOut = <Widget>[];
         for (final child in children) {
-          final span = (child is FB5Col) ? child.resolveSpan(bp) : 12;
-          final offset = (child is FB5Col) ? child.resolveOffset(bp) : 0;
+          int span = 12;
+          int offset = 0;
+          if (child is FB5Col) {
+            span = child.resolveSpan(bp);
+            offset = child.resolveOffset(bp);
+          }
           // Subtract a hair to avoid float rounding pushing a full 12-row onto
           // a second line.
           final width = (unit * span) - 0.01;
