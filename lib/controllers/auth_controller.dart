@@ -88,7 +88,8 @@ class AuthController extends GetxController {
     error.value = '';
     try {
       if (!SupabaseService.isReady) {
-        user.value = AppUser(id: 'demo-customer', email: email, fullName: fullName);
+        user.value =
+            AppUser(id: 'demo-customer', email: email, fullName: fullName);
         return true;
       }
       final res = await SupabaseService.auth.signUp(

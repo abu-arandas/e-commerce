@@ -58,10 +58,16 @@ class _StickyCartBar extends StatelessWidget {
       return SafeArea(
         top: false,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md, vertical: AppSpacing.sm),
           decoration: const BoxDecoration(
             color: AppColors.ink,
-            boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 16, offset: Offset(0, -4))],
+            boxShadow: [
+              BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 16,
+                  offset: Offset(0, -4))
+            ],
           ),
           child: Row(
             children: [
@@ -70,9 +76,13 @@ class _StickyCartBar extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('${cart.itemCount} item(s)',
-                      style: const TextStyle(color: AppColors.textMutedOnInk, fontSize: 12)),
+                      style: const TextStyle(
+                          color: AppColors.textMutedOnInk, fontSize: 12)),
                   Text(Formatters.price(cart.grandTotal),
-                      style: const TextStyle(color: AppColors.textOnInk, fontSize: 16, fontWeight: FontWeight.w700)),
+                      style: const TextStyle(
+                          color: AppColors.textOnInk,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700)),
                 ],
               ),
               const Spacer(),
@@ -117,23 +127,30 @@ class AppFooter extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('VANGUARD', style: AppTypography.wordmark(color: AppColors.textOnInk, size: 28)),
+                      Text('VANGUARD',
+                          style: AppTypography.wordmark(
+                              color: AppColors.textOnInk, size: 28)),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'Considered design, exceptional materials, and a shopping experience '
                         'that feels as premium as the pieces themselves.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMutedOnInk),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: AppColors.textMutedOnInk),
                       ),
                     ],
                   ),
                 ),
                 FB5Col(
                   classNames: 'col-6 col-md-3 col-lg-2',
-                  child: _links(context, 'Shop', const ['New in', 'Knitwear', 'Dresses', 'Outerwear']),
+                  child: _links(context, 'Shop',
+                      const ['New in', 'Knitwear', 'Dresses', 'Outerwear']),
                 ),
                 FB5Col(
                   classNames: 'col-6 col-md-3 col-lg-2',
-                  child: _links(context, 'Client care', const ['Contact', 'Shipping', 'Returns', 'Size guide']),
+                  child: _links(context, 'Client care',
+                      const ['Contact', 'Shipping', 'Returns', 'Size guide']),
                 ),
                 FB5Col(
                   classNames: 'col-12 col-lg-4',
@@ -143,31 +160,40 @@ class AppFooter extends StatelessWidget {
                       Text('THE EDIT', style: AppTypography.eyebrow()),
                       const SizedBox(height: AppSpacing.sm),
                       Text('New arrivals and private sales, first.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMutedOnInk)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: AppColors.textMutedOnInk)),
                       const SizedBox(height: AppSpacing.sm),
                       Row(
                         children: [
                           Expanded(
                             child: TextField(
-                              style: const TextStyle(color: AppColors.textOnInk),
+                              style:
+                                  const TextStyle(color: AppColors.textOnInk),
                               decoration: InputDecoration(
                                 hintText: 'Email address',
-                                hintStyle: const TextStyle(color: AppColors.textMutedOnInk),
+                                hintStyle: const TextStyle(
+                                    color: AppColors.textMutedOnInk),
                                 filled: true,
                                 fillColor: AppColors.inkSoft,
                                 enabledBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(AppSpacing.rSm),
-                                  borderSide: BorderSide(color: Color(0xFF2A2A30)),
+                                  borderRadius:
+                                      BorderRadius.all(AppSpacing.rSm),
+                                  borderSide:
+                                      BorderSide(color: Color(0xFF2A2A30)),
                                 ),
                               ),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           ElevatedButton(
-                            onPressed: () => Get.snackbar('Subscribed', 'Welcome to The Edit.',
+                            onPressed: () => Get.snackbar(
+                                'Subscribed', 'Welcome to The Edit.',
                                 snackPosition: SnackPosition.BOTTOM),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.gold, foregroundColor: AppColors.ink),
+                                backgroundColor: AppColors.gold,
+                                foregroundColor: AppColors.ink),
                             child: const Text('Join'),
                           ),
                         ],
@@ -181,7 +207,10 @@ class AppFooter extends StatelessWidget {
             const Divider(color: Color(0xFF2A2A30)),
             const SizedBox(height: AppSpacing.md),
             Text('© $year ${AppConstants.appName}. All rights reserved.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.textMutedOnInk)),
           ],
         ),
       ),
@@ -192,7 +221,8 @@ class AppFooter extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title.toUpperCase(), style: AppTypography.eyebrow(color: AppColors.textOnInk)),
+        Text(title.toUpperCase(),
+            style: AppTypography.eyebrow(color: AppColors.textOnInk)),
         const SizedBox(height: AppSpacing.sm),
         for (final item in items)
           Padding(
@@ -200,7 +230,10 @@ class AppFooter extends StatelessWidget {
             child: InkWell(
               onTap: () => Get.toNamed(AppRoutes.shop),
               child: Text(item,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMutedOnInk)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.textMutedOnInk)),
             ),
           ),
       ],

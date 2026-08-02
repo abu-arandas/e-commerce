@@ -18,7 +18,8 @@ class CatalogController extends GetxController {
 
   final RxnString categoryFilter = RxnString();
   final RxString searchQuery = ''.obs;
-  final RxString sort = 'featured'.obs; // featured | price_asc | price_desc | newest
+  final RxString sort =
+      'featured'.obs; // featured | price_asc | price_desc | newest
 
   // ---- Product detail + nested selection ----
   final Rxn<Product> selected = Rxn<Product>();
@@ -52,7 +53,8 @@ class CatalogController extends GetxController {
               .toList(),
         );
       } else {
-        await Future<void>.delayed(const Duration(milliseconds: 250)); // demo shimmer
+        await Future<void>.delayed(
+            const Duration(milliseconds: 250)); // demo shimmer
         products.assignAll(DemoData.products());
       }
     } catch (e) {
@@ -63,8 +65,7 @@ class CatalogController extends GetxController {
     }
   }
 
-  List<Product> get featured =>
-      products.where((p) => p.isFeatured).toList();
+  List<Product> get featured => products.where((p) => p.isFeatured).toList();
 
   /// Products after category filter, search, and sort are applied.
   List<Product> get visibleProducts {
@@ -125,7 +126,8 @@ class CatalogController extends GetxController {
   /// Load a product by slug (from the in-memory list, else fetch it), then seed
   /// the variant selection. [preselectColorSlug] supports deep links
   /// (`?color=midnight-blue`).
-  Future<Product?> loadProduct(String slug, {String? preselectColorSlug}) async {
+  Future<Product?> loadProduct(String slug,
+      {String? preselectColorSlug}) async {
     Product? product = products.firstWhereOrNull((p) => p.slug == slug);
 
     if (product == null && SupabaseService.isReady) {
@@ -186,7 +188,8 @@ class CatalogController extends GetxController {
   }
 
   // Derived selection state consumed by the detail view.
-  List<VariantItem> get availableSizes => selectedGroup.value?.sortedItems ?? const [];
+  List<VariantItem> get availableSizes =>
+      selectedGroup.value?.sortedItems ?? const [];
 
   List<String> get activeImages {
     final imgs = selectedGroup.value?.groupImages ?? const <String>[];

@@ -18,7 +18,8 @@ class AccountView extends StatelessWidget {
 
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.xl, horizontal: AppSpacing.md),
         child: FB5Container(
           child: Obx(() {
             final user = auth.user.value;
@@ -27,7 +28,9 @@ class AccountView extends StatelessWidget {
                 icon: Icons.person_outline,
                 title: 'You are signed out',
                 message: 'Sign in to view your profile and orders.',
-                action: GoldButton(label: 'Sign in', onPressed: () => Get.toNamed(AppRoutes.login)),
+                action: GoldButton(
+                    label: 'Sign in',
+                    onPressed: () => Get.toNamed(AppRoutes.login)),
               );
             }
             return Column(
@@ -56,16 +59,26 @@ class AccountView extends StatelessWidget {
                                   radius: 28,
                                   backgroundColor: AppColors.ink,
                                   child: Text(user.initials,
-                                      style: const TextStyle(color: AppColors.textOnInk, fontWeight: FontWeight.w700)),
+                                      style: const TextStyle(
+                                          color: AppColors.textOnInk,
+                                          fontWeight: FontWeight.w700)),
                                 ),
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(user.displayName, style: Theme.of(context).textTheme.titleLarge),
+                                      Text(user.displayName,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge),
                                       Text(user.email,
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate)),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                  color: AppColors.slate)),
                                     ],
                                   ),
                                 ),
@@ -79,7 +92,8 @@ class AccountView extends StatelessWidget {
                                 label: 'Open admin panel',
                                 expand: true,
                                 icon: Icons.dashboard_customize_outlined,
-                                onPressed: () => Get.toNamed(AppRoutes.adminDashboard),
+                                onPressed: () =>
+                                    Get.toNamed(AppRoutes.adminDashboard),
                               ),
                             const SizedBox(height: AppSpacing.xs),
                             OutlinedButton.icon(
@@ -106,7 +120,8 @@ class AccountView extends StatelessWidget {
                         child: const EmptyState(
                           icon: Icons.receipt_long_outlined,
                           title: 'No orders yet',
-                          message: 'Your order history will appear here once you make a purchase.',
+                          message:
+                              'Your order history will appear here once you make a purchase.',
                         ),
                       ),
                     ),

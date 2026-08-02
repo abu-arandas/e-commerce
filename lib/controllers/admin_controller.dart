@@ -108,11 +108,14 @@ class AdminController extends GetxController {
   int get totalSkus => products.fold(0, (sum, p) => sum + p.allItems.length);
 
   int get totalOrders => orders.length;
-  int get pendingOrders =>
-      orders.where((o) => o.status == OrderStatus.pending || o.status == OrderStatus.paid).length;
+  int get pendingOrders => orders
+      .where((o) =>
+          o.status == OrderStatus.pending || o.status == OrderStatus.paid)
+      .length;
 
   double get grossRevenue => orders
-      .where((o) => o.status != OrderStatus.cancelled && o.status != OrderStatus.refunded)
+      .where((o) =>
+          o.status != OrderStatus.cancelled && o.status != OrderStatus.refunded)
       .fold(0.0, (sum, o) => sum + o.grandTotal);
 
   double get averageOrderValue =>
@@ -147,7 +150,9 @@ class AdminController extends GetxController {
     // Demo/simple attribution: distribute each order's total across its lines'
     // products by matching titles to catalog categories.
     final byCat = <String, double>{};
-    final titleToCat = {for (final p in products) p.title: p.category ?? 'Other'};
+    final titleToCat = {
+      for (final p in products) p.title: p.category ?? 'Other'
+    };
     for (final o in orders) {
       for (final line in o.lines) {
         final cat = titleToCat[line.productTitle] ?? 'Other';
@@ -185,7 +190,10 @@ class AdminController extends GetxController {
 
   Future<void> deleteProduct(String id) async {
     if (SupabaseService.isReady) {
-      await SupabaseService.client.from(AppConstants.tblProducts).delete().eq('id', id);
+      await SupabaseService.client
+          .from(AppConstants.tblProducts)
+          .delete()
+          .eq('id', id);
     }
     products.removeWhere((p) => p.id == id);
   }
@@ -239,7 +247,10 @@ class AdminController extends GetxController {
 
   Future<void> deletePromotion(String id) async {
     if (SupabaseService.isReady) {
-      await SupabaseService.client.from(AppConstants.tblPromotions).delete().eq('id', id);
+      await SupabaseService.client
+          .from(AppConstants.tblPromotions)
+          .delete()
+          .eq('id', id);
     }
     promotions.removeWhere((p) => p.id == id);
   }
@@ -290,8 +301,24 @@ class AdminController extends GetxController {
         contactEmail: 'ada@example.com',
         createdAt: now.subtract(const Duration(hours: 3)),
         lines: const [
-          OrderLine(id: 'l1', productTitle: 'Cashmere Turtleneck', variantName: 'Midnight Blue', sizeLabel: 'M', sku: 'CASH-TURT-BLU-M', unitPrice: 245, quantity: 1, lineTotal: 245),
-          OrderLine(id: 'l2', productTitle: 'Tailored Wool Trouser', variantName: 'Charcoal', sizeLabel: '32', sku: 'WOOL-TROU-CHR-32', unitPrice: 189, quantity: 1, lineTotal: 189),
+          OrderLine(
+              id: 'l1',
+              productTitle: 'Cashmere Turtleneck',
+              variantName: 'Midnight Blue',
+              sizeLabel: 'M',
+              sku: 'CASH-TURT-BLU-M',
+              unitPrice: 245,
+              quantity: 1,
+              lineTotal: 245),
+          OrderLine(
+              id: 'l2',
+              productTitle: 'Tailored Wool Trouser',
+              variantName: 'Charcoal',
+              sizeLabel: '32',
+              sku: 'WOOL-TROU-CHR-32',
+              unitPrice: 189,
+              quantity: 1,
+              lineTotal: 189),
         ],
       ),
       Order(
@@ -304,7 +331,15 @@ class AdminController extends GetxController {
         contactEmail: 'grace@example.com',
         createdAt: now.subtract(const Duration(days: 1, hours: 2)),
         lines: const [
-          OrderLine(id: 'l3', productTitle: 'Bias-Cut Silk Slip Dress', variantName: 'Onyx', sizeLabel: 'S', sku: 'SILK-SLIP-ONX-S', unitPrice: 320, quantity: 1, lineTotal: 320),
+          OrderLine(
+              id: 'l3',
+              productTitle: 'Bias-Cut Silk Slip Dress',
+              variantName: 'Onyx',
+              sizeLabel: 'S',
+              sku: 'SILK-SLIP-ONX-S',
+              unitPrice: 320,
+              quantity: 1,
+              lineTotal: 320),
         ],
       ),
       Order(
@@ -318,7 +353,15 @@ class AdminController extends GetxController {
         trackingNumber: 'VF-TRACK-88213',
         createdAt: now.subtract(const Duration(days: 2, hours: 5)),
         lines: const [
-          OrderLine(id: 'l4', productTitle: 'Structured Cotton Trench', variantName: 'Sand', sizeLabel: 'M', sku: 'TRENCH-SND-M', unitPrice: 410, quantity: 1, lineTotal: 410),
+          OrderLine(
+              id: 'l4',
+              productTitle: 'Structured Cotton Trench',
+              variantName: 'Sand',
+              sizeLabel: 'M',
+              sku: 'TRENCH-SND-M',
+              unitPrice: 410,
+              quantity: 1,
+              lineTotal: 410),
         ],
       ),
       Order(
@@ -332,7 +375,15 @@ class AdminController extends GetxController {
         contactEmail: 'edsger@example.com',
         createdAt: now.subtract(const Duration(days: 4)),
         lines: const [
-          OrderLine(id: 'l5', productTitle: 'Cashmere Turtleneck', variantName: 'Crimson', sizeLabel: 'L', sku: 'CASH-TURT-CRM-L', unitPrice: 245, quantity: 2, lineTotal: 490),
+          OrderLine(
+              id: 'l5',
+              productTitle: 'Cashmere Turtleneck',
+              variantName: 'Crimson',
+              sizeLabel: 'L',
+              sku: 'CASH-TURT-CRM-L',
+              unitPrice: 245,
+              quantity: 2,
+              lineTotal: 490),
         ],
       ),
     ];

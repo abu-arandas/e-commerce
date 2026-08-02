@@ -42,9 +42,12 @@ enum AppRole {
       };
 
   bool get isStaff => this != AppRole.customer;
-  bool get canManageCatalog => this == AppRole.catalogManager || this == AppRole.admin;
-  bool get canManagePromotions => this == AppRole.marketingManager || this == AppRole.admin;
-  bool get canManageOrders => this == AppRole.fulfillment || this == AppRole.admin;
+  bool get canManageCatalog =>
+      this == AppRole.catalogManager || this == AppRole.admin;
+  bool get canManagePromotions =>
+      this == AppRole.marketingManager || this == AppRole.admin;
+  bool get canManageOrders =>
+      this == AppRole.fulfillment || this == AppRole.admin;
 }
 
 class AppUser {
@@ -63,7 +66,8 @@ class AppUser {
   final String? phone;
 
   String get displayName {
-    if (fullName != null && fullName!.trim().isNotEmpty) return fullName!.trim();
+    if (fullName != null && fullName!.trim().isNotEmpty)
+      return fullName!.trim();
     final handle = email.split('@').first;
     return handle.isEmpty ? 'Guest' : handle;
   }
@@ -71,7 +75,8 @@ class AppUser {
   String get initials {
     final n = displayName.trim();
     final parts = n.split(RegExp(r'\s+'));
-    if (parts.length >= 2) return (parts.first[0] + parts.last[0]).toUpperCase();
+    if (parts.length >= 2)
+      return (parts.first[0] + parts.last[0]).toUpperCase();
     return n.isNotEmpty ? n.substring(0, 1).toUpperCase() : '?';
   }
 
@@ -127,7 +132,9 @@ class Address {
     final parts = <String>[
       line1,
       if (line2 != null && line2!.isNotEmpty) line2!,
-      [city, region, postalCode].where((e) => e != null && e.isNotEmpty).join(', '),
+      [city, region, postalCode]
+          .where((e) => e != null && e.isNotEmpty)
+          .join(', '),
       country,
     ];
     return parts.where((e) => e.trim().isNotEmpty).join('\n');

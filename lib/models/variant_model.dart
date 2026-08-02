@@ -25,7 +25,8 @@ class VariantItem {
   final int sortOrder;
 
   bool get inStock => stockQuantity > 0;
-  bool get isLowStock => stockQuantity > 0 && stockQuantity <= lowStockThreshold;
+  bool get isLowStock =>
+      stockQuantity > 0 && stockQuantity <= lowStockThreshold;
 
   /// Effective unit price given the parent product's [basePrice].
   double effectivePrice(double basePrice) => priceOverride ?? basePrice;
@@ -37,8 +38,8 @@ class VariantItem {
         sizeLabel: J.str(json['size_label']),
         priceOverride: J.toDoubleOrNull(json['price_override']),
         stockQuantity: J.toInt(json['stock_quantity']),
-        lowStockThreshold:
-            J.toInt(json['low_stock_threshold'], AppConstants.lowStockThreshold),
+        lowStockThreshold: J.toInt(
+            json['low_stock_threshold'], AppConstants.lowStockThreshold),
         sortOrder: J.toInt(json['sort_order']),
       );
 
@@ -53,7 +54,11 @@ class VariantItem {
         'sort_order': sortOrder,
       };
 
-  VariantItem copyWith({int? stockQuantity, double? priceOverride, String? sizeLabel, String? sku}) =>
+  VariantItem copyWith(
+          {int? stockQuantity,
+          double? priceOverride,
+          String? sizeLabel,
+          String? sku}) =>
       VariantItem(
         id: id,
         groupId: groupId,
@@ -88,7 +93,8 @@ class VariantGroup {
   final int sortOrder;
 
   /// URL-safe slug for deep-linking a colour (`?color=midnight-blue`).
-  String get slug => name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
+  String get slug =>
+      name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 
   String? get primaryImage => groupImages.isNotEmpty ? groupImages.first : null;
 

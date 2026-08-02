@@ -72,8 +72,8 @@ class VanguardAppBar extends StatelessWidget implements PreferredSizeWidget {
                 IconButton(
                   icon: const Icon(Icons.person_outline),
                   tooltip: 'Account',
-                  onPressed: () =>
-                      _go(auth.isLoggedIn ? AppRoutes.account : AppRoutes.login),
+                  onPressed: () => _go(
+                      auth.isLoggedIn ? AppRoutes.account : AppRoutes.login),
                 ),
                 _CartButton(cart: cart),
               ],
@@ -85,7 +85,8 @@ class VanguardAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _go(String route) => Get.toNamed(route);
-  void _goShop(String category) => Get.toNamed('${AppRoutes.shop}?category=$category');
+  void _goShop(String category) =>
+      Get.toNamed('${AppRoutes.shop}?category=$category');
 }
 
 class _Wordmark extends StatelessWidget {
@@ -97,13 +98,20 @@ class _Wordmark extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('VANGUARD', style: AppTypography.wordmark(size: context.isMobile ? 20 : 24)),
+            Text('VANGUARD',
+                style:
+                    AppTypography.wordmark(size: context.isMobile ? 20 : 24)),
             const SizedBox(width: 6),
-            Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.gold, shape: BoxShape.circle)),
+            Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                    color: AppColors.gold, shape: BoxShape.circle)),
           ],
         ),
       ),
@@ -149,10 +157,14 @@ class _CartButton extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                decoration: const BoxDecoration(color: AppColors.gold, shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                    color: AppColors.gold, shape: BoxShape.circle),
                 alignment: Alignment.center,
                 child: Text('$count',
-                    style: const TextStyle(color: AppColors.ink, fontSize: 10, fontWeight: FontWeight.w700)),
+                    style: const TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700)),
               ),
             ),
         ],
@@ -180,10 +192,14 @@ class VanguardNavDrawer extends StatelessWidget {
             ),
             const Divider(),
             _tile(context, Icons.home_outlined, 'Home', AppRoutes.home),
-            _tile(context, Icons.grid_view_outlined, 'Shop all', AppRoutes.shop),
-            _tile(context, Icons.checkroom_outlined, 'Knitwear', '${AppRoutes.shop}?category=Knitwear'),
-            _tile(context, Icons.dry_cleaning_outlined, 'Dresses', '${AppRoutes.shop}?category=Dresses'),
-            _tile(context, Icons.ac_unit_outlined, 'Outerwear', '${AppRoutes.shop}?category=Outerwear'),
+            _tile(
+                context, Icons.grid_view_outlined, 'Shop all', AppRoutes.shop),
+            _tile(context, Icons.checkroom_outlined, 'Knitwear',
+                '${AppRoutes.shop}?category=Knitwear'),
+            _tile(context, Icons.dry_cleaning_outlined, 'Dresses',
+                '${AppRoutes.shop}?category=Dresses'),
+            _tile(context, Icons.ac_unit_outlined, 'Outerwear',
+                '${AppRoutes.shop}?category=Outerwear'),
             const Divider(),
             _tile(context, Icons.shopping_bag_outlined, 'Cart', AppRoutes.cart),
             Obx(() => _tile(
@@ -193,7 +209,8 @@ class VanguardNavDrawer extends StatelessWidget {
                   auth.isLoggedIn ? AppRoutes.account : AppRoutes.login,
                 )),
             Obx(() => auth.isStaff
-                ? _tile(context, Icons.dashboard_customize_outlined, 'Admin panel', AppRoutes.adminDashboard)
+                ? _tile(context, Icons.dashboard_customize_outlined,
+                    'Admin panel', AppRoutes.adminDashboard)
                 : const SizedBox.shrink()),
           ],
         ),
@@ -201,7 +218,9 @@ class VanguardNavDrawer extends StatelessWidget {
     );
   }
 
-  Widget _tile(BuildContext context, IconData icon, String label, String route) => ListTile(
+  Widget _tile(
+          BuildContext context, IconData icon, String label, String route) =>
+      ListTile(
         leading: Icon(icon, color: AppColors.ink),
         title: Text(label, style: Theme.of(context).textTheme.titleMedium),
         onTap: () {

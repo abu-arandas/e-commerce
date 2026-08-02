@@ -36,7 +36,8 @@ class Product {
   Iterable<VariantItem> get allItems => groups.expand((g) => g.items);
 
   bool get hasVariants => groups.isNotEmpty;
-  bool get inStock => allItems.any((i) => i.inStock) || (!hasVariants && isActive);
+  bool get inStock =>
+      allItems.any((i) => i.inStock) || (!hasVariants && isActive);
   int get totalStock => allItems.fold(0, (sum, i) => sum + i.stockQuantity);
 
   /// Lowest effective price across all variants (for "from $X" display).
@@ -82,7 +83,8 @@ class Product {
       isFeatured: J.toBool(json['is_featured']),
       createdAt: J.dateOrNull(json['created_at']),
       groups: rawGroups
-          .map((e) => VariantGroup.fromJson(Map<String, dynamic>.from(e as Map)))
+          .map(
+              (e) => VariantGroup.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
     );
   }

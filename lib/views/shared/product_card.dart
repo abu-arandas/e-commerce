@@ -69,7 +69,10 @@ class _ProductCardState extends State<ProductCard> {
                   children: [
                     if (p.category != null)
                       Text(p.category!.toUpperCase(),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.slate)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(color: AppColors.slate)),
                     const SizedBox(height: 2),
                     Text(p.title,
                         maxLines: 1,
@@ -82,7 +85,10 @@ class _ProductCardState extends State<ProductCard> {
                           p.hasPriceRange
                               ? 'From ${Formatters.priceTrim(p.fromPrice)}'
                               : Formatters.priceTrim(p.fromPrice),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.ink),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: AppColors.ink),
                         ),
                         const Spacer(),
                         _swatches(p),
@@ -119,8 +125,10 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   Widget _tag(String label, Color color, {bool dark = false}) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
-        decoration: BoxDecoration(color: color, borderRadius: const BorderRadius.all(AppSpacing.rSm)),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+        decoration: BoxDecoration(
+            color: color, borderRadius: const BorderRadius.all(AppSpacing.rSm)),
         child: Text(label,
             style: TextStyle(
                 color: dark ? AppColors.ink : AppColors.textOnInk,

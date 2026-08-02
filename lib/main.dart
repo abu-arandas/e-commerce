@@ -38,7 +38,8 @@ class VanguardApp extends StatelessWidget {
       // Media-query driven responsiveness (our Bootstrap 5 grid) works at any
       // window size; disable Flutter's default text scaling clamp for web.
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+        data: MediaQuery.of(context)
+            .copyWith(textScaler: const TextScaler.linear(1.0)),
         child: child ?? const SizedBox.shrink(),
       ),
     );

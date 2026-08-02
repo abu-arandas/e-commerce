@@ -69,14 +69,19 @@ class GoldButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final child = loading
         ? const SizedBox(
-            height: 18, width: 18,
-            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            height: 18,
+            width: 18,
+            child:
+                CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (icon != null) ...[Icon(icon, size: 18), const SizedBox(width: AppSpacing.xs)],
+              if (icon != null) ...[
+                Icon(icon, size: 18),
+                const SizedBox(width: AppSpacing.xs)
+              ],
               Text(label),
             ],
           );
@@ -88,8 +93,10 @@ class GoldButton extends StatelessWidget {
               backgroundColor: AppColors.gold,
               foregroundColor: AppColors.ink,
               disabledBackgroundColor: AppColors.goldSoft,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppSpacing.rSm)),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(AppSpacing.rSm)),
             )
           : null,
       child: child,
@@ -100,7 +107,11 @@ class GoldButton extends StatelessWidget {
 
 /// Coloured stock indicator with a dot.
 class StockBadge extends StatelessWidget {
-  const StockBadge({super.key, required this.stock, this.threshold = 5, this.compact = false});
+  const StockBadge(
+      {super.key,
+      required this.stock,
+      this.threshold = 5,
+      this.compact = false});
 
   final int stock;
   final int threshold;
@@ -123,9 +134,16 @@ class StockBadge extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: AppSpacing.xs),
-        Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: color)),
+        Text(label,
+            style: Theme.of(context)
+                .textTheme
+                .labelMedium
+                ?.copyWith(color: color)),
       ],
     );
   }
@@ -161,7 +179,8 @@ class QuantityStepper extends StatelessWidget {
           Container(
             constraints: const BoxConstraints(minWidth: 40),
             alignment: Alignment.center,
-            child: Text('$value', style: Theme.of(context).textTheme.titleMedium),
+            child:
+                Text('$value', style: Theme.of(context).textTheme.titleMedium),
           ),
           _btn(Icons.add, atMax ? null : onIncrement),
         ],
@@ -173,14 +192,16 @@ class QuantityStepper extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Icon(icon, size: 18, color: onTap == null ? AppColors.mist : AppColors.ink),
+          child: Icon(icon,
+              size: 18, color: onTap == null ? AppColors.mist : AppColors.ink),
         ),
       );
 }
 
 /// A network image with a graceful placeholder/error, tuned for CDN .webp.
 class VfImage extends StatelessWidget {
-  const VfImage({super.key, this.url, this.fit = BoxFit.cover, this.aspectRatio});
+  const VfImage(
+      {super.key, this.url, this.fit = BoxFit.cover, this.aspectRatio});
 
   final String? url;
   final BoxFit fit;
@@ -197,7 +218,8 @@ class VfImage extends StatelessWidget {
         fit: fit,
         fadeInDuration: const Duration(milliseconds: 250),
         placeholder: (_, __) => _placeholder(),
-        errorWidget: (_, __, ___) => _placeholder(icon: Icons.checkroom_outlined),
+        errorWidget: (_, __, ___) =>
+            _placeholder(icon: Icons.checkroom_outlined),
       );
     }
     if (aspectRatio != null) {
@@ -215,7 +237,12 @@ class VfImage extends StatelessWidget {
 
 /// Centered empty/placeholder state.
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.icon, required this.title, this.message, this.action});
+  const EmptyState(
+      {super.key,
+      required this.icon,
+      required this.title,
+      this.message,
+      this.action});
 
   final IconData icon;
   final String title;
@@ -237,9 +264,15 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(message!,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary)),
             ],
-            if (action != null) ...[const SizedBox(height: AppSpacing.lg), action!],
+            if (action != null) ...[
+              const SizedBox(height: AppSpacing.lg),
+              action!
+            ],
           ],
         ),
       ),

@@ -57,8 +57,9 @@ class OrderLine {
   final int quantity;
   final double lineTotal;
 
-  String get variantSummary =>
-      [variantName, sizeLabel].where((e) => e != null && e!.isNotEmpty).join(' · ');
+  String get variantSummary => [variantName, sizeLabel]
+      .where((e) => e != null && e!.isNotEmpty)
+      .join(' · ');
 
   factory OrderLine.fromJson(Map<String, dynamic> json) => OrderLine(
         id: J.str(json['id']),
@@ -104,7 +105,8 @@ class Order {
   int get itemCount => lines.fold(0, (sum, l) => sum + l.quantity);
 
   /// Short human reference derived from the UUID.
-  String get reference => id.length >= 8 ? '#${id.substring(0, 8).toUpperCase()}' : '#$id';
+  String get reference =>
+      id.length >= 8 ? '#${id.substring(0, 8).toUpperCase()}' : '#$id';
 
   factory Order.fromJson(Map<String, dynamic> json) {
     final rawLines = (json['order_items'] as List?) ?? const [];
