@@ -38,7 +38,8 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final ok = _isSignUp
-        ? await auth.signUp(_email.text.trim(), _password.text, fullName: _name.text.trim())
+        ? await auth.signUp(_email.text.trim(), _password.text,
+            fullName: _name.text.trim())
         : await auth.signIn(_email.text.trim(), _password.text);
     if (ok) {
       Get.offNamed(auth.isStaff ? AppRoutes.adminDashboard : AppRoutes.account);
@@ -50,7 +51,8 @@ class _LoginViewState extends State<LoginView> {
     return StorefrontScaffold(
       showFooter: false,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.xxl, horizontal: AppSpacing.md),
         constraints: const BoxConstraints(minHeight: 560),
         child: FB5Container(
           alignment: Alignment.topCenter,
@@ -78,8 +80,10 @@ class _LoginViewState extends State<LoginView> {
                     if (_isSignUp) ...[
                       TextFormField(
                         controller: _name,
-                        decoration: const InputDecoration(labelText: 'Full name'),
-                        validator: (v) => (v ?? '').trim().isEmpty ? 'Required' : null,
+                        decoration:
+                            const InputDecoration(labelText: 'Full name'),
+                        validator: (v) =>
+                            (v ?? '').trim().isEmpty ? 'Required' : null,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                     ],
@@ -87,22 +91,29 @@ class _LoginViewState extends State<LoginView> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(labelText: 'Email'),
-                      validator: (v) => (v ?? '').contains('@') ? null : 'Enter a valid email',
+                      validator: (v) => GetUtils.isEmail(v ?? '')
+                          ? null
+                          : 'Enter a valid email',
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
                       decoration: const InputDecoration(labelText: 'Password'),
-                      validator: (v) => (v ?? '').length < 6 ? 'Minimum 6 characters' : null,
+                      validator: (v) =>
+                          (v ?? '').length < 6 ? 'Minimum 6 characters' : null,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Obx(() {
-                      if (auth.error.value.isEmpty) return const SizedBox.shrink();
+                      if (auth.error.value.isEmpty)
+                        return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                         child: Text(auth.error.value,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.danger)),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppColors.danger)),
                       );
                     }),
                     Obx(() => GoldButton(
