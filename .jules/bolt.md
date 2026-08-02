@@ -1,0 +1,3 @@
+## 2026-08-02 - Rate Limiting Front-end Constraints
+**Learning:** Implementing security controls like rate limiting exclusively on the client-side relies on memory that gets wiped out when the app is restarted or refreshed (unless persistent storage like SharedPreferences is used), making it trivial to bypass. True brute-force protection requires backend integration.
+**Action:** For frontend-only requests, still implement best-effort logic via state tracking (e.g. Map tracking attempts and lockouts), but clearly document the security limitations that require backend mitigation for a full solution.
