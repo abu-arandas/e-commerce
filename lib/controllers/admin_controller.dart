@@ -39,10 +39,22 @@ class AdminController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
+  // Cached totals
+  final RxInt _cachedTotalSkus = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
+
+    // Performance optimization: calculate SKUs once reactively instead of dynamically
+    // flattening the deep product/group/item tree on every getter access.
+    ever(products, (_) => _updateTotalSkus());
+
     refreshAll();
+  }
+
+  void _updateTotalSkus() {
+    _cachedTotalSkus.value = products.fold<int>(0, (sum, p) => sum + p.allItems.length);
   }
 
   Future<void> refreshAll() async {
@@ -105,7 +117,10 @@ class AdminController extends GetxController {
   // ---------------------------------------------------------------------------
   int get totalProducts => products.length;
   int get activeProducts => products.where((p) => p.isActive).length;
-  int get totalSkus => products.fold(0, (sum, p) => sum + p.allItems.length);
+
+  // Uses a cached reactive value updated when the products list changes
+  // to avoid O(N*M) flattening cost on every build cycle.
+  int get totalSkus => _cachedTotalSkus.value;
 
   int get totalOrders => orders.length;
   int get pendingOrders =>
