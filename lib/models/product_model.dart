@@ -4,7 +4,7 @@ import 'variant_model.dart';
 /// The parent product container (PRD §5.1). Holds the colour [groups], each of
 /// which holds its size-level [VariantItem]s.
 class Product {
-  const Product({
+  Product({
     required this.id,
     required this.slug,
     required this.title,
@@ -28,6 +28,10 @@ class Product {
   final List<VariantGroup> groups;
   final DateTime? createdAt;
 
+  // Cache fields for performance optimization
+  double? _cachedFromPrice;
+  double? _cachedMaxPrice;
+
   // ---- Derived pricing / stock ----
 
   List<VariantGroup> get sortedGroups =>
@@ -41,15 +45,31 @@ class Product {
 
   /// Lowest effective price across all variants (for "from $X" display).
   double get fromPrice {
-    final prices = allItems.map((i) => i.effectivePrice(basePrice)).toList();
-    if (prices.isEmpty) return basePrice;
-    return prices.reduce((a, b) => a < b ? a : b);
+    if (_cachedFromPrice != null) return _cachedFromPrice!;
+    double? minPrice;
+    for (final group in groups) {
+      for (final item in group.items) {
+        final price = item.effectivePrice(basePrice);
+        if (minPrice == null || price < minPrice) {
+          minPrice = price;
+        }
+      }
+    }
+    return _cachedFromPrice = (minPrice ?? basePrice);
   }
 
   double get maxPrice {
-    final prices = allItems.map((i) => i.effectivePrice(basePrice)).toList();
-    if (prices.isEmpty) return basePrice;
-    return prices.reduce((a, b) => a > b ? a : b);
+    if (_cachedMaxPrice != null) return _cachedMaxPrice!;
+    double? maximumPrice;
+    for (final group in groups) {
+      for (final item in group.items) {
+        final price = item.effectivePrice(basePrice);
+        if (maximumPrice == null || price > maximumPrice) {
+          maximumPrice = price;
+        }
+      }
+    }
+    return _cachedMaxPrice = (maximumPrice ?? basePrice);
   }
 
   bool get hasPriceRange => (maxPrice - fromPrice).abs() > 0.001;
