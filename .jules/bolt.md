@@ -1,0 +1,3 @@
+## 2024-08-02 - Performance Optimization for Immutable Dart Models
+ **Learning:** In a `const` Dart class where properties cannot be cached with `late final`, getters that compute related derived values (e.g., min and max prices) iteratively can result in major inefficiencies due to redundant parsing and intermediate allocations via `expand`, `map`, and `toList`.
+ **Action:** Refactor related computationally expensive getters to use a single private method returning a Record (e.g. `(double, double)`) computed in a single pass without any object allocations, and have individual getters retrieve their respective fields from the Record. Ensure to clean up unintended lockfiles (e.g. `pubspec.lock`) generated during analysis.
