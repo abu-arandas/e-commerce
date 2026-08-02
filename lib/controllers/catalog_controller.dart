@@ -18,7 +18,9 @@ class CatalogController extends GetxController {
 
   final RxnString categoryFilter = RxnString();
   final RxString searchQuery = ''.obs;
-  final RxString sort = 'featured'.obs; // featured | price_asc | price_desc | newest
+  final RxString sort =
+      'featured'.obs; // featured | price_asc | price_desc | newest
+  final RxList<String> _cachedCategories = <String>[].obs;
 
   // ---- Product detail + nested selection ----
   final Rxn<Product> selected = Rxn<Product>();
@@ -30,7 +32,17 @@ class CatalogController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Recompute categories whenever products change
+    ever(products, (_) => _updateAvailableCategories());
     fetchProducts();
+  }
+
+  void _updateAvailableCategories() {
+    final set = <String>{};
+    for (final p in products) {
+      if (p.category != null) set.add(p.category!);
+    }
+    _cachedCategories.assignAll(set.toList()..sort());
   }
 
   // ---------------------------------------------------------------------------
@@ -52,7 +64,8 @@ class CatalogController extends GetxController {
               .toList(),
         );
       } else {
-        await Future<void>.delayed(const Duration(milliseconds: 250)); // demo shimmer
+        await Future<void>.delayed(
+            const Duration(milliseconds: 250)); // demo shimmer
         products.assignAll(DemoData.products());
       }
     } catch (e) {
@@ -63,8 +76,7 @@ class CatalogController extends GetxController {
     }
   }
 
-  List<Product> get featured =>
-      products.where((p) => p.isFeatured).toList();
+  List<Product> get featured => products.where((p) => p.isFeatured).toList();
 
   /// Products after category filter, search, and sort are applied.
   List<Product> get visibleProducts {
@@ -110,13 +122,7 @@ class CatalogController extends GetxController {
   void setSearch(String value) => searchQuery.value = value;
   void setSort(String value) => sort.value = value;
 
-  List<String> get availableCategories {
-    final set = <String>{};
-    for (final p in products) {
-      if (p.category != null) set.add(p.category!);
-    }
-    return set.toList()..sort();
-  }
+  List<String> get availableCategories => _cachedCategories.toList();
 
   // ---------------------------------------------------------------------------
   // Product detail + nested variant selection
@@ -125,7 +131,8 @@ class CatalogController extends GetxController {
   /// Load a product by slug (from the in-memory list, else fetch it), then seed
   /// the variant selection. [preselectColorSlug] supports deep links
   /// (`?color=midnight-blue`).
-  Future<Product?> loadProduct(String slug, {String? preselectColorSlug}) async {
+  Future<Product?> loadProduct(String slug,
+      {String? preselectColorSlug}) async {
     Product? product = products.firstWhereOrNull((p) => p.slug == slug);
 
     if (product == null && SupabaseService.isReady) {
@@ -186,7 +193,8 @@ class CatalogController extends GetxController {
   }
 
   // Derived selection state consumed by the detail view.
-  List<VariantItem> get availableSizes => selectedGroup.value?.sortedItems ?? const [];
+  List<VariantItem> get availableSizes =>
+      selectedGroup.value?.sortedItems ?? const [];
 
   List<String> get activeImages {
     final imgs = selectedGroup.value?.groupImages ?? const <String>[];
