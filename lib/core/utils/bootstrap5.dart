@@ -1,3 +1,5 @@
+library;
+
 import 'package:flutter/widgets.dart';
 
 /// A faithful, Dart-3 / Wasm-compatible re-implementation of the Bootstrap 5
@@ -16,7 +18,6 @@ import 'package:flutter/widgets.dart';
 ///
 /// Breakpoints (min viewport width, PRD §6.2):
 ///   xs < 576 · sm ≥ 576 · md ≥ 768 · lg ≥ 992 · xl ≥ 1200 · xxl ≥ 1400
-library;
 
 /// The six Bootstrap breakpoints, ordered smallest → largest.
 enum Fb5Breakpoint {
@@ -92,9 +93,11 @@ abstract final class Fb5 {
     return resolved;
   }
 
-  static bool isMobile(BuildContext context) => of(context).index < Fb5Breakpoint.md.index;
+  static bool isMobile(BuildContext context) =>
+      of(context).index < Fb5Breakpoint.md.index;
   static bool isTablet(BuildContext context) => of(context) == Fb5Breakpoint.md;
-  static bool isDesktop(BuildContext context) => of(context).index >= Fb5Breakpoint.lg.index;
+  static bool isDesktop(BuildContext context) =>
+      of(context).index >= Fb5Breakpoint.lg.index;
 }
 
 /// Convenience extension mirroring `BootstrapTheme.of(context)` ergonomics.
@@ -109,8 +112,7 @@ extension Fb5ContextX on BuildContext {
 const Map<int, double> _gutterScale = {0: 0, 1: 4, 2: 8, 3: 16, 4: 24, 5: 48};
 const double _kDefaultGutter = 24; // Bootstrap default = 1.5rem
 
-final RegExp _colRe =
-    RegExp(r'\bcol-(?:(xs|sm|md|lg|xl|xxl)-)?(\d{1,2})\b');
+final RegExp _colRe = RegExp(r'\bcol-(?:(xs|sm|md|lg|xl|xxl)-)?(\d{1,2})\b');
 final RegExp _offsetRe =
     RegExp(r'\boffset-(?:(xs|sm|md|lg|xl|xxl)-)?(\d{1,2})\b');
 final RegExp _gutterRe = RegExp(r'\bg([xy]?)-(\d)\b');
@@ -132,13 +134,29 @@ Fb5Breakpoint _bpFromToken(String? token) {
   }
 }
 
+// Caches for the frequent string-parsing of classNames to improve performance.
+final _spanCache = <String, Map<Fb5Breakpoint, int>>{};
+final _offsetCache = <String, Map<Fb5Breakpoint, int>>{};
+
 Map<Fb5Breakpoint, int> _parseSpans(String classNames, RegExp re) {
+  final Map<String, Map<Fb5Breakpoint, int>>? cache =
+      re == _colRe ? _spanCache : (re == _offsetRe ? _offsetCache : null);
+
+  if (cache != null && cache.containsKey(classNames)) {
+    return cache[classNames]!;
+  }
+
   final result = <Fb5Breakpoint, int>{};
   for (final m in re.allMatches(classNames)) {
     final bp = _bpFromToken(m.group(1));
     final n = int.tryParse(m.group(2) ?? '');
     if (n != null && n >= 1 && n <= 12) result[bp] = n;
   }
+
+  if (cache != null) {
+    cache[classNames] = result;
+  }
+
   return result;
 }
 
@@ -313,7 +331,9 @@ class FB5Container extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bp = context.breakpoint;
-    final maxWidth = fluid ? double.infinity : (Fb5.containerMaxWidth[bp] ?? double.infinity);
+    final maxWidth = fluid
+        ? double.infinity
+        : (Fb5.containerMaxWidth[bp] ?? double.infinity);
 
     return Align(
       alignment: alignment,
