@@ -15,11 +15,11 @@ abstract final class Env {
 
   /// Flat shipping fee (minor currency unit handled at display time).
   static const double flatShippingFee =
-      double.fromEnvironment('FLAT_SHIPPING_FEE', defaultValue: 12.0);
+      int.fromEnvironment('FLAT_SHIPPING_FEE', defaultValue: 12) * 1.0;
 
   /// Free-shipping threshold used for storefront messaging.
   static const double freeShippingThreshold =
-      double.fromEnvironment('FREE_SHIPPING_THRESHOLD', defaultValue: 150.0);
+      int.fromEnvironment('FREE_SHIPPING_THRESHOLD', defaultValue: 150) * 1.0;
 
   /// True when both Supabase credentials are present. When false the app runs
   /// against in-memory demo data so the UI is always explorable.
