@@ -42,6 +42,8 @@ class AdminController extends GetxController {
   // Cached totals
   final RxInt _cachedTotalSkus = 0.obs;
 
+  late final RxList<LowStockEntry> _lowStock = <LowStockEntry>[].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -49,6 +51,9 @@ class AdminController extends GetxController {
     // Performance optimization: calculate SKUs once reactively instead of dynamically
     // flattening the deep product/group/item tree on every getter access.
     ever(products, (_) => _updateTotalSkus());
+
+    // Re-evaluate low stock whenever the products list changes
+    ever(products, (_) => _updateLowStock());
 
     refreshAll();
   }
@@ -135,7 +140,9 @@ class AdminController extends GetxController {
 
   int get activePromotions => promotions.where((p) => p.isLive).length;
 
-  List<LowStockEntry> get lowStock {
+  List<LowStockEntry> get lowStock => _lowStock;
+
+  void _updateLowStock() {
     final entries = <LowStockEntry>[];
     for (final p in products) {
       for (final g in p.groups) {
@@ -154,7 +161,7 @@ class AdminController extends GetxController {
       }
     }
     entries.sort((a, b) => a.stock.compareTo(b.stock));
-    return entries;
+    _lowStock.assignAll(entries);
   }
 
   /// Revenue split by product category (for the dashboard breakdown chart).

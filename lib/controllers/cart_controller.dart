@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -35,7 +34,8 @@ class CartController extends GetxController {
   }) {
     final existing = items.firstWhereOrNull((c) => c.key == item.id);
     if (existing != null) {
-      existing.quantity = (existing.quantity + quantity).clamp(1, item.stockQuantity);
+      existing.quantity =
+          (existing.quantity + quantity).clamp(1, item.stockQuantity);
       items.refresh();
     } else {
       items.add(CartItem.from(
@@ -87,8 +87,7 @@ class CartController extends GetxController {
   int get itemCount => items.fold(0, (sum, c) => sum + c.quantity);
   bool get isEmpty => items.isEmpty;
 
-  double get subtotal =>
-      items.fold(0.0, (sum, c) => sum + c.lineTotal);
+  double get subtotal => items.fold(0.0, (sum, c) => sum + c.lineTotal);
 
   List<String> get categories =>
       items.map((c) => c.category).whereType<String>().toSet().toList();
@@ -98,7 +97,8 @@ class CartController extends GetxController {
       : 0;
 
   bool get hasFreeShipping =>
-      appliedPromo.value?.freeShipping == true || subtotal >= Env.freeShippingThreshold;
+      appliedPromo.value?.freeShipping == true ||
+      subtotal >= Env.freeShippingThreshold;
 
   double get baseShipping {
     if (isEmpty) return 0;
@@ -264,7 +264,10 @@ class CartController extends GetxController {
       .toList();
 
   String _pseudoId() {
-    final ts = DateTime.now().microsecondsSinceEpoch.toRadixString(16).padLeft(12, '0');
+    final ts = DateTime.now()
+        .microsecondsSinceEpoch
+        .toRadixString(16)
+        .padLeft(12, '0');
     return '$ts-demo-0000-0000-000000000000';
   }
 }
