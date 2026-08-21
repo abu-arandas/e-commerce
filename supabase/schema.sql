@@ -121,10 +121,19 @@ create table if not exists public.promotions (
   excluded_categories text[] not null default '{}',
   valid_from          timestamptz not null default now(),
   valid_until         timestamptz,
-  created_at          timestamptz not null default now()
+  created_at          timestamptz not null default now(),
+  -- A mis-keyed percentage must not be able to discount more than the basket.
+  constraint promotions_percentage_range
+    check (discount_type <> 'percentage' or discount_value <= 100),
+  constraint promotions_window_ordered
+    check (valid_until is null or valid_until > valid_from),
+  constraint promotions_usage_count_non_negative
+    check (usage_count >= 0)
 );
-create index if not exists promotions_active_idx
-  on public.promotions (is_active, valid_from, valid_until);
+-- Codes are looked up through the unique constraint on `code`; this partial
+-- index serves the back-office listing of what is currently live.
+create index if not exists promotions_live_idx
+  on public.promotions (valid_until) where is_active;
 
 -- store_settings — the authoritative source for shipping figures. A single row,
 -- enforced by a boolean primary key that can only ever be true. place_order
@@ -171,6 +180,7 @@ create table if not exists public.wishlists (
   created_at   timestamptz not null default now(),
   primary key (user_id, product_id)
 );
+create index if not exists wishlists_product_idx on public.wishlists (product_id);
 
 -- orders + order_items. `restocked_at` makes returning stock idempotent;
 -- `order_items.category` snapshots the category so revenue reporting survives a
@@ -190,11 +200,17 @@ create table if not exists public.orders (
   tracking_number  text,
   restocked_at     timestamptz,
   created_at       timestamptz not null default now(),
-  updated_at       timestamptz not null default now()
+  updated_at       timestamptz not null default now(),
+  constraint orders_money_non_negative
+    check (subtotal >= 0 and discount_total >= 0
+           and shipping_total >= 0 and grand_total >= 0),
+  constraint orders_discount_within_subtotal
+    check (discount_total <= subtotal)
 );
 create index if not exists orders_user_idx    on public.orders (user_id);
 create index if not exists orders_status_idx  on public.orders (status);
 create index if not exists orders_created_idx on public.orders (created_at desc);
+create index if not exists orders_promotion_idx on public.orders (promotion_id);
 
 create table if not exists public.order_items (
   id              uuid primary key default gen_random_uuid(),
@@ -211,6 +227,9 @@ create table if not exists public.order_items (
   line_total      numeric(10, 2) not null
 );
 create index if not exists order_items_order_idx    on public.order_items (order_id);
+-- Postgres indexes the referenced side of a foreign key automatically; the
+-- referencing side is ours, and it is the side a cascade or SET NULL searches.
+create index if not exists order_items_variant_item_idx on public.order_items (variant_item_id);
 create index if not exists order_items_category_idx on public.order_items (category);
 
 -- Upgrade path: these are no-ops on a fresh install, and add the columns when
@@ -417,7 +436,10 @@ begin
 
   case promo.discount_type
     when 'percentage' then
-      v_discount := round(v_eligible * (promo.discount_value / 100.0), 2);
+      -- Clamped: a mis-keyed percentage above 100 must never discount more
+      -- than the lines it applies to.
+      v_discount := least(round(v_eligible * (promo.discount_value / 100.0), 2),
+                          v_eligible);
     when 'fixed_amount' then
       v_discount := round(least(promo.discount_value, v_eligible), 2);
     when 'free_shipping' then
@@ -575,7 +597,11 @@ begin
     v_shipping := coalesce(v_settings.flat_shipping_fee, 12);
   end if;
 
-  v_grand := round(v_subtotal - v_discount + v_shipping, 2);
+  -- The discount can never exceed what was actually bought, so the total can
+  -- never fall below the shipping charge. The CHECK constraints on orders are
+  -- the backstop; this is the first line of defence.
+  v_discount := least(v_discount, v_subtotal);
+  v_grand    := round(v_subtotal - v_discount + v_shipping, 2);
 
   update public.orders set
     subtotal       = v_subtotal,
