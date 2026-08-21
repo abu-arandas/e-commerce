@@ -1,3 +1,7 @@
+## 2024-07-28 - Avoid chained map/where/toList in Dart
+**Learning:** Dart's `.where(...).toList()` and `.map(...).toList()` chained together on Iterables cause unnecessary intermediate List allocations. In hot paths (like sorting or filtering visible products on every keystroke), this creates garbage collection overhead.
+**Action:** When filtering or calculating aggregates (min/max) over lists that run frequently, prefer a single-pass filter inside `.where(...)` or a standard `for` loop over chained higher-order functions.
+
 ## 2024-11-20 - GetX Getter Optimization
  **Learning:** In GetX projects, expensive nested loops inside getters accessed by Obx widgets cause significant performance bottlenecks due to frequent recalculation.
  **Action:** Introduce a private reactive cache (e.g., `_lowStock = <LowStockEntry>[].obs`) updated via a worker (`ever`) only when the source reactive dependencies change, exposing the cache directly in the getter.
