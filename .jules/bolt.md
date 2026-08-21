@@ -6,3 +6,68 @@
 ## 2024-05-18 - Use GetUtils for validation
 **Learning:** GetX has built-in utilities like `GetUtils.isEmail` which are more robust than simple manual checks.
 **Action:** Prefer `GetUtils` for common validations in GetX projects instead of writing custom regex.
+
+## 2024-05-19 - Dart Environment Variable Parsing
+**Learning:** `double.fromEnvironment` is not available in Dart. Using `const int.fromEnvironment(...) * 1.0` limits it to integers. The best way is to use `double.tryParse(const String.fromEnvironment(...))` and make the constant variable `static final` rather than `static const`.
+**Action:** When fixing environment variable issues related to double values, use `double.tryParse` with `String.fromEnvironment`.
+
+## 2026-02-18 - [Dart 3 double.fromEnvironment]
+**Learning:** Dart 3 does not support `double.fromEnvironment`. It throws a compilation error when running tests.
+**Action:** To define constant doubles from environment variables, use `int.fromEnvironment('KEY') * 1.0` instead.
+
+## 2024-11-20 - Memoization in GetX Controllers
+ **Learning:** In GetX, using `ever()` inside `onInit()` is a great way to invalidate cached getters. However, tests that instantiate a GetX controller directly (e.g. `final controller = AdminController();`) must also explicitly call `controller.onInit()` for those `ever()` workers to be registered.
+ **Action:** Always explicitly call `onInit()` in unit tests that test reactive controllers when not using `Get.put()`.
+
+## 2024-08-02 - Testing Missing Implementation Detail
+
+**Learning:** When writing tests based on the source code, be careful not to hallucinate methods that were not provided in the original prompt or verified in the file. During test development for `formatters.dart`, I assumed a `dateTime` method existed because it was part of a larger file, but it wasn't mentioned in the core issue.
+
+**Action:** Always strictly verify the available methods and their signatures in the source code before creating tests to prevent build failures. Additionally, refrain from using global `dart format .` to avoid polluting unrelated files in the project.
+
+## 2023-11-20 - [Performance Optimization]
+**Learning:** Flutter's GetX triggers `availableCategories` repeatedly when the UI rebuilds (via `Obx`).
+**Action:** Cache the category list and only update it when `products` change.
+
+## 2026-08-02 - Rate Limiting Front-end Constraints
+**Learning:** Implementing security controls like rate limiting exclusively on the client-side relies on memory that gets wiped out when the app is restarted or refreshed (unless persistent storage like SharedPreferences is used), making it trivial to bypass. True brute-force protection requires backend integration.
+**Action:** For frontend-only requests, still implement best-effort logic via state tracking (e.g. Map tracking attempts and lockouts), but clearly document the security limitations that require backend mitigation for a full solution.
+
+## 2024-05-19 - Dart Type Promotion Convention
+ **Learning:** Dart's flow analysis does not promote the type of getters or static fields like `Get.arguments`. If we use an `is` check on a getter, we still have to cast it (`as Order`), which the analyzer complains about as redundant/dead code because technically it was already proven.
+ **Action:** Always assign the getter to a local variable first (e.g., `final args = Get.arguments`) before performing type checks, enabling type promotion and avoiding redundant casts.
+
+## 2024-08-02 - Caching String Regex Execution
+
+**Learning:** When string parsing via regex is repetitively executed inside widget rebuilding paths (like resolving grid spans in `FB5Col`), introducing a simple string-keyed cache avoids redundant match/parse overhead, especially as class names per widget remain mostly static.
+
+**Action:** Use Map-based caches when executing repeated static-heavy computations within layout build loops.
+
+## 2024-07-28 - Avoid chained map/where/toList in Dart
+**Learning:** Dart's `.where(...).toList()` and `.map(...).toList()` chained together on Iterables cause unnecessary intermediate List allocations. In hot paths (like sorting or filtering visible products on every keystroke), this creates garbage collection overhead.
+**Action:** When filtering or calculating aggregates (min/max) over lists that run frequently, prefer a single-pass filter inside `.where(...)` or a standard `for` loop over chained higher-order functions.
+
+## 2024-11-20 - GetX Getter Optimization
+ **Learning:** In GetX projects, expensive nested loops inside getters accessed by Obx widgets cause significant performance bottlenecks due to frequent recalculation.
+ **Action:** Introduce a private reactive cache (e.g., `_lowStock = <LowStockEntry>[].obs`) updated via a worker (`ever`) only when the source reactive dependencies change, exposing the cache directly in the getter.
+
+## 2024-08-02 - PL/pgSQL JSONB Array and Object Validation
+ **Learning:** When processing a `jsonb` array parameter in PostgreSQL functions (like `p_items` in `place_order`), it is important to first ensure the input is exactly a JSON array using `jsonb_typeof(p_items) = 'array'`. Failing to do so can result in type mismatches or runtime errors if a non-array JSON object is passed to `jsonb_array_length`. Moreover, checking each array element to confirm it is an object and explicitly validating required keys (`variant_item_id`, `quantity`) is necessary for secure input validation.
+ **Action:** Always validate `jsonb` inputs tightly by using `jsonb_typeof()` to assert structural requirements (array, object) before extracting lengths or navigating sub-keys, and ensure inner items in an array are objects with the appropriate keys.
+## 2024-10-27 - Security Fix: CORS Edge Function
+**Learning:** The project uses Deno for Supabase edge functions, requiring specific CORS header handling. Also, `flutter analyze` can generate a `pubspec.lock` which shouldn't be committed if it wasn't there originally.
+**Action:** Always check `git status` carefully to avoid committing unintended files generated by analysis tools.
+
+## 2024-08-02 - Performance Optimization for Immutable Dart Models
+ **Learning:** In a `const` Dart class where properties cannot be cached with `late final`, getters that compute related derived values (e.g., min and max prices) iteratively can result in major inefficiencies due to redundant parsing and intermediate allocations via `expand`, `map`, and `toList`.
+ **Action:** Refactor related computationally expensive getters to use a single private method returning a Record (e.g. `(double, double)`) computed in a single pass without any object allocations, and have individual getters retrieve their respective fields from the Record. Ensure to clean up unintended lockfiles (e.g. `pubspec.lock`) generated during analysis.
+
+## 2024-05-24 - Testing Strategy for Data Models \n **Learning:** Data models in Dart/Flutter, specifically those parsing JSON, require exhaustive testing of both valid data and missing/null optional fields (edge cases) to prevent runtime parsing errors. Computations derived from these models (like formatting IDs or calculating totals) should also have dedicated unit tests. \n **Action:** When creating tests for data models, always include JSON fixture-based parsing tests covering all fields (happy path), null/missing optional fields, and unit tests for any getters or calculated properties.
+
+## 2024-10-27 - Security Fix: CORS Edge Function
+**Learning:** The project uses Deno for Supabase edge functions, requiring specific CORS header handling. Also, `flutter analyze` can generate a `pubspec.lock` which shouldn't be committed if it wasn't there originally.
+**Action:** Always check `git status` carefully to avoid committing unintended files generated by analysis tools.
+
+## 2024-08-02 - Performance Optimization for Immutable Dart Models
+ **Learning:** In a `const` Dart class where properties cannot be cached with `late final`, getters that compute related derived values (e.g., min and max prices) iteratively can result in major inefficiencies due to redundant parsing and intermediate allocations via `expand`, `map`, and `toList`.
+ **Action:** Refactor related computationally expensive getters to use a single private method returning a Record (e.g. `(double, double)`) computed in a single pass without any object allocations, and have individual getters retrieve their respective fields from the Record. Ensure to clean up unintended lockfiles (e.g. `pubspec.lock`) generated during analysis.

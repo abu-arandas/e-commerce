@@ -15,18 +15,22 @@ class OrderConfirmationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final order = Get.arguments is Order ? Get.arguments as Order : null;
+    final args = Get.arguments;
+    final order = args is Order ? args : null;
 
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.xxl, horizontal: AppSpacing.md),
         child: FB5Container(
           child: order == null
               ? EmptyState(
                   icon: Icons.receipt_long_outlined,
                   title: 'No recent order',
                   message: 'Your order details are no longer available.',
-                  action: GoldButton(label: 'Back to shop', onPressed: () => Get.toNamed(AppRoutes.shop)),
+                  action: GoldButton(
+                      label: 'Back to shop',
+                      onPressed: () => Get.toNamed(AppRoutes.shop)),
                 )
               : ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 720),
@@ -37,7 +41,9 @@ class OrderConfirmationView extends StatelessWidget {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.sm),
-                            decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+                            decoration: const BoxDecoration(
+                                color: AppColors.success,
+                                shape: BoxShape.circle),
                             child: const Icon(Icons.check, color: Colors.white),
                           ),
                           const SizedBox(width: AppSpacing.md),
@@ -46,9 +52,14 @@ class OrderConfirmationView extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Thank you for your order',
-                                    style: Theme.of(context).textTheme.displaySmall),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displaySmall),
                                 Text('Order ${order.reference}',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.slate)),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.copyWith(color: AppColors.slate)),
                               ],
                             ),
                           ),
@@ -58,6 +69,8 @@ class OrderConfirmationView extends StatelessWidget {
                       if (order.contactEmail != null)
                         Text('A confirmation has been sent to ${order.contactEmail}.',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+                      const SizedBox(height: AppSpacing.lg),
+                      _OrderProgressTracker(),
                       const SizedBox(height: AppSpacing.xl),
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -73,38 +86,60 @@ class OrderConfirmationView extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(line.productTitle, style: Theme.of(context).textTheme.titleMedium),
-                                        Text('${line.variantSummary} · Qty ${line.quantity}',
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate)),
+                                        Text(line.productTitle,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium),
+                                        Text(
+                                            '${line.variantSummary} · Qty ${line.quantity}',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                    color: AppColors.slate)),
                                       ],
                                     ),
                                   ),
                                   Text(Formatters.price(line.lineTotal),
-                                      style: Theme.of(context).textTheme.titleMedium),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium),
                                 ],
                               ),
                               const Divider(),
                             ],
-                            _totalRow(context, 'Subtotal', Formatters.price(order.subtotal)),
+                            _totalRow(context, 'Subtotal',
+                                Formatters.price(order.subtotal)),
                             if (order.discountTotal > 0)
-                              _totalRow(context, 'Discount', '-${Formatters.price(order.discountTotal)}'),
-                            _totalRow(context, 'Shipping',
-                                order.shippingTotal == 0 ? 'Free' : Formatters.price(order.shippingTotal)),
+                              _totalRow(context, 'Discount',
+                                  '-${Formatters.price(order.discountTotal)}'),
+                            _totalRow(
+                                context,
+                                'Shipping',
+                                order.shippingTotal == 0
+                                    ? 'Free'
+                                    : Formatters.price(order.shippingTotal)),
                             const SizedBox(height: AppSpacing.xs),
-                            _totalRow(context, 'Total paid', Formatters.price(order.grandTotal), bold: true),
+                            _totalRow(context, 'Total paid',
+                                Formatters.price(order.grandTotal),
+                                bold: true),
                           ],
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Row(
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
                         children: [
                           GoldButton(label: 'Continue shopping', onPressed: () => Get.toNamed(AppRoutes.shop)),
-                          const SizedBox(width: AppSpacing.sm),
-                          OutlinedButton(
-                              onPressed: () => Get.toNamed(AppRoutes.account),
-                              child: const Text('View orders')),
+                          OutlinedButton.icon(
+                            onPressed: () => Get.toNamed(AppRoutes.account),
+                            icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                            label: const Text('View order history'),
+                          ),
                         ],
                       ),
                     ],
@@ -115,7 +150,8 @@ class OrderConfirmationView extends StatelessWidget {
     );
   }
 
-  Widget _totalRow(BuildContext context, String label, String value, {bool bold = false}) {
+  Widget _totalRow(BuildContext context, String label, String value,
+      {bool bold = false}) {
     final style = bold
         ? Theme.of(context).textTheme.titleLarge
         : Theme.of(context).textTheme.bodyLarge;
@@ -124,6 +160,59 @@ class OrderConfirmationView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [Text(label, style: style), Text(value, style: style)],
+      ),
+    );
+  }
+}
+
+class _OrderProgressTracker extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    const steps = ['Order Placed', 'Processing', 'Shipped', 'Delivered'];
+    const activeStep = 0;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: const BorderRadius.all(AppSpacing.rSm),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < steps.length; i++) ...[
+            Column(
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: i <= activeStep ? AppColors.gold : AppColors.line,
+                  child: Icon(
+                    i <= activeStep ? Icons.check : Icons.circle,
+                    size: 14,
+                    color: i <= activeStep ? AppColors.ink : AppColors.slate,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  steps[i],
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: i == activeStep ? FontWeight.bold : FontWeight.normal,
+                    color: i <= activeStep ? AppColors.ink : AppColors.slate,
+                  ),
+                ),
+              ],
+            ),
+            if (i < steps.length - 1)
+              Expanded(
+                child: Container(
+                  height: 2,
+                  color: i < activeStep ? AppColors.gold : AppColors.line,
+                  margin: const EdgeInsets.only(bottom: 16, left: 4, right: 4),
+                ),
+              ),
+          ],
+        ],
       ),
     );
   }
