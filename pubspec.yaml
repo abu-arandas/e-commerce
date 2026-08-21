@@ -2,18 +2,20 @@ name: vanguard_fashion
 description: >-
   Vanguard Fashion — a premium, responsive Flutter Web e-commerce platform with
   nested product variants, a dynamic promotions engine, and a Supabase backend.
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
   # Floor aligned to Flutter 3.24 (Dart 3.5): the theme APIs used here
   # (CardThemeData, etc.) landed in 3.24. Caret ranges let `pub` resolve newer
   # compatible package versions against whatever Flutter the developer has.
-  sdk: '>=3.5.0 <4.0.0'
-  flutter: '>=3.24.0'
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_web_plugins:
     sdk: flutter
 
   # State management & routing (GetX) — reactive Rx state + GetMaterialApp routing.

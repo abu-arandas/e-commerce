@@ -29,15 +29,13 @@ void main() {
     when(() => mockSupabaseClient.auth).thenReturn(mockAuthClient);
     when(() => mockSupabaseClient.from(any())).thenAnswer((_) => mockQueryBuilder);
 
-    SupabaseService.isReady = true;
-    SupabaseService.mockClient = mockSupabaseClient;
+    SupabaseService.setMockClient(mockSupabaseClient);
 
     authController = AuthController();
   });
 
   tearDown(() {
-    SupabaseService.isReady = false;
-    SupabaseService.mockClient = null;
+    SupabaseService.clearMockClient();
   });
 
   group('AuthController signIn Tests', () {
