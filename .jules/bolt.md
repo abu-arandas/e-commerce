@@ -1,3 +1,7 @@
+## 2026-02-18 - [Dart 3 double.fromEnvironment]
+**Learning:** Dart 3 does not support `double.fromEnvironment`. It throws a compilation error when running tests.
+**Action:** To define constant doubles from environment variables, use `int.fromEnvironment('KEY') * 1.0` instead.
+
 ## 2024-11-20 - Memoization in GetX Controllers
  **Learning:** In GetX, using `ever()` inside `onInit()` is a great way to invalidate cached getters. However, tests that instantiate a GetX controller directly (e.g. `final controller = AdminController();`) must also explicitly call `controller.onInit()` for those `ever()` workers to be registered.
  **Action:** Always explicitly call `onInit()` in unit tests that test reactive controllers when not using `Get.put()`.
