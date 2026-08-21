@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
 import '../../controllers/catalog_controller.dart';
+import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -212,7 +213,7 @@ class _Details extends StatelessWidget {
           VariantSelector(controller: catalog),
           const SizedBox(height: AppSpacing.xl),
 
-          // Quantity + add to cart.
+          // Quantity + add to cart + wishlist.
           Row(
             children: [
               Obx(() => QuantityStepper(
@@ -221,7 +222,7 @@ class _Details extends StatelessWidget {
                     onDecrement: catalog.decrementQty,
                     onIncrement: catalog.incrementQty,
                   )),
-              const SizedBox(width: AppSpacing.md),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Obx(() => GoldButton(
                       label: catalog.canAddToCart ? 'Add to bag' : 'Select a size',
@@ -230,6 +231,26 @@ class _Details extends StatelessWidget {
                           ? () => _addToCart(context, cart, catalog)
                           : null,
                     )),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Builder(
+                builder: (context) {
+                  final wishlist = Get.find<WishlistController>();
+                  return Obx(() {
+                    final saved = wishlist.isSaved(product.id);
+                    return OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        side: BorderSide(color: saved ? Colors.red.shade700 : AppColors.line),
+                      ),
+                      onPressed: () => wishlist.toggle(product),
+                      child: Icon(
+                        saved ? Icons.favorite : Icons.favorite_border,
+                        color: saved ? Colors.red.shade700 : AppColors.ink,
+                      ),
+                    );
+                  });
+                },
               ),
             ],
           ),
