@@ -271,8 +271,12 @@ class FB5Row extends StatelessWidget {
 
         final laidOut = <Widget>[];
         for (final child in children) {
-          final span = (child is FB5Col) ? child.resolveSpan(bp) : 12;
-          final offset = (child is FB5Col) ? child.resolveOffset(bp) : 0;
+          int span = 12;
+          int offset = 0;
+          if (child is FB5Col) {
+            span = child.resolveSpan(bp);
+            offset = child.resolveOffset(bp);
+          }
           // Subtract a hair to avoid float rounding pushing a full 12-row onto
           // a second line.
           final width = (unit * span) - 0.01;

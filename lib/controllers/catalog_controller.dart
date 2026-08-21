@@ -68,22 +68,22 @@ class CatalogController extends GetxController {
 
   /// Products after category filter, search, and sort are applied.
   List<Product> get visibleProducts {
-    var list = products.where((p) => p.isActive).toList();
-
     final cat = categoryFilter.value;
-    if (cat != null && cat.isNotEmpty) {
-      list = list.where((p) => p.category == cat).toList();
-    }
-
     final q = searchQuery.value.trim().toLowerCase();
-    if (q.isNotEmpty) {
-      list = list
-          .where((p) =>
-              p.title.toLowerCase().contains(q) ||
-              (p.category?.toLowerCase().contains(q) ?? false) ||
-              p.description.toLowerCase().contains(q))
-          .toList();
-    }
+
+    // ⚡ Bolt: Single-pass filter to avoid multiple intermediate list allocations
+    var list = products.where((p) {
+      if (!p.isActive) return false;
+      if (cat != null && cat.isNotEmpty && p.category != cat) return false;
+      if (q.isNotEmpty) {
+        if (!p.title.toLowerCase().contains(q) &&
+            !(p.category?.toLowerCase().contains(q) ?? false) &&
+            !p.description.toLowerCase().contains(q)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
 
     switch (sort.value) {
       case 'price_asc':
