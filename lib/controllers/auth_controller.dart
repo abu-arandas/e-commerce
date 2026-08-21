@@ -9,15 +9,15 @@ import '../models/user_model.dart';
 /// configured; in demo mode it supports a "Preview as…" path so the role-gated
 /// admin panels remain reachable.
 class AuthController extends GetxController {
-  AuthController({this.onSignedOut});
-
-  /// Invoked whenever the session ends, so per-account state (order history)
-  /// can be discarded without this controller depending on it.
-  final void Function()? onSignedOut;
-
   final Rxn<AppUser> user = Rxn<AppUser>();
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
+
+  // Rate limiting variables
+  final Map<String, int> _loginAttempts = {};
+  final Map<String, DateTime> _lockouts = {};
+  static const int _maxAttempts = 5;
+  static const Duration _lockoutDuration = Duration(minutes: 15);
 
   bool get isLoggedIn => user.value != null;
   bool get isStaff => user.value?.role.isStaff ?? false;
@@ -40,7 +40,6 @@ class AuthController extends GetxController {
         _loadProfile(session!.user.id, session.user.email);
       } else {
         user.value = null;
-        onSignedOut?.call();
       }
     });
   }
@@ -65,28 +64,55 @@ class AuthController extends GetxController {
   Future<bool> signIn(String email, String password) async {
     isLoading.value = true;
     error.value = '';
+
+    final normalizedEmail = email.trim().toLowerCase();
+
+    // Check rate limit
+    if (_lockouts.containsKey(normalizedEmail)) {
+      if (DateTime.now().difference(_lockouts[normalizedEmail]!) < _lockoutDuration) {
+        isLoading.value = false;
+        error.value = 'Too many failed attempts. Please try again later.';
+        return false;
+      } else {
+        _lockouts.remove(normalizedEmail);
+        _loginAttempts[normalizedEmail] = 0;
+      }
+    }
+
     try {
       if (!SupabaseService.isReady) {
         // Demo: accept any credentials as a customer.
         user.value = AppUser(id: 'demo-customer', email: email, fullName: null);
+        _loginAttempts.remove(normalizedEmail);
         return true;
       }
       final res = await SupabaseService.auth
           .signInWithPassword(email: email, password: password);
       if (res.user != null) {
         await _loadProfile(res.user!.id, res.user!.email);
+        _loginAttempts.remove(normalizedEmail);
         return true;
       }
+      _recordFailedAttempt(normalizedEmail);
       error.value = 'Invalid credentials';
       return false;
     } on sb.AuthException catch (e) {
+      _recordFailedAttempt(normalizedEmail);
       error.value = e.message;
       return false;
     } catch (e) {
+      _recordFailedAttempt(normalizedEmail);
       error.value = 'Sign-in failed: $e';
       return false;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _recordFailedAttempt(String email) {
+    _loginAttempts[email] = (_loginAttempts[email] ?? 0) + 1;
+    if (_loginAttempts[email]! >= _maxAttempts) {
+      _lockouts[email] = DateTime.now();
     }
   }
 
@@ -125,7 +151,6 @@ class AuthController extends GetxController {
       await SupabaseService.auth.signOut();
     }
     user.value = null;
-    onSignedOut?.call();
   }
 
   /// Demo-only: preview a staff persona without a backend so the admin panels

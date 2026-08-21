@@ -9,8 +9,8 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 
   <!-- Primary SEO meta. These defaults are overwritten per-route at runtime by
-       the SeoService (see lib/core/utils/seo/seo_service.dart) so crawlers that
-       do execute JS receive product-specific titles/descriptions. -->
+       the SeoService (see lib/core/utils/seo_service.dart) so crawlers that do
+       execute JS receive product-specific titles/descriptions. -->
   <title>Vanguard Fashion — Premium Designer Apparel</title>
   <meta name="description"
         content="Discover Vanguard Fashion: curated premium apparel with a seamless, responsive shopping experience across every device.">
@@ -37,9 +37,9 @@
   <link rel="icon" type="image/png" href="favicon.png"/>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Preconnect for faster first image paint. `picsum.photos` serves the demo
-       catalogue; replace it with your Supabase Storage host in production,
-       e.g. https://YOUR_PROJECT.supabase.co -->
+  <!-- Preconnect to the Supabase Storage CDN for faster first image paint.
+       Replace with your project host, e.g. https://YOUR_PROJECT.supabase.co -->
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preconnect" href="https://picsum.photos" crossorigin>
 
   <style>

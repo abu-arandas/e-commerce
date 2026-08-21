@@ -108,26 +108,8 @@ class Promotion {
       };
 }
 
-/// One cart line as far as the promotions engine is concerned: what it cost and
-/// which category it belongs to.
-///
-/// Category-targeted promotions must discount only the lines they target, so
-/// validation needs per-line totals rather than a single cart subtotal. This is
-/// the payload shape `validate_promotion(p_code, p_lines)` expects.
-class PromoLine {
-  const PromoLine({required this.lineTotal, this.category});
-
-  final String? category;
-  final double lineTotal;
-
-  Map<String, dynamic> toJson() => {
-        'category': category,
-        'line_total': lineTotal,
-      };
-}
-
-/// Result of validating a promo code against a cart — mirrors the jsonb
-/// returned by the `validate_promotion` SQL function.
+/// Result of validating a promo code against a cart subtotal — mirrors the
+/// jsonb returned by the `validate_promotion` SQL function.
 class PromoValidation {
   const PromoValidation({
     required this.valid,

@@ -7,9 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/utils/bootstrap5.dart';
-import '../../core/utils/formatters.dart';
 import '../../core/utils/seo/seo_service.dart';
-import '../../core/utils/store_settings.dart';
 import '../shared/product_grid.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
@@ -56,9 +54,13 @@ class HomeView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Obx(() {
-                  if (catalog.isLoading.value) return const ProductGridSkeleton(count: 4);
+                  if (catalog.isLoading.value) {
+                    return const ProductGridSkeleton(count: 4);
+                  }
                   final featured = catalog.featured;
-                  final list = featured.isEmpty ? catalog.visibleProducts.take(4).toList() : featured;
+                  final list = featured.isEmpty
+                      ? catalog.visibleProducts.take(4).toList()
+                      : featured;
                   return ProductGrid(products: list);
                 }),
                 const SizedBox(height: AppSpacing.xl),
@@ -77,7 +79,8 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _sectionWrap(BuildContext context, {required Widget child, Color? background}) {
+  Widget _sectionWrap(BuildContext context,
+      {required Widget child, Color? background}) {
     final v = AppSpacing.section(MediaQuery.sizeOf(context).width);
     return Container(
       color: background,
@@ -96,14 +99,12 @@ class _AnnouncementBar extends StatelessWidget {
       width: double.infinity,
       color: AppColors.ink,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Obx(() => Text(
-            'Complimentary shipping over '
-            '${Formatters.priceTrim(StoreSettings.freeShippingThreshold.value)}'
-            '  ·  Use code FALL20 for 20% off',
-            textAlign: TextAlign.center,
-            style: AppTypography.eyebrow(color: AppColors.goldSoft)
-                .copyWith(letterSpacing: 1.6),
-          )),
+      child: Text(
+        'Complimentary shipping over \$150  ·  Use code FALL20 for 20% off',
+        textAlign: TextAlign.center,
+        style: AppTypography.eyebrow(color: AppColors.goldSoft)
+            .copyWith(letterSpacing: 1.6),
+      ),
     );
   }
 }
@@ -120,7 +121,8 @@ class _Hero extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const VfImage(url: 'https://picsum.photos/seed/vf-hero-editorial/1800/1200'),
+          const VfImage(
+              url: 'https://picsum.photos/seed/vf-hero-editorial/1800/1200'),
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -143,14 +145,17 @@ class _Hero extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('AUTUMN / WINTER',
-                          style: AppTypography.eyebrow(color: AppColors.goldSoft)),
+                          style:
+                              AppTypography.eyebrow(color: AppColors.goldSoft)),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'Quiet luxury,\nengineered to last.',
                         style: Theme.of(context)
                             .textTheme
                             .displayLarge
-                            ?.copyWith(color: AppColors.textOnInk, fontSize: isMobile ? 44 : 64),
+                            ?.copyWith(
+                                color: AppColors.textOnInk,
+                                fontSize: isMobile ? 44 : 64),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
@@ -208,7 +213,9 @@ class _CategoryStrip extends StatelessWidget {
                 borderRadius: const BorderRadius.all(AppSpacing.rMd),
                 child: Stack(
                   children: [
-                    VfImage(url: 'https://picsum.photos/seed/$seed/600/700', aspectRatio: 4 / 5),
+                    VfImage(
+                        url: 'https://picsum.photos/seed/$seed/600/700',
+                        aspectRatio: 4 / 5),
                     Positioned.fill(
                       child: Container(
                         alignment: Alignment.bottomLeft,
@@ -221,7 +228,8 @@ class _CategoryStrip extends StatelessWidget {
                           ),
                         ),
                         child: Text(name,
-                            style: AppTypography.wordmark(color: AppColors.textOnInk, size: 20)),
+                            style: AppTypography.wordmark(
+                                color: AppColors.textOnInk, size: 20)),
                       ),
                     ),
                   ],
@@ -248,7 +256,8 @@ class _EditorialBand extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.all(AppSpacing.rMd),
             child: VfImage(
-                url: 'https://picsum.photos/seed/vf-editorial-craft/1000/800', aspectRatio: 5 / 4),
+                url: 'https://picsum.photos/seed/vf-editorial-craft/1000/800',
+                aspectRatio: 5 / 4),
           ),
         ),
         FB5Col(
@@ -256,12 +265,16 @@ class _EditorialBand extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionHeading(eyebrow: 'Our craft', title: 'Made to be kept'),
+              const SectionHeading(
+                  eyebrow: 'Our craft', title: 'Made to be kept'),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'Every piece is developed with heritage mills and finished by hand. We favour '
                 'natural fibres, considered construction, and colours that endure beyond a single season.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton(

@@ -7,7 +7,6 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/utils/bootstrap5.dart';
 import '../../core/utils/formatters.dart';
 import '../../models/order_model.dart';
-import '../shared/ui_kit.dart';
 import 'admin_scaffold.dart';
 
 class AdminDashboardView extends StatelessWidget {
@@ -26,7 +25,7 @@ class AdminDashboardView extends StatelessWidget {
           label: const Text('Refresh'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textOnInk,
-            side: const BorderSide(color: AppColors.inkLine),
+            side: const BorderSide(color: Color(0xFF2A2A30)),
           ),
         ),
       ],
@@ -34,30 +33,41 @@ class AdminDashboardView extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ErrorBanner(
-              message: admin.error.value,
-              onDismiss: () => admin.error.value = '',
-            ),
             // KPI row.
             FB5Row(
               classNames: 'gx-3 gy-3',
               children: [
-                _kpi('Revenue', Formatters.price(admin.grossRevenue), Icons.payments_outlined, AppColors.gold),
-                _kpi('Orders', '${admin.totalOrders}', Icons.receipt_long_outlined, AppColors.info),
-                _kpi('Pending', '${admin.pendingOrders}', Icons.hourglass_bottom, AppColors.warning),
-                _kpi('Avg. order', Formatters.price(admin.averageOrderValue), Icons.trending_up, AppColors.success),
-                _kpi('Products', '${admin.activeProducts}/${admin.totalProducts}', Icons.checkroom_outlined, AppColors.mist),
-                _kpi('SKUs', '${admin.totalSkus}', Icons.qr_code_2, AppColors.mist),
-                _kpi('Live promos', '${admin.activePromotions}', Icons.sell_outlined, AppColors.gold),
-                _kpi('Low stock', '${admin.lowStock.length}', Icons.warning_amber_rounded, AppColors.danger),
+                _kpi('Revenue', Formatters.price(admin.grossRevenue),
+                    Icons.payments_outlined, AppColors.gold),
+                _kpi('Orders', '${admin.totalOrders}',
+                    Icons.receipt_long_outlined, AppColors.info),
+                _kpi('Pending', '${admin.pendingOrders}',
+                    Icons.hourglass_bottom, AppColors.warning),
+                _kpi('Avg. order', Formatters.price(admin.averageOrderValue),
+                    Icons.trending_up, AppColors.success),
+                _kpi(
+                    'Products',
+                    '${admin.activeProducts}/${admin.totalProducts}',
+                    Icons.checkroom_outlined,
+                    AppColors.mist),
+                _kpi('SKUs', '${admin.totalSkus}', Icons.qr_code_2,
+                    AppColors.mist),
+                _kpi('Live promos', '${admin.activePromotions}',
+                    Icons.sell_outlined, AppColors.gold),
+                _kpi('Low stock', '${admin.lowStock.length}',
+                    Icons.warning_amber_rounded, AppColors.danger),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
             FB5Row(
               classNames: 'gx-4 gy-4',
               children: [
-                FB5Col(classNames: 'col-12 col-lg-7', child: _RecentOrders(admin: admin)),
-                FB5Col(classNames: 'col-12 col-lg-5', child: _LowStock(admin: admin)),
+                FB5Col(
+                    classNames: 'col-12 col-lg-7',
+                    child: _RecentOrders(admin: admin)),
+                FB5Col(
+                    classNames: 'col-12 col-lg-5',
+                    child: _LowStock(admin: admin)),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -77,7 +87,7 @@ class AdminDashboardView extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.inkSoft,
             borderRadius: const BorderRadius.all(AppSpacing.rMd),
-            border: Border.all(color: AppColors.inkLine),
+            border: Border.all(color: const Color(0xFF2A2A30)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +96,10 @@ class AdminDashboardView extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Text(value, style: Theme.of(context).textTheme.headlineSmall),
               Text(label.toUpperCase(),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textMutedOnInk)),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: AppColors.textMutedOnInk)),
             ],
           ),
         );
@@ -107,7 +120,7 @@ class _Panel extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.inkSoft,
         borderRadius: const BorderRadius.all(AppSpacing.rMd),
-        border: Border.all(color: AppColors.inkLine),
+        border: Border.all(color: const Color(0xFF2A2A30)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -141,18 +154,23 @@ class _RecentOrders extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(o.reference, style: Theme.of(context).textTheme.titleSmall),
+                        Text(o.reference,
+                            style: Theme.of(context).textTheme.titleSmall),
                         Text(o.contactEmail ?? '—',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppColors.textMutedOnInk)),
                       ],
                     ),
                   ),
                   Expanded(child: _StatusPill(status: o.status)),
                   Expanded(
                     child: Text(Formatters.price(o.grandTotal),
-                        textAlign: TextAlign.right, style: Theme.of(context).textTheme.titleSmall),
+                        textAlign: TextAlign.right,
+                        style: Theme.of(context).textTheme.titleSmall),
                   ),
                 ],
               ),
@@ -160,7 +178,8 @@ class _RecentOrders extends StatelessWidget {
           if (admin.recentOrders.isEmpty)
             const Padding(
               padding: EdgeInsets.all(AppSpacing.lg),
-              child: Text('No orders yet.', style: TextStyle(color: AppColors.textMutedOnInk)),
+              child: Text('No orders yet.',
+                  style: TextStyle(color: AppColors.textMutedOnInk)),
             ),
         ],
       ),
@@ -178,18 +197,22 @@ class _LowStock extends StatelessWidget {
     return _Panel(
       title: 'Low-stock alerts',
       child: entries.isEmpty
-          ? const Text('All SKUs are healthy.', style: TextStyle(color: AppColors.textMutedOnInk))
+          ? const Text('All SKUs are healthy.',
+              style: TextStyle(color: AppColors.textMutedOnInk))
           : Column(
               children: [
                 for (final e in entries)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     child: Row(
                       children: [
                         Container(
-                          width: 8, height: 8,
+                          width: 8,
+                          height: 8,
                           decoration: BoxDecoration(
-                            color: e.isOut ? AppColors.danger : AppColors.warning,
+                            color:
+                                e.isOut ? AppColors.danger : AppColors.warning,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -198,16 +221,27 @@ class _LowStock extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('${e.productTitle} · ${e.colorName} · ${e.sizeLabel}',
-                                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodyMedium),
+                              Text(
+                                  '${e.productTitle} · ${e.colorName} · ${e.sizeLabel}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
                               Text(e.sku,
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textMutedOnInk)),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                          color: AppColors.textMutedOnInk)),
                             ],
                           ),
                         ),
                         Text(e.isOut ? 'Out' : '${e.stock} left',
-                            style: TextStyle(color: e.isOut ? AppColors.danger : AppColors.warning, fontWeight: FontWeight.w600)),
+                            style: TextStyle(
+                                color: e.isOut
+                                    ? AppColors.danger
+                                    : AppColors.warning,
+                                fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -224,24 +258,31 @@ class _RevenueByCategory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = admin.revenueByCategory;
-    final max = data.values.isEmpty ? 1.0 : data.values.reduce((a, b) => a > b ? a : b);
+    final max =
+        data.values.isEmpty ? 1.0 : data.values.reduce((a, b) => a > b ? a : b);
     return _Panel(
       title: 'Revenue by category',
       child: data.isEmpty
-          ? const Text('No sales data yet.', style: TextStyle(color: AppColors.textMutedOnInk))
+          ? const Text('No sales data yet.',
+              style: TextStyle(color: AppColors.textMutedOnInk))
           : Column(
               children: [
                 for (final entry in data.entries)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     child: Row(
                       children: [
-                        SizedBox(width: 96, child: Text(entry.key, style: Theme.of(context).textTheme.bodyMedium)),
+                        SizedBox(
+                            width: 96,
+                            child: Text(entry.key,
+                                style: Theme.of(context).textTheme.bodyMedium)),
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
-                              value: (entry.value / max).clamp(0.02, 1).toDouble(),
+                              value:
+                                  (entry.value / max).clamp(0.02, 1).toDouble(),
                               minHeight: 10,
                               backgroundColor: AppColors.ink,
                               color: AppColors.gold,
@@ -252,7 +293,8 @@ class _RevenueByCategory extends StatelessWidget {
                         SizedBox(
                           width: 80,
                           child: Text(Formatters.price(entry.value),
-                              textAlign: TextAlign.right, style: Theme.of(context).textTheme.bodyMedium),
+                              textAlign: TextAlign.right,
+                              style: Theme.of(context).textTheme.bodyMedium),
                         ),
                       ],
                     ),
@@ -267,46 +309,31 @@ class _StatusPill extends StatelessWidget {
   const _StatusPill({required this.status});
   final OrderStatus status;
 
-  /// (text, fill, border) per status — see [AppColors] for why the translucent
-  /// values are constants rather than derived at runtime.
-  (Color, Color, Color) get _palette => switch (status) {
-        OrderStatus.pending => (
-            AppColors.warning,
-            AppColors.warningTint,
-            AppColors.warningEdge
-          ),
-        OrderStatus.paid ||
-        OrderStatus.processing =>
-          (AppColors.info, AppColors.infoTint, AppColors.infoEdge),
-        OrderStatus.shipped => (
-            AppColors.gold,
-            AppColors.goldTint,
-            AppColors.goldEdge
-          ),
-        OrderStatus.delivered => (
-            AppColors.success,
-            AppColors.successTint,
-            AppColors.successEdge
-          ),
-        OrderStatus.cancelled ||
-        OrderStatus.refunded =>
-          (AppColors.danger, AppColors.dangerTint, AppColors.dangerEdge),
+  Color get _color => switch (status) {
+        OrderStatus.pending => AppColors.warning,
+        OrderStatus.paid => AppColors.info,
+        OrderStatus.processing => AppColors.info,
+        OrderStatus.shipped => AppColors.gold,
+        OrderStatus.delivered => AppColors.success,
+        OrderStatus.cancelled => AppColors.danger,
+        OrderStatus.refunded => AppColors.danger,
       };
 
   @override
   Widget build(BuildContext context) {
-    final (text, fill, border) = _palette;
     return Align(
       alignment: Alignment.center,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
+        padding:
+            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
         decoration: BoxDecoration(
-          color: fill,
+          color: _color.withValues(alpha: 0.16),
           borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          border: Border.all(color: border),
+          border: Border.all(color: _color.withValues(alpha: 0.5)),
         ),
         child: Text(status.label,
-            style: TextStyle(color: text, fontSize: 11, fontWeight: FontWeight.w600)),
+            style: TextStyle(
+                color: _color, fontSize: 11, fontWeight: FontWeight.w600)),
       ),
     );
   }

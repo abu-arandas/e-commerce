@@ -1,9 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:get/get.dart';
 
-import '../core/routes/app_routes.dart';
 import '../core/utils/app_constants.dart';
-import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/product_model.dart';
@@ -20,7 +18,9 @@ class CatalogController extends GetxController {
 
   final RxnString categoryFilter = RxnString();
   final RxString searchQuery = ''.obs;
-  final RxString sort = 'featured'.obs; // featured | price_asc | price_desc | newest
+  final RxString sort =
+      'featured'.obs; // featured | price_asc | price_desc | newest
+  final RxList<String> _cachedCategories = <String>[].obs;
 
   // ---- Product detail + nested selection ----
   final Rxn<Product> selected = Rxn<Product>();
@@ -32,7 +32,17 @@ class CatalogController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Recompute categories whenever products change
+    ever(products, (_) => _updateAvailableCategories());
     fetchProducts();
+  }
+
+  void _updateAvailableCategories() {
+    final set = <String>{};
+    for (final p in products) {
+      if (p.category != null) set.add(p.category!);
+    }
+    _cachedCategories.assignAll(set.toList()..sort());
   }
 
   // ---------------------------------------------------------------------------
@@ -45,7 +55,7 @@ class CatalogController extends GetxController {
       if (SupabaseService.isReady) {
         final rows = await SupabaseService.client
             .from(AppConstants.tblProducts)
-            .select(AppConstants.productTree)
+            .select('*, variant_groups(*, variant_items(*))')
             .eq('is_active', true)
             .order('created_at');
         products.assignAll(
@@ -54,7 +64,8 @@ class CatalogController extends GetxController {
               .toList(),
         );
       } else {
-        await Future<void>.delayed(const Duration(milliseconds: 250)); // demo shimmer
+        await Future<void>.delayed(
+            const Duration(milliseconds: 250)); // demo shimmer
         products.assignAll(DemoData.products());
       }
     } catch (e) {
@@ -65,27 +76,26 @@ class CatalogController extends GetxController {
     }
   }
 
-  List<Product> get featured =>
-      products.where((p) => p.isFeatured).toList();
+  List<Product> get featured => products.where((p) => p.isFeatured).toList();
 
   /// Products after category filter, search, and sort are applied.
   List<Product> get visibleProducts {
-    var list = products.where((p) => p.isActive).toList();
-
     final cat = categoryFilter.value;
-    if (cat != null && cat.isNotEmpty) {
-      list = list.where((p) => p.category == cat).toList();
-    }
-
     final q = searchQuery.value.trim().toLowerCase();
-    if (q.isNotEmpty) {
-      list = list
-          .where((p) =>
-              p.title.toLowerCase().contains(q) ||
-              (p.category?.toLowerCase().contains(q) ?? false) ||
-              p.description.toLowerCase().contains(q))
-          .toList();
-    }
+
+    // ⚡ Bolt: Single-pass filter to avoid multiple intermediate list allocations
+    var list = products.where((p) {
+      if (!p.isActive) return false;
+      if (cat != null && cat.isNotEmpty && p.category != cat) return false;
+      if (q.isNotEmpty) {
+        if (!p.title.toLowerCase().contains(q) &&
+            !(p.category?.toLowerCase().contains(q) ?? false) &&
+            !p.description.toLowerCase().contains(q)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
 
     switch (sort.value) {
       case 'price_asc':
@@ -112,13 +122,7 @@ class CatalogController extends GetxController {
   void setSearch(String value) => searchQuery.value = value;
   void setSort(String value) => sort.value = value;
 
-  List<String> get availableCategories {
-    final set = <String>{};
-    for (final p in products) {
-      if (p.category != null) set.add(p.category!);
-    }
-    return set.toList()..sort();
-  }
+  List<String> get availableCategories => _cachedCategories.toList();
 
   // ---------------------------------------------------------------------------
   // Product detail + nested variant selection
@@ -127,22 +131,15 @@ class CatalogController extends GetxController {
   /// Load a product by slug (from the in-memory list, else fetch it), then seed
   /// the variant selection. [preselectColorSlug] supports deep links
   /// (`?color=midnight-blue`).
-  Future<Product?> loadProduct(String slug, {String? preselectColorSlug}) async {
-    // Drop the previous product first, otherwise navigating between two product
-    // pages renders the old one until the new one resolves.
-    if (selected.value?.slug != slug) {
-      selected.value = null;
-      selectedGroup.value = null;
-      selectedItem.value = null;
-    }
-
+  Future<Product?> loadProduct(String slug,
+      {String? preselectColorSlug}) async {
     Product? product = products.firstWhereOrNull((p) => p.slug == slug);
 
     if (product == null && SupabaseService.isReady) {
       try {
         final row = await SupabaseService.client
             .from(AppConstants.tblProducts)
-            .select(AppConstants.productTree)
+            .select('*, variant_groups(*, variant_items(*))')
             .eq('slug', slug)
             .maybeSingle();
         if (row != null) {
@@ -173,22 +170,8 @@ class CatalogController extends GetxController {
         items.firstWhereOrNull((i) => i.inStock) ?? items.firstOrNull;
   }
 
-  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1)
-  /// and reflect the choice in the address bar so the exact colour is
-  /// shareable, matching the `?color=` link the page accepts on the way in.
-  ///
-  /// `replaceState` is used rather than a route push: the selection is not a
-  /// separate destination, and pushing would trap the shopper behind one back
-  /// press per swatch they tried.
-  void selectGroup(VariantGroup group) {
-    _applyGroup(group);
-    final product = selected.value;
-    if (product != null) {
-      Browser.replaceUrl(
-        AppRoutes.productPath(product.slug, colorSlug: group.slug),
-      );
-    }
-  }
+  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1).
+  void selectGroup(VariantGroup group) => _applyGroup(group);
 
   /// User picked a size within the current colour.
   void selectSize(VariantItem item) {
@@ -210,7 +193,8 @@ class CatalogController extends GetxController {
   }
 
   // Derived selection state consumed by the detail view.
-  List<VariantItem> get availableSizes => selectedGroup.value?.sortedItems ?? const [];
+  List<VariantItem> get availableSizes =>
+      selectedGroup.value?.sortedItems ?? const [];
 
   List<String> get activeImages {
     final imgs = selectedGroup.value?.groupImages ?? const <String>[];

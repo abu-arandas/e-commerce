@@ -10,6 +10,7 @@ abstract final class AppRoutes {
   static const String orderConfirmation = '/order/confirmed';
   static const String account = '/account';
   static const String login = '/login';
+  static const String wishlist = '/wishlist';
 
   // Admin
   static const String adminDashboard = '/admin';

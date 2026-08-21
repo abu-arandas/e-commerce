@@ -1,16 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../core/utils/app_constants.dart';
-import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
-import '../core/utils/json_parse.dart';
-import '../core/utils/store_settings.dart';
+import '../core/utils/env.dart';
 import '../core/utils/supabase_service.dart';
-import '../core/utils/uuid.dart';
 import '../models/cart_item_model.dart';
 import '../models/order_model.dart';
 import '../models/product_model.dart';
@@ -20,18 +14,7 @@ import '../models/variant_model.dart';
 /// Shopping cart + promotions engine (PRD §3.1 "Dynamic Promotions"). Totals are
 /// fully reactive; an applied promo code is re-validated on every cart change so
 /// percentage discounts and minimum-order rules stay correct.
-///
-/// The cart survives a page refresh via `localStorage` — a browser reload is a
-/// routine event on web and must not empty the bag.
 class CartController extends GetxController {
-  CartController({this.onOrderPlaced});
-
-  /// Invoked with each successfully placed order, so order history can record
-  /// it without the cart having to know about that controller.
-  final void Function(Order order)? onOrderPlaced;
-
-  static const String _storageKey = 'vanguard.cart.v1';
-
   final RxList<CartItem> items = <CartItem>[].obs;
 
   final RxnString appliedCode = RxnString();
@@ -39,20 +22,6 @@ class CartController extends GetxController {
   final RxString promoError = ''.obs;
   final RxBool isApplyingPromo = false.obs;
   final RxBool isPlacingOrder = false.obs;
-
-  /// Set when [placeOrder] fails, so checkout can explain what went wrong.
-  final RxString checkoutError = ''.obs;
-
-  /// Monotonic token used to discard promo validations that have been overtaken
-  /// by a newer one — rapid quantity clicks would otherwise let a stale
-  /// response win and leave an incorrect discount on screen.
-  int _promoRequest = 0;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _restore();
-  }
 
   // ---------------------------------------------------------------------------
   // Mutations
@@ -63,10 +32,10 @@ class CartController extends GetxController {
     required VariantItem item,
     int quantity = 1,
   }) {
-    if (item.stockQuantity <= 0) return;
     final existing = items.firstWhereOrNull((c) => c.key == item.id);
     if (existing != null) {
-      existing.quantity = (existing.quantity + quantity).clamp(1, item.stockQuantity);
+      existing.quantity =
+          (existing.quantity + quantity).clamp(1, item.stockQuantity);
       items.refresh();
     } else {
       items.add(CartItem.from(
@@ -76,12 +45,13 @@ class CartController extends GetxController {
         quantity: quantity.clamp(1, item.stockQuantity),
       ));
     }
-    _afterChange();
+    _refreshPromo();
   }
 
   void removeItem(String key) {
     items.removeWhere((c) => c.key == key);
-    _afterChange();
+    if (items.isEmpty) clearPromo();
+    _refreshPromo();
   }
 
   void updateQuantity(String key, int quantity) {
@@ -93,7 +63,7 @@ class CartController extends GetxController {
     }
     line.quantity = quantity.clamp(1, line.maxStock);
     items.refresh();
-    _afterChange();
+    _refreshPromo();
   }
 
   void increment(String key) {
@@ -109,16 +79,6 @@ class CartController extends GetxController {
   void clear() {
     items.clear();
     clearPromo();
-    _persist();
-  }
-
-  void _afterChange() {
-    if (items.isEmpty) {
-      clearPromo();
-    } else {
-      unawaited(_refreshPromo());
-    }
-    _persist();
   }
 
   // ---------------------------------------------------------------------------
@@ -129,23 +89,20 @@ class CartController extends GetxController {
 
   double get subtotal => items.fold(0.0, (sum, c) => sum + c.lineTotal);
 
-  /// Per-line categories and totals, as the promotions engine needs them.
-  List<PromoLine> get promoLines => items
-      .map((c) => PromoLine(category: c.category, lineTotal: c.lineTotal))
-      .toList();
+  List<String> get categories =>
+      items.map((c) => c.category).whereType<String>().toSet().toList();
 
-  double get discount =>
-      appliedPromo.value?.valid == true ? appliedPromo.value!.discountAmount : 0;
+  double get discount => appliedPromo.value?.valid == true
+      ? appliedPromo.value!.discountAmount
+      : 0;
 
   bool get hasFreeShipping =>
       appliedPromo.value?.freeShipping == true ||
-      subtotal >= StoreSettings.freeShippingThreshold.value;
+      subtotal >= Env.freeShippingThreshold;
 
   double get baseShipping {
     if (isEmpty) return 0;
-    return subtotal >= StoreSettings.freeShippingThreshold.value
-        ? 0
-        : StoreSettings.flatShippingFee.value;
+    return subtotal >= Env.freeShippingThreshold ? 0 : Env.flatShippingFee;
   }
 
   double get shipping => hasFreeShipping ? 0 : baseShipping;
@@ -156,7 +113,7 @@ class CartController extends GetxController {
   }
 
   double get amountToFreeShipping {
-    final remaining = StoreSettings.freeShippingThreshold.value - subtotal;
+    final remaining = Env.freeShippingThreshold - subtotal;
     return remaining > 0 ? remaining : 0;
   }
 
@@ -171,54 +128,41 @@ class CartController extends GetxController {
     }
     isApplyingPromo.value = true;
     promoError.value = '';
-    final seq = ++_promoRequest;
     try {
       final result = await _validate(trimmed);
-      if (seq != _promoRequest) return result.valid;
       if (result.valid) {
         appliedCode.value = trimmed.toUpperCase();
         appliedPromo.value = result;
         return true;
+      } else {
+        appliedCode.value = null;
+        appliedPromo.value = null;
+        promoError.value = result.reason ?? 'Promo code could not be applied';
+        return false;
       }
-      appliedCode.value = null;
-      appliedPromo.value = null;
-      promoError.value = result.reason ?? 'Promo code could not be applied';
-      return false;
     } finally {
-      if (seq == _promoRequest) isApplyingPromo.value = false;
-      _persist();
+      isApplyingPromo.value = false;
     }
   }
 
   void clearPromo() {
-    _promoRequest++; // cancel any in-flight validation
     appliedCode.value = null;
     appliedPromo.value = null;
     promoError.value = '';
-    _persist();
   }
 
-  /// Re-validate a still-applied code after the cart changes, dropping it if it
-  /// no longer qualifies (e.g. the subtotal fell below the minimum).
-  ///
-  /// Both the code and the computed discount are cleared together: leaving the
-  /// code set would send it to `place_order`, which rejects invalid promotions
-  /// outright and would fail the whole checkout.
+  /// Re-validate a still-applied code after the cart changes; silently drop it
+  /// if it no longer qualifies (e.g. subtotal fell below the minimum).
   Future<void> _refreshPromo() async {
     final code = appliedCode.value;
     if (code == null || isEmpty) return;
-    final seq = ++_promoRequest;
     final result = await _validate(code);
-    if (seq != _promoRequest) return; // superseded by a newer change
     if (result.valid) {
       appliedPromo.value = result;
-      promoError.value = '';
     } else {
-      appliedCode.value = null;
       appliedPromo.value = null;
       promoError.value = result.reason ?? 'Promo no longer applies';
     }
-    _persist();
   }
 
   Future<PromoValidation> _validate(String code) async {
@@ -228,35 +172,29 @@ class CartController extends GetxController {
           AppConstants.rpcValidatePromotion,
           params: {
             'p_code': code,
-            'p_lines': promoLines.map((e) => e.toJson()).toList(),
+            'p_subtotal': subtotal,
+            'p_categories': categories,
           },
         );
         return PromoValidation.fromJson(Map<String, dynamic>.from(res as Map));
       } catch (e) {
-        if (kDebugMode) debugPrint('validate_promotion error: $e');
-        return PromoValidation.invalid('Could not validate that code right now');
+        return PromoValidation.invalid('Validation failed: $e');
       }
     }
-    return DemoData.validatePromo(code, promoLines);
+    return DemoData.validatePromo(code, subtotal, categories);
   }
 
   // ---------------------------------------------------------------------------
   // Checkout
   // ---------------------------------------------------------------------------
-
-  /// Places the order. Returns the created [Order], or null with
-  /// [checkoutError] set on failure.
   Future<Order?> placeOrder({
     Map<String, dynamic>? shippingAddress,
     String? contactEmail,
   }) async {
     if (isEmpty) return null;
     isPlacingOrder.value = true;
-    checkoutError.value = '';
     try {
       if (SupabaseService.isReady) {
-        // Note: shipping is deliberately NOT sent — `place_order` recomputes it
-        // (and every unit price) server-side from `store_settings`.
         final res = await SupabaseService.client.rpc(
           AppConstants.rpcPlaceOrder,
           params: {
@@ -264,24 +202,21 @@ class CartController extends GetxController {
             'p_promo_code': appliedCode.value,
             'p_shipping_address': shippingAddress,
             'p_contact_email': contactEmail,
+            'p_flat_shipping': baseShipping,
           },
         );
-        final order = _orderFromResult(
-          Map<String, dynamic>.from(res as Map),
-          contactEmail,
-        );
+        final map = Map<String, dynamic>.from(res as Map);
+        final order = _orderFromResult(map, contactEmail);
         clear();
-        onOrderPlaced?.call(order);
         return order;
       } else {
         await Future<void>.delayed(const Duration(milliseconds: 600));
         final order = _demoOrder(contactEmail);
         clear();
-        onOrderPlaced?.call(order);
         return order;
       }
     } catch (e) {
-      checkoutError.value = _friendlyCheckoutError(e);
+      promoError.value = 'Order failed: $e';
       if (kDebugMode) debugPrint('placeOrder error: $e');
       return null;
     } finally {
@@ -289,32 +224,13 @@ class CartController extends GetxController {
     }
   }
 
-  /// Surfaces the useful part of a Postgres `raise exception` message (e.g.
-  /// "Insufficient stock for SKU …") without leaking the raw error envelope.
-  String _friendlyCheckoutError(Object error) {
-    final text = error.toString();
-    for (final marker in const [
-      'Insufficient stock',
-      'Promotion rejected',
-      'no longer exists',
-      'Cannot place an empty order',
-    ]) {
-      final idx = text.indexOf(marker);
-      if (idx >= 0) {
-        final end = text.indexOf(RegExp(r'[,}]'), idx);
-        return end > idx ? text.substring(idx, end) : text.substring(idx);
-      }
-    }
-    return 'We could not complete your order. Please try again.';
-  }
-
   Order _orderFromResult(Map<String, dynamic> map, String? email) => Order(
-        id: J.str(map['order_id'], Uuid.v4()),
-        status: OrderStatus.fromDb(J.strOrNull(map['status'])),
-        subtotal: J.toDouble(map['subtotal'], subtotal),
-        discountTotal: J.toDouble(map['discount_total'], discount),
-        shippingTotal: J.toDouble(map['shipping_total'], shipping),
-        grandTotal: J.toDouble(map['grand_total'], grandTotal),
+        id: map['order_id']?.toString() ?? _pseudoId(),
+        status: OrderStatus.pending,
+        subtotal: (map['subtotal'] as num?)?.toDouble() ?? subtotal,
+        discountTotal: (map['discount_total'] as num?)?.toDouble() ?? discount,
+        shippingTotal: (map['shipping_total'] as num?)?.toDouble() ?? shipping,
+        grandTotal: (map['grand_total'] as num?)?.toDouble() ?? grandTotal,
         promoCode: appliedCode.value,
         contactEmail: email,
         createdAt: DateTime.now(),
@@ -322,7 +238,7 @@ class CartController extends GetxController {
       );
 
   Order _demoOrder(String? email) => Order(
-        id: Uuid.v4(),
+        id: _pseudoId(),
         status: OrderStatus.pending,
         subtotal: subtotal,
         discountTotal: discount,
@@ -344,54 +260,14 @@ class CartController extends GetxController {
             unitPrice: c.unitPrice,
             quantity: c.quantity,
             lineTotal: c.lineTotal,
-            category: c.category,
           ))
       .toList();
 
-  // ---------------------------------------------------------------------------
-  // Persistence
-  // ---------------------------------------------------------------------------
-  void _persist() {
-    if (items.isEmpty) {
-      Browser.remove(_storageKey);
-      return;
-    }
-    try {
-      Browser.write(
-        _storageKey,
-        jsonEncode({
-          'items': items.map((e) => e.toJson()).toList(),
-          'promo_code': appliedCode.value,
-        }),
-      );
-    } catch (_) {
-      // Persistence is best-effort and must never break a cart mutation.
-    }
-  }
-
-  void _restore() {
-    final raw = Browser.read(_storageKey);
-    if (raw == null || raw.isEmpty) return;
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is! Map) return;
-      final rawItems = decoded['items'];
-      if (rawItems is! List) return;
-
-      items.assignAll(rawItems
-          .whereType<Map>()
-          .map((e) => CartItem.fromJson(Map<String, dynamic>.from(e)))
-          .where((e) => e.variantItemId.isNotEmpty && e.quantity > 0));
-
-      final code = J.strOrNull(decoded['promo_code']);
-      if (code != null && code.isNotEmpty && items.isNotEmpty) {
-        appliedCode.value = code;
-        // Re-validate rather than trusting a persisted discount: prices, stock
-        // and promo windows may all have moved on since the tab was closed.
-        unawaited(_refreshPromo());
-      }
-    } catch (_) {
-      Browser.remove(_storageKey);
-    }
+  String _pseudoId() {
+    final ts = DateTime.now()
+        .microsecondsSinceEpoch
+        .toRadixString(16)
+        .padLeft(12, '0');
+    return '$ts-demo-0000-0000-000000000000';
   }
 }

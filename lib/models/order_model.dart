@@ -46,7 +46,6 @@ class OrderLine {
     required this.lineTotal,
     this.variantName,
     this.sizeLabel,
-    this.category,
   });
 
   final String id;
@@ -58,12 +57,9 @@ class OrderLine {
   final int quantity;
   final double lineTotal;
 
-  /// Category snapshot taken at purchase time, so historical revenue reporting
-  /// survives the product being re-categorised, renamed, or deleted.
-  final String? category;
-
-  String get variantSummary =>
-      [variantName, sizeLabel].where((e) => e != null && e.isNotEmpty).join(' · ');
+  String get variantSummary => [variantName, sizeLabel]
+      .where((e) => e != null && e.isNotEmpty)
+      .join(' · ');
 
   factory OrderLine.fromJson(Map<String, dynamic> json) => OrderLine(
         id: J.str(json['id']),
@@ -74,7 +70,6 @@ class OrderLine {
         unitPrice: J.toDouble(json['unit_price']),
         quantity: J.toInt(json['quantity']),
         lineTotal: J.toDouble(json['line_total']),
-        category: J.strOrNull(json['category']),
       );
 }
 
@@ -109,23 +104,9 @@ class Order {
 
   int get itemCount => lines.fold(0, (sum, l) => sum + l.quantity);
 
-  Order copyWith({OrderStatus? status, String? trackingNumber}) => Order(
-        id: id,
-        userId: userId,
-        status: status ?? this.status,
-        subtotal: subtotal,
-        discountTotal: discountTotal,
-        shippingTotal: shippingTotal,
-        grandTotal: grandTotal,
-        promoCode: promoCode,
-        contactEmail: contactEmail,
-        trackingNumber: trackingNumber ?? this.trackingNumber,
-        lines: lines,
-        createdAt: createdAt,
-      );
-
   /// Short human reference derived from the UUID.
-  String get reference => id.length >= 8 ? '#${id.substring(0, 8).toUpperCase()}' : '#$id';
+  String get reference =>
+      id.length >= 8 ? '#${id.substring(0, 8).toUpperCase()}' : '#$id';
 
   factory Order.fromJson(Map<String, dynamic> json) {
     final rawLines = (json['order_items'] as List?) ?? const [];

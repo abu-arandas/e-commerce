@@ -7,7 +7,6 @@ import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/bootstrap5.dart';
-import '../../models/user_model.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
 import 'cart_view.dart';
@@ -32,11 +31,6 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   late final CartController cart = Get.find<CartController>();
 
-  /// Set once an order succeeds. Placing an order empties the cart, which would
-  /// otherwise flash the "nothing to check out" state during the hand-off to
-  /// the confirmation page.
-  bool _placed = false;
-
   @override
   void initState() {
     super.initState();
@@ -49,7 +43,16 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   @override
   void dispose() {
-    for (final c in [_email, _name, _line1, _line2, _city, _region, _postal, _country]) {
+    for (final c in [
+      _email,
+      _name,
+      _line1,
+      _line2,
+      _city,
+      _region,
+      _postal,
+      _country
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -57,40 +60,29 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   Future<void> _placeOrder() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-
-    final address = Address(
-      id: '',
-      label: 'Shipping',
-      line1: _line1.text.trim(),
-      line2: _line2.text.trim().isEmpty ? null : _line2.text.trim(),
-      city: _city.text.trim(),
-      region: _region.text.trim().isEmpty ? null : _region.text.trim(),
-      postalCode: _postal.text.trim(),
-      country: _country.text.trim(),
-    );
-
     final order = await cart.placeOrder(
       contactEmail: _email.text.trim(),
       shippingAddress: {
-        ...address.toJson(),
         'full_name': _name.text.trim(),
+        'line1': _line1.text.trim(),
+        'line2': _line2.text.trim(),
+        'city': _city.text.trim(),
+        'region': _region.text.trim(),
+        'postal_code': _postal.text.trim(),
+        'country': _country.text.trim(),
       },
     );
-    if (!mounted) return;
     if (order != null) {
-      setState(() => _placed = true);
       Get.offNamed(AppRoutes.orderConfirmation, arguments: order);
     } else {
       Get.snackbar(
-        'Checkout failed',
-        cart.checkoutError.value.isNotEmpty
-            ? cart.checkoutError.value
-            : 'Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.danger,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(AppSpacing.md),
-      );
+          'Checkout failed',
+          cart.promoError.value.isNotEmpty
+              ? cart.promoError.value
+              : 'Please try again',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.danger,
+          colorText: Colors.white);
     }
   }
 
@@ -98,36 +90,37 @@ class _CheckoutViewState extends State<CheckoutView> {
   Widget build(BuildContext context) {
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.xl, horizontal: AppSpacing.md),
         child: FB5Container(
           child: Obx(() {
-            if (cart.isEmpty && !_placed) {
+            if (cart.isEmpty) {
               return EmptyState(
                 icon: Icons.shopping_bag_outlined,
                 title: 'Nothing to check out',
                 message: 'Your bag is empty.',
-                action: GoldButton(label: 'Shop now', onPressed: () => Get.toNamed(AppRoutes.shop)),
+                action: GoldButton(
+                    label: 'Shop now',
+                    onPressed: () => Get.toNamed(AppRoutes.shop)),
               );
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SectionHeading(eyebrow: 'Almost yours', title: 'Checkout'),
+                const SectionHeading(
+                    eyebrow: 'Almost yours', title: 'Checkout'),
                 const SizedBox(height: AppSpacing.lg),
                 FB5Row(
                   classNames: 'gx-5 gy-4',
                   children: [
-                    FB5Col(classNames: 'col-12 col-lg-7', child: _form(context)),
+                    FB5Col(
+                        classNames: 'col-12 col-lg-7', child: _form(context)),
                     FB5Col(
                       classNames: 'col-12 col-lg-5',
                       child: Column(
                         children: [
                           OrderSummaryPanel(cart: cart),
                           const SizedBox(height: AppSpacing.md),
-                          Obx(() => ErrorBanner(
-                                message: cart.checkoutError.value,
-                                onDismiss: () => cart.checkoutError.value = '',
-                              )),
                           Obx(() => GoldButton(
                                 label: 'Place order',
                                 expand: true,
@@ -137,7 +130,10 @@ class _CheckoutViewState extends State<CheckoutView> {
                               )),
                           const SizedBox(height: AppSpacing.xs),
                           Text('Demo checkout — no payment is captured.',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.mist)),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: AppColors.mist)),
                         ],
                       ),
                     ),
@@ -168,7 +164,8 @@ class _CheckoutViewState extends State<CheckoutView> {
             const SizedBox(height: AppSpacing.sm),
             _field(_email, 'Email address', required: true, email: true),
             const SizedBox(height: AppSpacing.lg),
-            Text('Shipping address', style: Theme.of(context).textTheme.titleLarge),
+            Text('Shipping address',
+                style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.sm),
             _field(_name, 'Full name', required: true),
             const SizedBox(height: AppSpacing.sm),
@@ -179,9 +176,15 @@ class _CheckoutViewState extends State<CheckoutView> {
             FB5Row(
               classNames: 'gx-3 gy-3',
               children: [
-                FB5Col(classNames: 'col-12 col-sm-6', child: _field(_city, 'City', required: true)),
-                FB5Col(classNames: 'col-6 col-sm-3', child: _field(_region, 'State')),
-                FB5Col(classNames: 'col-6 col-sm-3', child: _field(_postal, 'ZIP', required: true)),
+                FB5Col(
+                    classNames: 'col-12 col-sm-6',
+                    child: _field(_city, 'City', required: true)),
+                FB5Col(
+                    classNames: 'col-6 col-sm-3',
+                    child: _field(_region, 'State')),
+                FB5Col(
+                    classNames: 'col-6 col-sm-3',
+                    child: _field(_postal, 'ZIP', required: true)),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -192,7 +195,8 @@ class _CheckoutViewState extends State<CheckoutView> {
     );
   }
 
-  Widget _field(TextEditingController c, String label, {bool required = false, bool email = false}) {
+  Widget _field(TextEditingController c, String label,
+      {bool required = false, bool email = false}) {
     return TextFormField(
       controller: c,
       decoration: InputDecoration(labelText: label),
@@ -200,7 +204,7 @@ class _CheckoutViewState extends State<CheckoutView> {
       validator: (v) {
         final value = (v ?? '').trim();
         if (required && value.isEmpty) return 'Required';
-        if (email && value.isNotEmpty && !value.contains('@')) return 'Enter a valid email';
+        if (email && value.isNotEmpty && !RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) return 'Enter a valid email';
         return null;
       },
     );

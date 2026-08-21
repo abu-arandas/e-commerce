@@ -31,7 +31,9 @@ class _ShopViewState extends State<ShopView> {
       catalog.setCategory(category);
     });
     SeoService.update(
-      title: category != null ? '$category — Vanguard Fashion' : 'Shop — Vanguard Fashion',
+      title: category != null
+          ? '$category — Vanguard Fashion'
+          : 'Shop — Vanguard Fashion',
       description: 'Browse the Vanguard Fashion collection.',
       canonicalPath: '/shop',
     );
@@ -66,7 +68,10 @@ class _ShopViewState extends State<ShopView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('${list.length} piece(s)',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate)),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: AppColors.slate)),
                     const SizedBox(height: AppSpacing.md),
                     ProductGrid(products: list),
                   ],
@@ -122,7 +127,9 @@ class _FilterBar extends StatelessWidget {
           child: Obx(() => DropdownButtonFormField<String>(
                 initialValue: catalog.sort.value,
                 isExpanded: true,
-                decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                decoration: const InputDecoration(
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                 items: const [
                   DropdownMenuItem(value: 'featured', child: Text('Featured')),
                   DropdownMenuItem(value: 'price_asc', child: Text('Price ↑')),
@@ -143,7 +150,8 @@ class _FilterBar extends StatelessWidget {
           selected: selected,
           onSelected: (_) => onTap(),
           selectedColor: AppColors.ink,
-          labelStyle: TextStyle(color: selected ? AppColors.textOnInk : AppColors.ink),
+          labelStyle:
+              TextStyle(color: selected ? AppColors.textOnInk : AppColors.ink),
         ),
       );
 }

@@ -6,7 +6,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/formatters.dart';
 import '../../models/order_model.dart';
-import '../shared/ui_kit.dart';
 import 'admin_scaffold.dart';
 
 /// Fulfillment grid (PRD §3.2 "Order & Inventory Sync"): review orders, expand
@@ -27,26 +26,21 @@ class AdminOrdersView extends StatelessWidget {
           label: const Text('Refresh'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textOnInk,
-            side: const BorderSide(color: AppColors.inkLine),
+            side: const BorderSide(color: Color(0xFF2A2A30)),
           ),
         ),
       ],
       child: Obx(() {
         final orders = admin.orders;
+        if (orders.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(AppSpacing.xl),
+            child: Text('No orders yet.', style: TextStyle(color: AppColors.textMutedOnInk)),
+          );
+        }
         return Column(
           children: [
-            ErrorBanner(
-              message: admin.error.value,
-              onDismiss: () => admin.error.value = '',
-            ),
-            if (orders.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(AppSpacing.xl),
-                child: Text('No orders yet.',
-                    style: TextStyle(color: AppColors.textMutedOnInk)),
-              )
-            else
-              for (final o in orders) _OrderTile(order: o, admin: admin),
+            for (final o in orders) _OrderTile(order: o, admin: admin),
           ],
         );
       }),
@@ -66,7 +60,7 @@ class _OrderTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.inkSoft,
         borderRadius: const BorderRadius.all(AppSpacing.rMd),
-        border: Border.all(color: AppColors.inkLine),
+        border: Border.all(color: const Color(0xFF2A2A30)),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -89,10 +83,7 @@ class _OrderTile extends StatelessWidget {
               ),
               Expanded(
                 flex: 2,
-                child: Text(
-                    order.createdAt != null
-                        ? Formatters.dateTime(order.createdAt!)
-                        : '—',
+                child: Text(order.createdAt != null ? Formatters.date(order.createdAt!) : '—',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),
               ),
               Expanded(
@@ -109,7 +100,7 @@ class _OrderTile extends StatelessWidget {
             ],
           ),
           children: [
-            const Divider(color: AppColors.inkLine),
+            const Divider(color: Color(0xFF2A2A30)),
             for (final line in order.lines)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
@@ -126,7 +117,7 @@ class _OrderTile extends StatelessWidget {
                   ],
                 ),
               ),
-            const Divider(color: AppColors.inkLine),
+            const Divider(color: Color(0xFF2A2A30)),
             Row(
               children: [
                 if (order.promoCode != null)
@@ -160,13 +151,6 @@ class _StatusDropdown extends StatelessWidget {
   final Order order;
   final AdminController admin;
 
-  /// Statuses that return the order's stock to the shelf, so they warrant a
-  /// confirmation step.
-  static const Set<OrderStatus> _restocking = {
-    OrderStatus.cancelled,
-    OrderStatus.refunded,
-  };
-
   @override
   Widget build(BuildContext context) {
     return DropdownButtonHideUnderline(
@@ -176,45 +160,13 @@ class _StatusDropdown extends StatelessWidget {
         borderRadius: const BorderRadius.all(AppSpacing.rSm),
         style: const TextStyle(color: AppColors.textOnInk, fontSize: 13),
         items: [
-          // The happy path in pipeline order, then the terminal states.
-          for (final s in OrderStatus.pipeline)
-            DropdownMenuItem(value: s, child: Text(s.label)),
-          for (final s in const [OrderStatus.cancelled, OrderStatus.refunded])
+          for (final s in OrderStatus.values)
             DropdownMenuItem(value: s, child: Text(s.label)),
         ],
-        onChanged: (s) => _onChanged(context, s),
+        onChanged: (s) {
+          if (s != null && s != order.status) admin.updateOrderStatus(order, s);
+        },
       ),
     );
-  }
-
-  Future<void> _onChanged(BuildContext context, OrderStatus? status) async {
-    if (status == null || status == order.status) return;
-
-    if (_restocking.contains(status) && !_restocking.contains(order.status)) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.inkSoft,
-          title: Text('Mark ${order.reference} as ${status.label.toLowerCase()}?'),
-          content: Text(
-            'This returns ${order.itemCount} item(s) to stock. '
-            'It cannot be undone from here.',
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancel')),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-              child: Text(status.label),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true) return;
-    }
-
-    await admin.updateOrderStatus(order, status);
   }
 }

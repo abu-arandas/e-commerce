@@ -122,12 +122,6 @@ class VariantGroup {
         'sort_order': sortOrder,
       };
 
-  /// This group plus its size variants, for the `save_product` RPC.
-  Map<String, dynamic> toRpcJson() => {
-        ...toJson(),
-        'items': items.map((i) => i.toJson()).toList(),
-      };
-
   VariantGroup copyWith({
     String? name,
     String? colorHex,

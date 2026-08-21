@@ -5,9 +5,7 @@ import 'core/bindings/initial_binding.dart';
 import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
-import 'core/theme/app_typography.dart';
 import 'core/utils/app_constants.dart';
-import 'core/utils/store_settings.dart';
 import 'core/utils/supabase_service.dart';
 import 'core/utils/url_strategy/url_strategy.dart';
 
@@ -20,10 +18,6 @@ Future<void> main() async {
   // Initialise Supabase if credentials were provided via --dart-define; the app
   // otherwise runs against in-memory demo data.
   await SupabaseService.init();
-
-  // Shipping fee / free-shipping threshold are owned by the backend so the
-  // figures on screen match the ones `place_order` charges.
-  await StoreSettings.load();
 
   runApp(const VanguardApp());
 }
@@ -41,15 +35,10 @@ class VanguardApp extends StatelessWidget {
       initialRoute: AppRoutes.home,
       getPages: AppPages.routes,
       defaultTransition: Transition.fadeIn,
-      // Our Bootstrap 5 grid handles layout at any window size; text gets a
-      // gentle viewport-driven scale instead of the platform's own setting
-      // (PRD §6.2 "adjust typography scaling").
+      // Media-query driven responsiveness (our Bootstrap 5 grid) works at any
+      // window size; disable Flutter's default text scaling clamp for web.
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          textScaler: TextScaler.linear(
-            AppTypography.scaleFor(MediaQuery.sizeOf(context).width),
-          ),
-        ),
+        data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
         child: child ?? const SizedBox.shrink(),
       ),
     );

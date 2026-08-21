@@ -33,4 +33,8 @@ abstract final class AppShadows {
   static const List<BoxShadow> lifted = [
     BoxShadow(color: Color(0x1F14141A), blurRadius: 40, offset: Offset(0, 18)),
   ];
+
+  static const List<BoxShadow> nav = [
+    BoxShadow(color: Color(0x0F000000), blurRadius: 16, offset: Offset(0, 4)),
+  ];
 }

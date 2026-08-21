@@ -1,47 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../controllers/admin_controller.dart';
 import '../../controllers/auth_controller.dart';
-import '../../controllers/orders_controller.dart';
+import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/bootstrap5.dart';
 import '../../core/utils/formatters.dart';
-import '../../core/utils/seo/seo_service.dart';
-import '../../models/order_model.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
 
-class AccountView extends StatefulWidget {
+class AccountView extends StatelessWidget {
   const AccountView({super.key});
 
   @override
-  State<AccountView> createState() => _AccountViewState();
-}
-
-class _AccountViewState extends State<AccountView> {
-  final AuthController auth = Get.find<AuthController>();
-  final OrdersController orders = Get.find<OrdersController>();
-
-  @override
-  void initState() {
-    super.initState();
-    SeoService.update(
-      title: 'Your account — Vanguard Fashion',
-      description: 'Manage your Vanguard Fashion profile and review past orders.',
-      canonicalPath: AppRoutes.account,
-    );
-    // Deferred so the first frame is not blocked on the network.
-    WidgetsBinding.instance.addPostFrameCallback((_) => orders.fetch());
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final auth = Get.find<AuthController>();
+    final wishlist = Get.find<WishlistController>();
+
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
         child: FB5Container(
           child: Obx(() {
             final user = auth.user.value;
@@ -50,9 +31,7 @@ class _AccountViewState extends State<AccountView> {
                 icon: Icons.person_outline,
                 title: 'You are signed out',
                 message: 'Sign in to view your profile and orders.',
-                action: GoldButton(
-                    label: 'Sign in',
-                    onPressed: () => Get.toNamed(AppRoutes.login)),
+                action: GoldButton(label: 'Sign in', onPressed: () => Get.toNamed(AppRoutes.login)),
               );
             }
             return Column(
@@ -65,11 +44,92 @@ class _AccountViewState extends State<AccountView> {
                   children: [
                     FB5Col(
                       classNames: 'col-12 col-lg-4',
-                      child: _ProfileCard(auth: auth, onSignOut: _signOut),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: const BorderRadius.all(AppSpacing.rMd),
+                              border: Border.all(color: AppColors.line),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: AppColors.ink,
+                                      child: Text(user.initials,
+                                          style: const TextStyle(color: AppColors.textOnInk, fontWeight: FontWeight.w700)),
+                                    ),
+                                    const SizedBox(width: AppSpacing.md),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(user.displayName, style: Theme.of(context).textTheme.titleLarge),
+                                          Text(user.email,
+                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                Chip(label: Text(user.role.label)),
+                                const SizedBox(height: AppSpacing.md),
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: const Icon(Icons.favorite_outline, color: AppColors.ink),
+                                  title: const Text('Saved Wishlist'),
+                                  subtitle: Text('${wishlist.count} items'),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  onTap: () => Get.toNamed(AppRoutes.wishlist),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                if (auth.isStaff) ...[
+                                  GoldButton(
+                                    label: 'Open admin panel',
+                                    expand: true,
+                                    icon: Icons.dashboard_customize_outlined,
+                                    onPressed: () => Get.toNamed(AppRoutes.adminDashboard),
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                ],
+                                OutlinedButton.icon(
+                                  onPressed: () async {
+                                    await auth.signOut();
+                                    Get.offNamed(AppRoutes.home);
+                                  },
+                                  icon: const Icon(Icons.logout, size: 18),
+                                  label: const Text('Sign out'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     FB5Col(
                       classNames: 'col-12 col-lg-8',
-                      child: _OrderHistory(orders: orders),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: const BorderRadius.all(AppSpacing.rMd),
+                          border: Border.all(color: AppColors.line),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Order History', style: Theme.of(context).textTheme.titleLarge),
+                            const SizedBox(height: AppSpacing.md),
+                            _OrderHistoryList(),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -80,201 +140,96 @@ class _AccountViewState extends State<AccountView> {
       ),
     );
   }
-
-  Future<void> _signOut() async {
-    await auth.signOut();
-    Get.offAllNamed(AppRoutes.home);
-  }
 }
 
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({required this.auth, required this.onSignOut});
-  final AuthController auth;
-  final Future<void> Function() onSignOut;
-
+class _OrderHistoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final user = auth.user.value!;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: const BorderRadius.all(AppSpacing.rMd),
-        border: Border.all(color: AppColors.line),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    if (!Get.isRegistered<AdminController>()) {
+      Get.put(AdminController());
+    }
+    final admin = Get.find<AdminController>();
+
+    return Obx(() {
+      final orders = admin.orders;
+      if (orders.isEmpty) {
+        return const EmptyState(
+          icon: Icons.receipt_long_outlined,
+          title: 'No orders yet',
+          message: 'Your order history will appear here once you make a purchase.',
+        );
+      }
+
+      return Column(
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: AppColors.ink,
-                child: Text(user.initials,
-                    style: const TextStyle(
-                        color: AppColors.textOnInk, fontWeight: FontWeight.w700)),
+          for (final o in orders)
+            Card(
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(color: AppColors.line),
+                borderRadius: BorderRadius.circular(8),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: ExpansionTile(
+                title: Row(
                   children: [
-                    Text(user.displayName,
-                        style: Theme.of(context).textTheme.titleLarge),
-                    Text(user.email,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppColors.slate)),
+                    Text('Order ${o.reference}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    const SizedBox(width: AppSpacing.sm),
+                    _statusBadge(o.status.label),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Chip(label: Text(user.role.label)),
-          const SizedBox(height: AppSpacing.md),
-          if (auth.isStaff) ...[
-            GoldButton(
-              label: 'Open admin panel',
-              expand: true,
-              icon: Icons.dashboard_customize_outlined,
-              onPressed: () => Get.toNamed(AppRoutes.adminDashboard),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-          ],
-          OutlinedButton.icon(
-            onPressed: onSignOut,
-            icon: const Icon(Icons.logout, size: 18),
-            label: const Text('Sign out'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OrderHistory extends StatelessWidget {
-  const _OrderHistory({required this.orders});
-  final OrdersController orders;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: const BorderRadius.all(AppSpacing.rMd),
-        border: Border.all(color: AppColors.line),
-      ),
-      child: Obx(() {
-        if (orders.isLoading.value) {
-          return const Padding(
-            padding: EdgeInsets.all(AppSpacing.xxl),
-            child: Center(child: CircularProgressIndicator(color: AppColors.ink)),
-          );
-        }
-        if (orders.orders.isEmpty) {
-          return Column(
-            children: [
-              if (orders.error.value.isNotEmpty)
-                ErrorBanner(message: orders.error.value),
-              const EmptyState(
-                icon: Icons.receipt_long_outlined,
-                title: 'No orders yet',
-                message:
-                    'Your order history will appear here once you make a purchase.',
-              ),
-            ],
-          );
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Order history',
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            if (orders.error.value.isNotEmpty)
-              ErrorBanner(message: orders.error.value),
-            for (final order in orders.orders) _OrderRow(order: order),
-          ],
-        );
-      }),
-    );
-  }
-}
-
-class _OrderRow extends StatelessWidget {
-  const _OrderRow({required this.order});
-  final Order order;
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        title: Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                subtitle: Text(
+                  '${Formatters.date(o.createdAt ?? DateTime.now())} · ${o.lines.length} item(s)',
+                  style: const TextStyle(color: AppColors.slate, fontSize: 12),
+                ),
+                trailing: Text(
+                  Formatters.price(o.grandTotal),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
                 children: [
-                  Text(order.reference,
-                      style: Theme.of(context).textTheme.titleSmall),
-                  Text(
-                    order.createdAt != null
-                        ? Formatters.dateTime(order.createdAt!)
-                        : '—',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: AppColors.slate),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(order.status.label,
-                  style: Theme.of(context).textTheme.bodySmall),
-            ),
-            Text(Formatters.price(order.grandTotal),
-                style: Theme.of(context).textTheme.titleSmall),
-          ],
-        ),
-        children: [
-          for (final line in order.lines)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${line.productTitle} · ${line.variantSummary} · ×${line.quantity}',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final line in o.lines)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text('${line.productTitle} (${line.variantSummary}) x${line.quantity}'),
+                                ),
+                                Text(Formatters.price(line.lineTotal)),
+                              ],
+                            ),
+                          ),
+                        const Divider(),
+                        if (o.trackingNumber != null)
+                          Text('Tracking: ${o.trackingNumber}',
+                              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.goldDeep)),
+                      ],
                     ),
                   ),
-                  Text(Formatters.price(line.lineTotal),
-                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),
-          if (order.trackingNumber != null)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Tracking: ${order.trackingNumber}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: AppColors.slate)),
-              ),
-            ),
-          const Divider(),
         ],
+      );
+    });
+  }
+
+  Widget _statusBadge(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.ink),
       ),
     );
   }

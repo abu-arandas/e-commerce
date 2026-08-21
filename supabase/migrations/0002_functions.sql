@@ -2,11 +2,6 @@
 -- Vanguard Fashion — 0002 business-logic functions
 -- Server-authoritative pricing, promo validation, and atomic checkout so the
 -- exact nested SKU stock decrements when an order is placed (PRD §3.2).
---
--- NOTE: `validate_promotion`, `place_order` and `restock_order` below are
--- SUPERSEDED by 0004_hardening.sql, which fixes client-controlled shipping,
--- category-scoped discounts, the usage-limit race, lock ordering, and restock
--- idempotency. Apply 0004; do not treat the definitions here as current.
 -- ============================================================================
 
 -- Role helper used by RLS policies (0003). SECURITY DEFINER so it can read the
@@ -156,7 +151,7 @@ declare
   v_group_name    text;
   v_category      text;
 begin
-  if p_items is null or jsonb_array_length(p_items) = 0 then
+  if p_items is null or jsonb_typeof(p_items) != 'array' or jsonb_array_length(p_items) = 0 then
     raise exception 'Cannot place an empty order';
   end if;
 
@@ -166,6 +161,18 @@ begin
 
   for v_item in select * from jsonb_array_elements(p_items)
   loop
+    if jsonb_typeof(v_item) != 'object' then
+      raise exception 'Each order item must be a JSON object';
+    end if;
+
+    if not (v_item ? 'variant_item_id') or (v_item ->> 'variant_item_id') is null then
+      raise exception 'Missing variant_item_id in order item';
+    end if;
+
+    if not (v_item ? 'quantity') or (v_item ->> 'quantity') is null then
+      raise exception 'Missing quantity in order item';
+    end if;
+
     v_variant_id := (v_item ->> 'variant_item_id')::uuid;
     v_qty        := (v_item ->> 'quantity')::integer;
 

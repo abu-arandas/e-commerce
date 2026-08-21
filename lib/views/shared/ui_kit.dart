@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
-import '../../core/utils/formatters.dart';
 
 /// Small, reusable presentation atoms shared across the storefront and admin.
 
@@ -109,16 +108,18 @@ class StockBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color;
+    late Color color;
+    late String label;
     if (stock <= 0) {
       color = AppColors.outOfStock;
+      label = 'Sold out';
     } else if (stock <= threshold) {
       color = AppColors.lowStock;
+      label = compact ? '$stock left' : 'Only $stock left';
     } else {
       color = AppColors.inStock;
+      label = 'In stock';
     }
-    final label =
-        Formatters.stockLabel(stock, lowThreshold: threshold, compact: compact);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -246,52 +247,6 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Inline failure notice. Renders nothing when [message] is empty, so it can be
-/// dropped at the top of a panel and bound straight to a controller's error.
-class ErrorBanner extends StatelessWidget {
-  const ErrorBanner({super.key, required this.message, this.onDismiss});
-
-  final String message;
-  final VoidCallback? onDismiss;
-
-  @override
-  Widget build(BuildContext context) {
-    if (message.isEmpty) return const SizedBox.shrink();
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.dangerTint,
-        borderRadius: const BorderRadius.all(AppSpacing.rSm),
-        border: Border.all(color: AppColors.dangerEdge),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: AppColors.danger),
-            ),
-          ),
-          if (onDismiss != null)
-            IconButton(
-              icon: const Icon(Icons.close, size: 16),
-              color: AppColors.danger,
-              onPressed: onDismiss,
-              tooltip: 'Dismiss',
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 /// A small colour swatch used in variant pickers and product cards.
 /// Named `VfSwatch` to avoid clashing with Flutter's `ColorSwatch`.
 class VfSwatch extends StatelessWidget {
@@ -310,7 +265,12 @@ class VfSwatch extends StatelessWidget {
   final VoidCallback? onTap;
   final bool disabled;
 
-  Color get _color => AppColors.fromHex(hex);
+  Color get _color {
+    final h = hex?.replaceFirst('#', '');
+    if (h == null || h.length != 6) return AppColors.mist;
+    final value = int.tryParse('FF$h', radix: 16);
+    return value == null ? AppColors.mist : Color(value);
+  }
 
   @override
   Widget build(BuildContext context) {

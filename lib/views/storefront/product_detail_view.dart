@@ -3,15 +3,14 @@ import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
 import '../../controllers/catalog_controller.dart';
+import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
-import '../../core/utils/app_constants.dart';
 import '../../core/utils/bootstrap5.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/seo/seo_service.dart';
-import '../../core/utils/store_settings.dart';
 import '../shared/storefront_scaffold.dart';
 import '../shared/ui_kit.dart';
 import '../shared/variant_selector.dart';
@@ -214,7 +213,7 @@ class _Details extends StatelessWidget {
           VariantSelector(controller: catalog),
           const SizedBox(height: AppSpacing.xl),
 
-          // Quantity + add to cart.
+          // Quantity + add to cart + wishlist.
           Row(
             children: [
               Obx(() => QuantityStepper(
@@ -223,7 +222,7 @@ class _Details extends StatelessWidget {
                     onDecrement: catalog.decrementQty,
                     onIncrement: catalog.incrementQty,
                   )),
-              const SizedBox(width: AppSpacing.md),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Obx(() => GoldButton(
                       label: catalog.canAddToCart ? 'Add to bag' : 'Select a size',
@@ -232,6 +231,26 @@ class _Details extends StatelessWidget {
                           ? () => _addToCart(context, cart, catalog)
                           : null,
                     )),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Builder(
+                builder: (context) {
+                  final wishlist = Get.find<WishlistController>();
+                  return Obx(() {
+                    final saved = wishlist.isSaved(product.id);
+                    return OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        side: BorderSide(color: saved ? Colors.red.shade700 : AppColors.line),
+                      ),
+                      onPressed: () => wishlist.toggle(product),
+                      child: Icon(
+                        saved ? Icons.favorite : Icons.favorite_border,
+                        color: saved ? Colors.red.shade700 : AppColors.ink,
+                      ),
+                    );
+                  });
+                },
               ),
             ],
           ),
@@ -277,19 +296,15 @@ class _AssuranceRow extends StatelessWidget {
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
         );
-    return Obx(() => Wrap(
-          spacing: AppSpacing.lg,
-          runSpacing: AppSpacing.xs,
-          children: [
-            item(
-              Icons.local_shipping_outlined,
-              'Free shipping over '
-              '${Formatters.priceTrim(StoreSettings.freeShippingThreshold.value)}',
-            ),
-            item(Icons.autorenew, '${AppConstants.freeReturnsDays}-day returns'),
-            item(Icons.verified_outlined, 'Authenticity guaranteed'),
-          ],
-        ));
+    return Wrap(
+      spacing: AppSpacing.lg,
+      runSpacing: AppSpacing.xs,
+      children: [
+        item(Icons.local_shipping_outlined, 'Free shipping over \$150'),
+        item(Icons.autorenew, '30-day returns'),
+        item(Icons.verified_outlined, 'Authenticity guaranteed'),
+      ],
+    );
   }
 }
 
@@ -319,13 +334,11 @@ class _Accordion extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Obx(() => Text(
-                      'Complimentary carbon-neutral shipping on orders over '
-                      '${Formatters.priceTrim(StoreSettings.freeShippingThreshold.value)}. '
-                      'Returns accepted within ${AppConstants.freeReturnsDays} days '
-                      'in original condition.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    )),
+                child: Text(
+                  'Complimentary carbon-neutral shipping on orders over \$150. Returns accepted '
+                  'within 30 days in original condition.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ],
           ),

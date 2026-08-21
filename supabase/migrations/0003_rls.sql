@@ -2,11 +2,6 @@
 -- Vanguard Fashion — 0003 Row-Level Security
 -- Storefront reads are public; writes are staff-only; customers see only their
 -- own profile, addresses, wishlist, and orders.
---
--- NOTE: the `promotions_read`, `orders_insert` and `order_items_insert`
--- policies below are SUPERSEDED by 0004_hardening.sql — the first exposed every
--- active promo code to anonymous clients, and the second let anyone insert
--- order rows with arbitrary totals.
 -- ============================================================================
 
 alter table public.products        enable row level security;
