@@ -4,7 +4,7 @@ import 'variant_model.dart';
 /// The parent product container (PRD §5.1). Holds the colour [groups], each of
 /// which holds its size-level [VariantItem]s.
 class Product {
-  Product({
+  const Product({
     required this.id,
     required this.slug,
     required this.title,
@@ -27,10 +27,6 @@ class Product {
   final bool isFeatured;
   final List<VariantGroup> groups;
   final DateTime? createdAt;
-
-  // Cache fields for performance optimization
-  double? _cachedFromPrice;
-  double? _cachedMaxPrice;
 
   // ---- Derived pricing / stock ----
 
