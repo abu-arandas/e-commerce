@@ -134,13 +134,29 @@ Fb5Breakpoint _bpFromToken(String? token) {
   }
 }
 
+// Caches for the frequent string-parsing of classNames to improve performance.
+final _spanCache = <String, Map<Fb5Breakpoint, int>>{};
+final _offsetCache = <String, Map<Fb5Breakpoint, int>>{};
+
 Map<Fb5Breakpoint, int> _parseSpans(String classNames, RegExp re) {
+  final Map<String, Map<Fb5Breakpoint, int>>? cache =
+      re == _colRe ? _spanCache : (re == _offsetRe ? _offsetCache : null);
+
+  if (cache != null && cache.containsKey(classNames)) {
+    return cache[classNames]!;
+  }
+
   final result = <Fb5Breakpoint, int>{};
   for (final m in re.allMatches(classNames)) {
     final bp = _bpFromToken(m.group(1));
     final n = int.tryParse(m.group(2) ?? '');
     if (n != null && n >= 1 && n <= 12) result[bp] = n;
   }
+
+  if (cache != null) {
+    cache[classNames] = result;
+  }
+
   return result;
 }
 

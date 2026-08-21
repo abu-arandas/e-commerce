@@ -1,3 +1,9 @@
+## 2024-08-02 - Caching String Regex Execution
+
+**Learning:** When string parsing via regex is repetitively executed inside widget rebuilding paths (like resolving grid spans in `FB5Col`), introducing a simple string-keyed cache avoids redundant match/parse overhead, especially as class names per widget remain mostly static.
+
+**Action:** Use Map-based caches when executing repeated static-heavy computations within layout build loops.
+
 ## 2024-07-28 - Avoid chained map/where/toList in Dart
 **Learning:** Dart's `.where(...).toList()` and `.map(...).toList()` chained together on Iterables cause unnecessary intermediate List allocations. In hot paths (like sorting or filtering visible products on every keystroke), this creates garbage collection overhead.
 **Action:** When filtering or calculating aggregates (min/max) over lists that run frequently, prefer a single-pass filter inside `.where(...)` or a standard `for` loop over chained higher-order functions.
