@@ -1,3 +1,7 @@
+## 2024-05-19 - Dart Environment Variable Parsing
+**Learning:** `double.fromEnvironment` is not available in Dart. Using `const int.fromEnvironment(...) * 1.0` limits it to integers. The best way is to use `double.tryParse(const String.fromEnvironment(...))` and make the constant variable `static final` rather than `static const`.
+**Action:** When fixing environment variable issues related to double values, use `double.tryParse` with `String.fromEnvironment`.
+
 ## 2026-02-18 - [Dart 3 double.fromEnvironment]
 **Learning:** Dart 3 does not support `double.fromEnvironment`. It throws a compilation error when running tests.
 **Action:** To define constant doubles from environment variables, use `int.fromEnvironment('KEY') * 1.0` instead.
