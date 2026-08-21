@@ -27,12 +27,6 @@ abstract final class SupabaseService {
   /// True once [init] has successfully configured a live Supabase client.
   static bool get isReady => _ready;
 
-  @visibleForTesting
-  static set isReady(bool value) => _ready = value;
-
-  @visibleForTesting
-  static set mockClient(SupabaseClient? client) => _mockClient = client;
-
   /// The active client. Only valid when [isReady] is true.
   static SupabaseClient get client => _mockClient ?? Supabase.instance.client;
 
