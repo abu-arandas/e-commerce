@@ -4,6 +4,7 @@ import '../../controllers/admin_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/cart_controller.dart';
 import '../../controllers/catalog_controller.dart';
+import '../../controllers/wishlist_controller.dart';
 
 /// Registers the app's controllers up front. Storefront controllers are eager
 /// (they drive the first paint); the [AdminController] is lazy (`fenix`) so its
@@ -16,6 +17,8 @@ class InitialBinding extends Bindings {
     Get.put<AuthController>(AuthController(), permanent: true);
     Get.put<CartController>(CartController(), permanent: true);
     Get.put<CatalogController>(CatalogController(), permanent: true);
+    Get.put<WishlistController>(WishlistController(), permanent: true);
     Get.lazyPut<AdminController>(() => AdminController(), fenix: true);
   }
 }
+

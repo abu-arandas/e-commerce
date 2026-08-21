@@ -87,7 +87,7 @@ class _LoginViewState extends State<LoginView> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(labelText: 'Email'),
-                      validator: (v) => (v ?? '').contains('@') ? null : 'Enter a valid email',
+                      validator: (v) => RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch((v ?? '').trim()) ? null : 'Enter a valid email',
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextFormField(
