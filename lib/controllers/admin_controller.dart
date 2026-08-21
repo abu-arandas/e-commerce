@@ -39,9 +39,13 @@ class AdminController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
+  late final RxList<LowStockEntry> _lowStock = <LowStockEntry>[].obs;
+
   @override
   void onInit() {
     super.onInit();
+    // Re-evaluate low stock whenever the products list changes
+    ever(products, (_) => _updateLowStock());
     refreshAll();
   }
 
@@ -120,7 +124,9 @@ class AdminController extends GetxController {
 
   int get activePromotions => promotions.where((p) => p.isLive).length;
 
-  List<LowStockEntry> get lowStock {
+  List<LowStockEntry> get lowStock => _lowStock;
+
+  void _updateLowStock() {
     final entries = <LowStockEntry>[];
     for (final p in products) {
       for (final g in p.groups) {
@@ -139,7 +145,7 @@ class AdminController extends GetxController {
       }
     }
     entries.sort((a, b) => a.stock.compareTo(b.stock));
-    return entries;
+    _lowStock.assignAll(entries);
   }
 
   /// Revenue split by product category (for the dashboard breakdown chart).

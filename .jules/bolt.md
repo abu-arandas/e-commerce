@@ -1,3 +1,7 @@
+## 2024-11-20 - GetX Getter Optimization
+ **Learning:** In GetX projects, expensive nested loops inside getters accessed by Obx widgets cause significant performance bottlenecks due to frequent recalculation.
+ **Action:** Introduce a private reactive cache (e.g., `_lowStock = <LowStockEntry>[].obs`) updated via a worker (`ever`) only when the source reactive dependencies change, exposing the cache directly in the getter.
+
 ## 2024-08-02 - PL/pgSQL JSONB Array and Object Validation
  **Learning:** When processing a `jsonb` array parameter in PostgreSQL functions (like `p_items` in `place_order`), it is important to first ensure the input is exactly a JSON array using `jsonb_typeof(p_items) = 'array'`. Failing to do so can result in type mismatches or runtime errors if a non-array JSON object is passed to `jsonb_array_length`. Moreover, checking each array element to confirm it is an object and explicitly validating required keys (`variant_item_id`, `quantity`) is necessary for secure input validation.
  **Action:** Always validate `jsonb` inputs tightly by using `jsonb_typeof()` to assert structural requirements (array, object) before extracting lengths or navigating sub-keys, and ensure inner items in an array are objects with the appropriate keys.
