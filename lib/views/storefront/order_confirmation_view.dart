@@ -58,6 +58,8 @@ class OrderConfirmationView extends StatelessWidget {
                       if (order.contactEmail != null)
                         Text('A confirmation has been sent to ${order.contactEmail}.',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+                      const SizedBox(height: AppSpacing.lg),
+                      _OrderProgressTracker(),
                       const SizedBox(height: AppSpacing.xl),
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -98,13 +100,16 @@ class OrderConfirmationView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Row(
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
                         children: [
                           GoldButton(label: 'Continue shopping', onPressed: () => Get.toNamed(AppRoutes.shop)),
-                          const SizedBox(width: AppSpacing.sm),
-                          OutlinedButton(
-                              onPressed: () => Get.toNamed(AppRoutes.account),
-                              child: const Text('View orders')),
+                          OutlinedButton.icon(
+                            onPressed: () => Get.toNamed(AppRoutes.account),
+                            icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                            label: const Text('View order history'),
+                          ),
                         ],
                       ),
                     ],
@@ -124,6 +129,59 @@ class OrderConfirmationView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [Text(label, style: style), Text(value, style: style)],
+      ),
+    );
+  }
+}
+
+class _OrderProgressTracker extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    const steps = ['Order Placed', 'Processing', 'Shipped', 'Delivered'];
+    const activeStep = 0;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: const BorderRadius.all(AppSpacing.rSm),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < steps.length; i++) ...[
+            Column(
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: i <= activeStep ? AppColors.gold : AppColors.line,
+                  child: Icon(
+                    i <= activeStep ? Icons.check : Icons.circle,
+                    size: 14,
+                    color: i <= activeStep ? AppColors.ink : AppColors.slate,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  steps[i],
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: i == activeStep ? FontWeight.bold : FontWeight.normal,
+                    color: i <= activeStep ? AppColors.ink : AppColors.slate,
+                  ),
+                ),
+              ],
+            ),
+            if (i < steps.length - 1)
+              Expanded(
+                child: Container(
+                  height: 2,
+                  color: i < activeStep ? AppColors.gold : AppColors.line,
+                  margin: const EdgeInsets.only(bottom: 16, left: 4, right: 4),
+                ),
+              ),
+          ],
+        ],
       ),
     );
   }
