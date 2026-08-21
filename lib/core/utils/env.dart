@@ -14,16 +14,12 @@ abstract final class Env {
       String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
 
   /// Flat shipping fee (minor currency unit handled at display time).
-  static double get flatShippingFee {
-    const val = String.fromEnvironment('FLAT_SHIPPING_FEE');
-    return double.tryParse(val) ?? 12.0;
-  }
+  static final double flatShippingFee =
+      double.tryParse(const String.fromEnvironment('FLAT_SHIPPING_FEE', defaultValue: '12.0')) ?? 12.0;
 
   /// Free-shipping threshold used for storefront messaging.
-  static double get freeShippingThreshold {
-    const val = String.fromEnvironment('FREE_SHIPPING_THRESHOLD');
-    return double.tryParse(val) ?? 150.0;
-  }
+  static final double freeShippingThreshold =
+      double.tryParse(const String.fromEnvironment('FREE_SHIPPING_THRESHOLD', defaultValue: '150.0')) ?? 150.0;
 
   /// True when both Supabase credentials are present. When false the app runs
   /// against in-memory demo data so the UI is always explorable.

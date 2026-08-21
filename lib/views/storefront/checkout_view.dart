@@ -173,7 +173,7 @@ class _CheckoutViewState extends State<CheckoutView> {
       validator: (v) {
         final value = (v ?? '').trim();
         if (required && value.isEmpty) return 'Required';
-        if (email && value.isNotEmpty && !value.contains('@')) return 'Enter a valid email';
+        if (email && value.isNotEmpty && !RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) return 'Enter a valid email';
         return null;
       },
     );
