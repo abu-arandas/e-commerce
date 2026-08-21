@@ -13,6 +13,7 @@ abstract final class AppConstants {
   static const String tblWishlists = 'wishlists';
   static const String tblOrders = 'orders';
   static const String tblOrderItems = 'order_items';
+  static const String tblStoreSettings = 'store_settings';
 
   // RPCs
   static const String rpcValidatePromotion = 'validate_promotion';
