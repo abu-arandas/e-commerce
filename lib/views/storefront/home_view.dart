@@ -54,8 +54,9 @@ class HomeView extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Obx(() {
-                  if (catalog.isLoading.value)
+                  if (catalog.isLoading.value) {
                     return const ProductGridSkeleton(count: 4);
+                  }
                   final featured = catalog.featured;
                   final list = featured.isEmpty
                       ? catalog.visibleProducts.take(4).toList()
@@ -250,11 +251,11 @@ class _EditorialBand extends StatelessWidget {
       classNames: 'gx-5 gy-4',
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        FB5Col(
+        const FB5Col(
           classNames: 'col-12 col-lg-6',
           child: ClipRRect(
-            borderRadius: const BorderRadius.all(AppSpacing.rMd),
-            child: const VfImage(
+            borderRadius: BorderRadius.all(AppSpacing.rMd),
+            child: VfImage(
                 url: 'https://picsum.photos/seed/vf-editorial-craft/1000/800',
                 aspectRatio: 5 / 4),
           ),

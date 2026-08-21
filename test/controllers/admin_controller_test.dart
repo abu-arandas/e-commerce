@@ -7,8 +7,14 @@ void main() {
   group('AdminController - lowStock logic', () {
     late AdminController controller;
 
-    setUp(() {
+    setUp(() async {
       controller = AdminController();
+      // onInit() registers the ever(products) workers that keep the cached
+      // lowStock list in sync; without it the cache is never populated.
+      controller.onInit();
+      await controller.refreshAll();
+      // Drop demo data so each case starts from an empty catalogue.
+      controller.products.clear();
     });
 
     test('returns empty list when no products', () {

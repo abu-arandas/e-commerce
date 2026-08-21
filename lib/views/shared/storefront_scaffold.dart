@@ -167,17 +167,16 @@ class AppFooter extends StatelessWidget {
                       const SizedBox(height: AppSpacing.sm),
                       Row(
                         children: [
-                          Expanded(
+                          const Expanded(
                             child: TextField(
-                              style:
-                                  const TextStyle(color: AppColors.textOnInk),
+                              style: TextStyle(color: AppColors.textOnInk),
                               decoration: InputDecoration(
                                 hintText: 'Email address',
-                                hintStyle: const TextStyle(
-                                    color: AppColors.textMutedOnInk),
+                                hintStyle:
+                                    TextStyle(color: AppColors.textMutedOnInk),
                                 filled: true,
                                 fillColor: AppColors.inkSoft,
-                                enabledBorder: const OutlineInputBorder(
+                                enabledBorder: OutlineInputBorder(
                                   borderRadius:
                                       BorderRadius.all(AppSpacing.rSm),
                                   borderSide:

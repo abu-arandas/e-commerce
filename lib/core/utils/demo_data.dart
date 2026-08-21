@@ -8,8 +8,7 @@ import '../../models/variant_model.dart';
 /// storefront and admin panels are always fully explorable. Mirrors
 /// `supabase/seed.sql`. Demo imagery uses picsum seeds for reliable loading.
 abstract final class DemoData {
-  static String _img(String seed) =>
-      'https://picsum.photos/seed/$seed/900/1200';
+  static String _img(String seed) => 'https://picsum.photos/seed/$seed/900/1200';
 
   static List<Product> products() => [
         Product(
@@ -28,37 +27,13 @@ abstract final class DemoData {
               productId: '11111111-1111-1111-1111-111111111111',
               name: 'Midnight Blue',
               colorHex: '#1E2A44',
-              groupImages: [
-                _img('vf-cash-midnight-1'),
-                _img('vf-cash-midnight-2')
-              ],
+              groupImages: [_img('vf-cash-midnight-1'), _img('vf-cash-midnight-2')],
               sortOrder: 0,
               items: const [
-                VariantItem(
-                    id: 'i-cb-s',
-                    groupId: 'a1-midnight',
-                    sku: 'CASH-TURT-BLU-S',
-                    sizeLabel: 'S',
-                    stockQuantity: 12),
-                VariantItem(
-                    id: 'i-cb-m',
-                    groupId: 'a1-midnight',
-                    sku: 'CASH-TURT-BLU-M',
-                    sizeLabel: 'M',
-                    stockQuantity: 8),
-                VariantItem(
-                    id: 'i-cb-l',
-                    groupId: 'a1-midnight',
-                    sku: 'CASH-TURT-BLU-L',
-                    sizeLabel: 'L',
-                    stockQuantity: 3),
-                VariantItem(
-                    id: 'i-cb-xl',
-                    groupId: 'a1-midnight',
-                    sku: 'CASH-TURT-BLU-XL',
-                    sizeLabel: 'XL',
-                    stockQuantity: 0,
-                    priceOverride: 255),
+                VariantItem(id: 'i-cb-s', groupId: 'a1-midnight', sku: 'CASH-TURT-BLU-S', sizeLabel: 'S', stockQuantity: 12),
+                VariantItem(id: 'i-cb-m', groupId: 'a1-midnight', sku: 'CASH-TURT-BLU-M', sizeLabel: 'M', stockQuantity: 8),
+                VariantItem(id: 'i-cb-l', groupId: 'a1-midnight', sku: 'CASH-TURT-BLU-L', sizeLabel: 'L', stockQuantity: 3),
+                VariantItem(id: 'i-cb-xl', groupId: 'a1-midnight', sku: 'CASH-TURT-BLU-XL', sizeLabel: 'XL', stockQuantity: 0, priceOverride: 255),
               ],
             ),
             VariantGroup(
@@ -69,24 +44,9 @@ abstract final class DemoData {
               groupImages: [_img('vf-cash-crimson-1')],
               sortOrder: 1,
               items: const [
-                VariantItem(
-                    id: 'i-cc-s',
-                    groupId: 'a1-crimson',
-                    sku: 'CASH-TURT-CRM-S',
-                    sizeLabel: 'S',
-                    stockQuantity: 5),
-                VariantItem(
-                    id: 'i-cc-m',
-                    groupId: 'a1-crimson',
-                    sku: 'CASH-TURT-CRM-M',
-                    sizeLabel: 'M',
-                    stockQuantity: 9),
-                VariantItem(
-                    id: 'i-cc-l',
-                    groupId: 'a1-crimson',
-                    sku: 'CASH-TURT-CRM-L',
-                    sizeLabel: 'L',
-                    stockQuantity: 6),
+                VariantItem(id: 'i-cc-s', groupId: 'a1-crimson', sku: 'CASH-TURT-CRM-S', sizeLabel: 'S', stockQuantity: 5),
+                VariantItem(id: 'i-cc-m', groupId: 'a1-crimson', sku: 'CASH-TURT-CRM-M', sizeLabel: 'M', stockQuantity: 9),
+                VariantItem(id: 'i-cc-l', groupId: 'a1-crimson', sku: 'CASH-TURT-CRM-L', sizeLabel: 'L', stockQuantity: 6),
               ],
             ),
             VariantGroup(
@@ -97,18 +57,8 @@ abstract final class DemoData {
               groupImages: [_img('vf-cash-oatmeal-1')],
               sortOrder: 2,
               items: const [
-                VariantItem(
-                    id: 'i-co-m',
-                    groupId: 'a1-oatmeal',
-                    sku: 'CASH-TURT-OAT-M',
-                    sizeLabel: 'M',
-                    stockQuantity: 14),
-                VariantItem(
-                    id: 'i-co-l',
-                    groupId: 'a1-oatmeal',
-                    sku: 'CASH-TURT-OAT-L',
-                    sizeLabel: 'L',
-                    stockQuantity: 11),
+                VariantItem(id: 'i-co-m', groupId: 'a1-oatmeal', sku: 'CASH-TURT-OAT-M', sizeLabel: 'M', stockQuantity: 14),
+                VariantItem(id: 'i-co-l', groupId: 'a1-oatmeal', sku: 'CASH-TURT-OAT-L', sizeLabel: 'L', stockQuantity: 11),
               ],
             ),
           ],
@@ -132,24 +82,9 @@ abstract final class DemoData {
               groupImages: [_img('vf-trou-charcoal-1')],
               sortOrder: 0,
               items: const [
-                VariantItem(
-                    id: 'i-tc-30',
-                    groupId: 'a2-charcoal',
-                    sku: 'WOOL-TROU-CHR-30',
-                    sizeLabel: '30',
-                    stockQuantity: 10),
-                VariantItem(
-                    id: 'i-tc-32',
-                    groupId: 'a2-charcoal',
-                    sku: 'WOOL-TROU-CHR-32',
-                    sizeLabel: '32',
-                    stockQuantity: 7),
-                VariantItem(
-                    id: 'i-tc-34',
-                    groupId: 'a2-charcoal',
-                    sku: 'WOOL-TROU-CHR-34',
-                    sizeLabel: '34',
-                    stockQuantity: 4),
+                VariantItem(id: 'i-tc-30', groupId: 'a2-charcoal', sku: 'WOOL-TROU-CHR-30', sizeLabel: '30', stockQuantity: 10),
+                VariantItem(id: 'i-tc-32', groupId: 'a2-charcoal', sku: 'WOOL-TROU-CHR-32', sizeLabel: '32', stockQuantity: 7),
+                VariantItem(id: 'i-tc-34', groupId: 'a2-charcoal', sku: 'WOOL-TROU-CHR-34', sizeLabel: '34', stockQuantity: 4),
               ],
             ),
             VariantGroup(
@@ -160,18 +95,8 @@ abstract final class DemoData {
               groupImages: [_img('vf-trou-camel-1')],
               sortOrder: 1,
               items: const [
-                VariantItem(
-                    id: 'i-tm-32',
-                    groupId: 'a2-camel',
-                    sku: 'WOOL-TROU-CAM-32',
-                    sizeLabel: '32',
-                    stockQuantity: 6),
-                VariantItem(
-                    id: 'i-tm-34',
-                    groupId: 'a2-camel',
-                    sku: 'WOOL-TROU-CAM-34',
-                    sizeLabel: '34',
-                    stockQuantity: 2),
+                VariantItem(id: 'i-tm-32', groupId: 'a2-camel', sku: 'WOOL-TROU-CAM-32', sizeLabel: '32', stockQuantity: 6),
+                VariantItem(id: 'i-tm-34', groupId: 'a2-camel', sku: 'WOOL-TROU-CAM-34', sizeLabel: '34', stockQuantity: 2),
               ],
             ),
           ],
@@ -195,24 +120,9 @@ abstract final class DemoData {
               groupImages: [_img('vf-slip-champagne-1')],
               sortOrder: 0,
               items: const [
-                VariantItem(
-                    id: 'i-sc-xs',
-                    groupId: 'a3-champagne',
-                    sku: 'SILK-SLIP-CHA-XS',
-                    sizeLabel: 'XS',
-                    stockQuantity: 6),
-                VariantItem(
-                    id: 'i-sc-s',
-                    groupId: 'a3-champagne',
-                    sku: 'SILK-SLIP-CHA-S',
-                    sizeLabel: 'S',
-                    stockQuantity: 9),
-                VariantItem(
-                    id: 'i-sc-m',
-                    groupId: 'a3-champagne',
-                    sku: 'SILK-SLIP-CHA-M',
-                    sizeLabel: 'M',
-                    stockQuantity: 5),
+                VariantItem(id: 'i-sc-xs', groupId: 'a3-champagne', sku: 'SILK-SLIP-CHA-XS', sizeLabel: 'XS', stockQuantity: 6),
+                VariantItem(id: 'i-sc-s', groupId: 'a3-champagne', sku: 'SILK-SLIP-CHA-S', sizeLabel: 'S', stockQuantity: 9),
+                VariantItem(id: 'i-sc-m', groupId: 'a3-champagne', sku: 'SILK-SLIP-CHA-M', sizeLabel: 'M', stockQuantity: 5),
               ],
             ),
             VariantGroup(
@@ -223,18 +133,8 @@ abstract final class DemoData {
               groupImages: [_img('vf-slip-onyx-1')],
               sortOrder: 1,
               items: const [
-                VariantItem(
-                    id: 'i-so-s',
-                    groupId: 'a3-onyx',
-                    sku: 'SILK-SLIP-ONX-S',
-                    sizeLabel: 'S',
-                    stockQuantity: 8),
-                VariantItem(
-                    id: 'i-so-m',
-                    groupId: 'a3-onyx',
-                    sku: 'SILK-SLIP-ONX-M',
-                    sizeLabel: 'M',
-                    stockQuantity: 7),
+                VariantItem(id: 'i-so-s', groupId: 'a3-onyx', sku: 'SILK-SLIP-ONX-S', sizeLabel: 'S', stockQuantity: 8),
+                VariantItem(id: 'i-so-m', groupId: 'a3-onyx', sku: 'SILK-SLIP-ONX-M', sizeLabel: 'M', stockQuantity: 7),
               ],
             ),
           ],
@@ -257,24 +157,9 @@ abstract final class DemoData {
               groupImages: [_img('vf-trench-sand-1'), _img('vf-trench-sand-2')],
               sortOrder: 0,
               items: const [
-                VariantItem(
-                    id: 'i-ts-s',
-                    groupId: 'a4-sand',
-                    sku: 'TRENCH-SND-S',
-                    sizeLabel: 'S',
-                    stockQuantity: 4),
-                VariantItem(
-                    id: 'i-ts-m',
-                    groupId: 'a4-sand',
-                    sku: 'TRENCH-SND-M',
-                    sizeLabel: 'M',
-                    stockQuantity: 5),
-                VariantItem(
-                    id: 'i-ts-l',
-                    groupId: 'a4-sand',
-                    sku: 'TRENCH-SND-L',
-                    sizeLabel: 'L',
-                    stockQuantity: 3),
+                VariantItem(id: 'i-ts-s', groupId: 'a4-sand', sku: 'TRENCH-SND-S', sizeLabel: 'S', stockQuantity: 4),
+                VariantItem(id: 'i-ts-m', groupId: 'a4-sand', sku: 'TRENCH-SND-M', sizeLabel: 'M', stockQuantity: 5),
+                VariantItem(id: 'i-ts-l', groupId: 'a4-sand', sku: 'TRENCH-SND-L', sizeLabel: 'L', stockQuantity: 3),
               ],
             ),
           ],
@@ -330,21 +215,15 @@ abstract final class DemoData {
   }
 
   /// Local mirror of the SQL `validate_promotion` function for demo mode.
-  static PromoValidation validatePromo(
-      String code, double subtotal, List<String> categories) {
-    final promo = promotions()
-        .where((p) => p.code.toUpperCase() == code.toUpperCase())
-        .firstOrNull;
+  static PromoValidation validatePromo(String code, double subtotal, List<String> categories) {
+    final promo = promotions().where((p) => p.code.toUpperCase() == code.toUpperCase()).firstOrNull;
     if (promo == null) return PromoValidation.invalid('Code not found');
     if (!promo.isActive) return PromoValidation.invalid('Promotion inactive');
-    if (promo.isScheduled)
-      return PromoValidation.invalid('Promotion not yet active');
+    if (promo.isScheduled) return PromoValidation.invalid('Promotion not yet active');
     if (promo.isExpired) return PromoValidation.invalid('Promotion expired');
-    if (promo.usageExhausted)
-      return PromoValidation.invalid('Usage limit reached');
+    if (promo.usageExhausted) return PromoValidation.invalid('Usage limit reached');
     if (subtotal < promo.minOrderValue) {
-      return PromoValidation.invalid(
-          'Requires a minimum order of \$${promo.minOrderValue.toStringAsFixed(0)}');
+      return PromoValidation.invalid('Requires a minimum order of \$${promo.minOrderValue.toStringAsFixed(0)}');
     }
     if (promo.includedCategories.isNotEmpty &&
         !categories.any(promo.includedCategories.contains)) {
@@ -363,8 +242,7 @@ abstract final class DemoData {
         discount = double.parse(discount.toStringAsFixed(2));
         break;
       case DiscountType.fixedAmount:
-        discount =
-            promo.discountValue < subtotal ? promo.discountValue : subtotal;
+        discount = promo.discountValue < subtotal ? promo.discountValue : subtotal;
         break;
       case DiscountType.freeShipping:
         freeShip = true;

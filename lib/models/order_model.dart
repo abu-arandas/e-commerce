@@ -58,7 +58,7 @@ class OrderLine {
   final double lineTotal;
 
   String get variantSummary => [variantName, sizeLabel]
-      .where((e) => e != null && e!.isNotEmpty)
+      .where((e) => e != null && e.isNotEmpty)
       .join(' · ');
 
   factory OrderLine.fromJson(Map<String, dynamic> json) => OrderLine(

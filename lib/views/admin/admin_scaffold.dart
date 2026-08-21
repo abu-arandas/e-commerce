@@ -26,8 +26,7 @@ const _adminNav = [
 /// Ink-themed admin shell with a persistent nav rail on desktop and a drawer on
 /// smaller viewports. Gates access to staff roles (PRD §2).
 class AdminScaffold extends StatelessWidget {
-  const AdminScaffold(
-      {super.key, required this.title, required this.child, this.actions});
+  const AdminScaffold({super.key, required this.title, required this.child, this.actions});
 
   final String title;
   final Widget child;
@@ -44,21 +43,16 @@ class AdminScaffold extends StatelessWidget {
         final desktop = context.isDesktop;
         return Scaffold(
           backgroundColor: AppColors.ink,
-          drawer: desktop
-              ? null
-              : Drawer(
-                  backgroundColor: AppColors.inkSoft,
-                  child: _NavList(auth: auth)),
+          drawer: desktop ? null : Drawer(backgroundColor: AppColors.inkSoft, child: _NavList(auth: auth)),
           appBar: desktop
               ? null
               : AppBar(
-                  title: Text(title,
-                      style: AppTypography.wordmark(
-                          color: AppColors.textOnInk, size: 20)),
+                  title: Text(title, style: AppTypography.wordmark(color: AppColors.textOnInk, size: 20)),
                 ),
           body: Row(
             children: [
-              if (desktop) SizedBox(width: 248, child: _NavList(auth: auth)),
+              if (desktop)
+                SizedBox(width: 248, child: _NavList(auth: auth)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,53 +119,36 @@ class _NavList extends StatelessWidget {
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
-                  Text('VANGUARD',
-                      style: AppTypography.wordmark(
-                          color: AppColors.textOnInk, size: 20)),
+                  Text('VANGUARD', style: AppTypography.wordmark(color: AppColors.textOnInk, size: 20)),
                   const SizedBox(width: 6),
-                  Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                          color: AppColors.gold, shape: BoxShape.circle)),
+                  Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.gold, shape: BoxShape.circle)),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-              child: Text('BACK OFFICE',
-                  style: AppTypography.eyebrow(color: AppColors.slate)),
+              child: Text('BACK OFFICE', style: AppTypography.eyebrow(color: AppColors.slate)),
             ),
             const SizedBox(height: AppSpacing.sm),
             for (final item in _adminNav)
-              _NavTile(
-                  item: item,
-                  active: current.startsWith(item.route) &&
-                      (item.route != AppRoutes.adminDashboard ||
-                          current == item.route)),
+              _NavTile(item: item, active: current.startsWith(item.route) && (item.route != AppRoutes.adminDashboard || current == item.route)),
             const Spacer(),
             const Divider(color: Color(0xFF2A2A30)),
             Obx(() => ListTile(
-                  leading: const Icon(Icons.person_outline,
-                      color: AppColors.textMutedOnInk),
+                  leading: const Icon(Icons.person_outline, color: AppColors.textMutedOnInk),
                   title: Text(auth.user.value?.displayName ?? 'Staff',
                       style: const TextStyle(color: AppColors.textOnInk)),
                   subtitle: Text(auth.role.label,
-                      style: const TextStyle(
-                          color: AppColors.textMutedOnInk, fontSize: 11)),
+                      style: const TextStyle(color: AppColors.textMutedOnInk, fontSize: 11)),
                 )),
             ListTile(
-              leading: const Icon(Icons.storefront_outlined,
-                  color: AppColors.textMutedOnInk),
-              title: const Text('View storefront',
-                  style: TextStyle(color: AppColors.textMutedOnInk)),
+              leading: const Icon(Icons.storefront_outlined, color: AppColors.textMutedOnInk),
+              title: const Text('View storefront', style: TextStyle(color: AppColors.textMutedOnInk)),
               onTap: () => Get.toNamed(AppRoutes.home),
             ),
             ListTile(
-              leading:
-                  const Icon(Icons.logout, color: AppColors.textMutedOnInk),
-              title: const Text('Sign out',
-                  style: TextStyle(color: AppColors.textMutedOnInk)),
+              leading: const Icon(Icons.logout, color: AppColors.textMutedOnInk),
+              title: const Text('Sign out', style: TextStyle(color: AppColors.textMutedOnInk)),
               onTap: () async {
                 await auth.signOut();
                 Get.offAllNamed(AppRoutes.home);
@@ -193,21 +170,16 @@ class _NavTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
       child: Material(
         color: active ? AppColors.ink : Colors.transparent,
         borderRadius: const BorderRadius.all(AppSpacing.rSm),
         child: ListTile(
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(AppSpacing.rSm)),
-          leading: Icon(item.icon,
-              color: active ? AppColors.gold : AppColors.textMutedOnInk,
-              size: 20),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppSpacing.rSm)),
+          leading: Icon(item.icon, color: active ? AppColors.gold : AppColors.textMutedOnInk, size: 20),
           title: Text(item.label,
               style: TextStyle(
-                  color:
-                      active ? AppColors.textOnInk : AppColors.textMutedOnInk,
+                  color: active ? AppColors.textOnInk : AppColors.textMutedOnInk,
                   fontWeight: active ? FontWeight.w600 : FontWeight.w400)),
           onTap: () {
             if (Scaffold.maybeOf(context)?.hasDrawer ?? false) {
@@ -234,17 +206,14 @@ class _AccessDenied extends StatelessWidget {
           children: [
             const Icon(Icons.lock_outline, size: 48, color: AppColors.gold),
             const SizedBox(height: AppSpacing.md),
-            Text('Staff access required',
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text('Staff access required', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: AppSpacing.xs),
             const Text('Sign in with a staff account to view the admin panel.',
                 style: TextStyle(color: AppColors.textMutedOnInk)),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
               onPressed: () => Get.offNamed(AppRoutes.login),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.gold,
-                  foregroundColor: AppColors.ink),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.gold, foregroundColor: AppColors.ink),
               child: const Text('Go to sign in'),
             ),
           ],

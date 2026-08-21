@@ -82,7 +82,7 @@ class _PromoCard extends StatelessWidget {
         borderRadius: const BorderRadius.all(AppSpacing.rMd),
         border: Border.all(
             color: promo.isLive
-                ? AppColors.gold.withOpacity(0.4)
+                ? AppColors.gold.withValues(alpha: 0.4)
                 : const Color(0xFF2A2A30)),
       ),
       child: Column(
@@ -296,7 +296,7 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
                               const InputDecoration(labelText: 'Description')),
                       const SizedBox(height: AppSpacing.sm),
                       DropdownButtonFormField<DiscountType>(
-                        value: _type,
+                        initialValue: _type,
                         decoration:
                             const InputDecoration(labelText: 'Discount type'),
                         dropdownColor: AppColors.ink,
@@ -384,7 +384,7 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         value: _active,
-                        activeColor: AppColors.gold,
+                        activeThumbColor: AppColors.gold,
                         title: const Text('Active'),
                         onChanged: (v) => setState(() => _active = v),
                       ),

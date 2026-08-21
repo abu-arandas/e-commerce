@@ -125,7 +125,7 @@ class _FilterBar extends StatelessWidget {
         FB5Col(
           classNames: 'col-4 col-lg-2',
           child: Obx(() => DropdownButtonFormField<String>(
-                value: catalog.sort.value,
+                initialValue: catalog.sort.value,
                 isExpanded: true,
                 decoration: const InputDecoration(
                     contentPadding:

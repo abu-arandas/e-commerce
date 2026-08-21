@@ -20,6 +20,7 @@ class CatalogController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxString sort =
       'featured'.obs; // featured | price_asc | price_desc | newest
+  final RxList<String> _cachedCategories = <String>[].obs;
 
   // ---- Product detail + nested selection ----
   final Rxn<Product> selected = Rxn<Product>();
@@ -31,7 +32,17 @@ class CatalogController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Recompute categories whenever products change
+    ever(products, (_) => _updateAvailableCategories());
     fetchProducts();
+  }
+
+  void _updateAvailableCategories() {
+    final set = <String>{};
+    for (final p in products) {
+      if (p.category != null) set.add(p.category!);
+    }
+    _cachedCategories.assignAll(set.toList()..sort());
   }
 
   // ---------------------------------------------------------------------------
@@ -69,22 +80,22 @@ class CatalogController extends GetxController {
 
   /// Products after category filter, search, and sort are applied.
   List<Product> get visibleProducts {
-    var list = products.where((p) => p.isActive).toList();
-
     final cat = categoryFilter.value;
-    if (cat != null && cat.isNotEmpty) {
-      list = list.where((p) => p.category == cat).toList();
-    }
-
     final q = searchQuery.value.trim().toLowerCase();
-    if (q.isNotEmpty) {
-      list = list
-          .where((p) =>
-              p.title.toLowerCase().contains(q) ||
-              (p.category?.toLowerCase().contains(q) ?? false) ||
-              p.description.toLowerCase().contains(q))
-          .toList();
-    }
+
+    // ⚡ Bolt: Single-pass filter to avoid multiple intermediate list allocations
+    var list = products.where((p) {
+      if (!p.isActive) return false;
+      if (cat != null && cat.isNotEmpty && p.category != cat) return false;
+      if (q.isNotEmpty) {
+        if (!p.title.toLowerCase().contains(q) &&
+            !(p.category?.toLowerCase().contains(q) ?? false) &&
+            !p.description.toLowerCase().contains(q)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
 
     switch (sort.value) {
       case 'price_asc':
@@ -111,13 +122,7 @@ class CatalogController extends GetxController {
   void setSearch(String value) => searchQuery.value = value;
   void setSort(String value) => sort.value = value;
 
-  List<String> get availableCategories {
-    final set = <String>{};
-    for (final p in products) {
-      if (p.category != null) set.add(p.category!);
-    }
-    return set.toList()..sort();
-  }
+  List<String> get availableCategories => _cachedCategories.toList();
 
   // ---------------------------------------------------------------------------
   // Product detail + nested variant selection

@@ -44,6 +44,5 @@ abstract final class J {
     return DateTime.tryParse(v.toString());
   }
 
-  static DateTime date(dynamic v) =>
-      dateOrNull(v) ?? DateTime.fromMillisecondsSinceEpoch(0);
+  static DateTime date(dynamic v) => dateOrNull(v) ?? DateTime.fromMillisecondsSinceEpoch(0);
 }

@@ -13,8 +13,7 @@ abstract final class AppSpacing {
   static const double xxxl = 72;
 
   // Section vertical rhythm scales with the viewport.
-  static double section(double width) =>
-      width < 768 ? 48 : (width < 1200 ? 72 : 96);
+  static double section(double width) => width < 768 ? 48 : (width < 1200 ? 72 : 96);
 
   // Radii
   static const double radiusSm = 6;

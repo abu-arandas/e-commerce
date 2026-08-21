@@ -20,8 +20,7 @@ class CartView extends StatelessWidget {
     final cart = Get.find<CartController>();
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
         child: FB5Container(
           child: Obx(() {
             if (cart.isEmpty) {
@@ -29,16 +28,13 @@ class CartView extends StatelessWidget {
                 icon: Icons.shopping_bag_outlined,
                 title: 'Your bag is empty',
                 message: 'Discover the collection and add your favourites.',
-                action: GoldButton(
-                    label: 'Shop now',
-                    onPressed: () => Get.toNamed(AppRoutes.shop)),
+                action: GoldButton(label: 'Shop now', onPressed: () => Get.toNamed(AppRoutes.shop)),
               );
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SectionHeading(
-                    eyebrow: 'Your selection', title: 'Shopping bag'),
+                const SectionHeading(eyebrow: 'Your selection', title: 'Shopping bag'),
                 const SizedBox(height: AppSpacing.lg),
                 FB5Row(
                   classNames: 'gx-5 gy-4',
@@ -87,8 +83,7 @@ class _CartLine extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.all(AppSpacing.rSm),
-            child: SizedBox(
-                width: 84, height: 108, child: VfImage(url: line.imageUrl)),
+            child: SizedBox(width: 84, height: 108, child: VfImage(url: line.imageUrl)),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -99,8 +94,7 @@ class _CartLine extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(line.productTitle,
-                          style: Theme.of(context).textTheme.titleMedium),
+                      child: Text(line.productTitle, style: Theme.of(context).textTheme.titleMedium),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, size: 18),
@@ -110,15 +104,8 @@ class _CartLine extends StatelessWidget {
                   ],
                 ),
                 Text('${line.colorName} · Size ${line.sizeLabel}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: AppColors.slate)),
-                Text(line.sku,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: AppColors.mist)),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate)),
+                Text(line.sku, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.mist)),
                 const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
@@ -175,25 +162,18 @@ class _OrderSummaryState extends State<_OrderSummary> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Order summary',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('Order summary', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.md),
 
             // Free-shipping progress.
             if (cart.amountToFreeShipping > 0) ...[
-              Text(
-                  'Add ${Formatters.price(cart.amountToFreeShipping)} for free shipping',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: AppColors.goldDeep)),
+              Text('Add ${Formatters.price(cart.amountToFreeShipping)} for free shipping',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.goldDeep)),
               const SizedBox(height: AppSpacing.xs),
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
-                  value: (cart.subtotal / Env.freeShippingThreshold)
-                      .clamp(0, 1)
-                      .toDouble(),
+                  value: (cart.subtotal / Env.freeShippingThreshold).clamp(0, 1).toDouble(),
                   minHeight: 6,
                   backgroundColor: AppColors.surfaceAlt,
                   color: AppColors.gold,
@@ -204,16 +184,11 @@ class _OrderSummaryState extends State<_OrderSummary> {
 
             _row(context, 'Subtotal', Formatters.price(cart.subtotal)),
             if (cart.discount > 0)
-              _row(
-                  context,
-                  'Discount${cart.appliedCode.value != null ? ' (${cart.appliedCode.value})' : ''}',
-                  '-${Formatters.price(cart.discount)}',
-                  highlight: true),
-            _row(context, 'Shipping',
-                cart.shipping == 0 ? 'Free' : Formatters.price(cart.shipping)),
+              _row(context, 'Discount${cart.appliedCode.value != null ? ' (${cart.appliedCode.value})' : ''}',
+                  '-${Formatters.price(cart.discount)}', highlight: true),
+            _row(context, 'Shipping', cart.shipping == 0 ? 'Free' : Formatters.price(cart.shipping)),
             const Divider(height: AppSpacing.lg),
-            _row(context, 'Total', Formatters.price(cart.grandTotal),
-                bold: true),
+            _row(context, 'Total', Formatters.price(cart.grandTotal), bold: true),
             const SizedBox(height: AppSpacing.md),
 
             // Promo code.
@@ -223,21 +198,15 @@ class _OrderSummaryState extends State<_OrderSummary> {
                   child: TextField(
                     controller: _promo,
                     textCapitalization: TextCapitalization.characters,
-                    decoration: const InputDecoration(
-                        hintText: 'Promo code', isDense: true),
+                    decoration: const InputDecoration(hintText: 'Promo code', isDense: true),
                     onSubmitted: (v) => cart.applyPromo(v),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 OutlinedButton(
-                  onPressed: cart.isApplyingPromo.value
-                      ? null
-                      : () => cart.applyPromo(_promo.text),
+                  onPressed: cart.isApplyingPromo.value ? null : () => cart.applyPromo(_promo.text),
                   child: cart.isApplyingPromo.value
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Apply'),
                 ),
               ],
@@ -247,25 +216,16 @@ class _OrderSummaryState extends State<_OrderSummary> {
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle,
-                        size: 16, color: AppColors.success),
+                    const Icon(Icons.check_circle, size: 16, color: AppColors.success),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(
-                          cart.appliedPromo.value?.description ??
-                              'Promo applied',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: AppColors.success)),
+                      child: Text(cart.appliedPromo.value?.description ?? 'Promo applied',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.success)),
                     ),
                     InkWell(
                       onTap: cart.clearPromo,
                       child: Text('Remove',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(color: AppColors.slate)),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.slate)),
                     ),
                   ],
                 ),
@@ -274,10 +234,7 @@ class _OrderSummaryState extends State<_OrderSummary> {
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(cart.promoError.value,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: AppColors.danger)),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.danger)),
               ),
 
             if (widget.showCheckout) ...[
@@ -301,8 +258,7 @@ class _OrderSummaryState extends State<_OrderSummary> {
     );
   }
 
-  Widget _row(BuildContext context, String label, String value,
-      {bool bold = false, bool highlight = false}) {
+  Widget _row(BuildContext context, String label, String value, {bool bold = false, bool highlight = false}) {
     final style = bold
         ? Theme.of(context).textTheme.titleLarge
         : Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -319,12 +275,10 @@ class _OrderSummaryState extends State<_OrderSummary> {
 
 /// Public wrapper so checkout can reuse the same summary panel.
 class OrderSummaryPanel extends StatelessWidget {
-  const OrderSummaryPanel(
-      {super.key, required this.cart, this.showCheckout = false});
+  const OrderSummaryPanel({super.key, required this.cart, this.showCheckout = false});
   final CartController cart;
   final bool showCheckout;
 
   @override
-  Widget build(BuildContext context) =>
-      _OrderSummary(cart: cart, showCheckout: showCheckout);
+  Widget build(BuildContext context) => _OrderSummary(cart: cart, showCheckout: showCheckout);
 }

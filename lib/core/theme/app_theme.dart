@@ -7,7 +7,7 @@ import 'app_typography.dart';
 /// Assembles the light (storefront) and dark (admin ink) [ThemeData].
 abstract final class AppTheme {
   static ThemeData get light {
-    final colorScheme = const ColorScheme.light(
+    const colorScheme = ColorScheme.light(
       primary: AppColors.ink,
       onPrimary: AppColors.textOnInk,
       secondary: AppColors.gold,
@@ -74,17 +74,17 @@ abstract final class AppTheme {
         fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md, vertical: AppSpacing.md),
-        border: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.line),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.line),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.line),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.line),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.gold, width: 1.5),
         ),
         labelStyle: base.textTheme.bodyMedium,
         hintStyle: base.textTheme.bodyMedium?.copyWith(color: AppColors.mist),
@@ -107,7 +107,7 @@ abstract final class AppTheme {
 
   /// Ink theme used for the admin panel — a focused, low-glare dark surface.
   static ThemeData get dark {
-    final colorScheme = const ColorScheme.dark(
+    const colorScheme = ColorScheme.dark(
       primary: AppColors.gold,
       onPrimary: AppColors.ink,
       secondary: AppColors.goldSoft,

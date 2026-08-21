@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
 import '../../controllers/catalog_controller.dart';
+import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -54,8 +55,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
   Widget build(BuildContext context) {
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
         child: FB5Container(
           child: Obx(() {
             final product = catalog.selected.value;
@@ -73,8 +73,7 @@ class _ProductDetailViewState extends State<ProductDetailView> {
             if (product == null) {
               return const Padding(
                 padding: EdgeInsets.all(AppSpacing.xxxl),
-                child: Center(
-                    child: CircularProgressIndicator(color: AppColors.ink)),
+                child: Center(child: CircularProgressIndicator(color: AppColors.ink)),
               );
             }
 
@@ -86,12 +85,8 @@ class _ProductDetailViewState extends State<ProductDetailView> {
                 FB5Row(
                   classNames: 'gx-5 gy-4',
                   children: [
-                    FB5Col(
-                        classNames: 'col-12 col-lg-7',
-                        child: _Gallery(catalog: catalog)),
-                    FB5Col(
-                        classNames: 'col-12 col-lg-5',
-                        child: _Details(catalog: catalog)),
+                    FB5Col(classNames: 'col-12 col-lg-7', child: _Gallery(catalog: catalog)),
+                    FB5Col(classNames: 'col-12 col-lg-5', child: _Details(catalog: catalog)),
                   ],
                 ),
               ],
@@ -109,18 +104,13 @@ class _Breadcrumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style =
-        Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate);
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate);
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        InkWell(
-            onTap: () => Get.toNamed(AppRoutes.home),
-            child: Text('Home', style: style)),
+        InkWell(onTap: () => Get.toNamed(AppRoutes.home), child: Text('Home', style: style)),
         Text('  /  ', style: style),
-        InkWell(
-            onTap: () => Get.toNamed(AppRoutes.shop),
-            child: Text('Shop', style: style)),
+        InkWell(onTap: () => Get.toNamed(AppRoutes.shop), child: Text('Shop', style: style)),
         Text('  /  ', style: style),
         Text(product, style: style?.copyWith(color: AppColors.ink)),
       ],
@@ -136,8 +126,7 @@ class _Gallery extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final images = catalog.activeImages;
-      final active = catalog.activeImage.value
-          .clamp(0, images.isEmpty ? 0 : images.length - 1);
+      final active = catalog.activeImage.value.clamp(0, images.isEmpty ? 0 : images.length - 1);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -155,8 +144,7 @@ class _Gallery extends StatelessWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: images.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(width: AppSpacing.xs),
+                separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
                 itemBuilder: (_, i) => GestureDetector(
                   onTap: () => catalog.setActiveImage(i),
                   child: Container(
@@ -206,37 +194,26 @@ class _Details extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(Formatters.price(catalog.currentUnitPrice),
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(color: AppColors.ink)),
-              if (product.hasPriceRange &&
-                  catalog.selectedItem.value == null) ...[
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.ink)),
+              if (product.hasPriceRange && catalog.selectedItem.value == null) ...[
                 const SizedBox(width: AppSpacing.xs),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 3),
-                  child: Text('starting',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: AppColors.slate)),
+                  child: Text('starting', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate)),
                 ),
               ],
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(product.description,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: AppColors.textSecondary)),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.xl),
 
           // Nested Color → Size selector.
           VariantSelector(controller: catalog),
           const SizedBox(height: AppSpacing.xl),
 
-          // Quantity + add to cart.
+          // Quantity + add to cart + wishlist.
           Row(
             children: [
               Obx(() => QuantityStepper(
@@ -245,16 +222,35 @@ class _Details extends StatelessWidget {
                     onDecrement: catalog.decrementQty,
                     onIncrement: catalog.incrementQty,
                   )),
-              const SizedBox(width: AppSpacing.md),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Obx(() => GoldButton(
-                      label:
-                          catalog.canAddToCart ? 'Add to bag' : 'Select a size',
+                      label: catalog.canAddToCart ? 'Add to bag' : 'Select a size',
                       icon: Icons.shopping_bag_outlined,
                       onPressed: catalog.canAddToCart
                           ? () => _addToCart(context, cart, catalog)
                           : null,
                     )),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Builder(
+                builder: (context) {
+                  final wishlist = Get.find<WishlistController>();
+                  return Obx(() {
+                    final saved = wishlist.isSaved(product.id);
+                    return OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        side: BorderSide(color: saved ? Colors.red.shade700 : AppColors.line),
+                      ),
+                      onPressed: () => wishlist.toggle(product),
+                      child: Icon(
+                        saved ? Icons.favorite : Icons.favorite_border,
+                        color: saved ? Colors.red.shade700 : AppColors.ink,
+                      ),
+                    );
+                  });
+                },
               ),
             ],
           ),
@@ -267,16 +263,11 @@ class _Details extends StatelessWidget {
     });
   }
 
-  void _addToCart(
-      BuildContext context, CartController cart, CatalogController catalog) {
+  void _addToCart(BuildContext context, CartController cart, CatalogController catalog) {
     final product = catalog.selected.value!;
     final group = catalog.selectedGroup.value!;
     final item = catalog.selectedItem.value!;
-    cart.add(
-        product: product,
-        group: group,
-        item: item,
-        quantity: catalog.quantity.value);
+    cart.add(product: product, group: group, item: item, quantity: catalog.quantity.value);
     Get.snackbar(
       'Added to bag',
       '${product.title} · ${group.name} · ${item.sizeLabel}',
@@ -329,20 +320,17 @@ class _Accordion extends StatelessWidget {
         children: [
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
-            title: Text('Details & materials',
-                style: Theme.of(context).textTheme.titleMedium),
+            title: Text('Details & materials', style: Theme.of(context).textTheme.titleMedium),
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Text(description,
-                    style: Theme.of(context).textTheme.bodyMedium),
+                child: Text(description, style: Theme.of(context).textTheme.bodyMedium),
               ),
             ],
           ),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
-            title: Text('Shipping & returns',
-                style: Theme.of(context).textTheme.titleMedium),
+            title: Text('Shipping & returns', style: Theme.of(context).textTheme.titleMedium),
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.md),

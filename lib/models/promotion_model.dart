@@ -66,7 +66,8 @@ class Promotion {
       validUntil != null && DateTime.now().isAfter(validUntil!);
   bool get isScheduled =>
       validFrom != null && DateTime.now().isBefore(validFrom!);
-  bool get usageExhausted => usageLimit != null && usageCount >= usageLimit!;
+  bool get usageExhausted =>
+      usageLimit != null && usageCount >= usageLimit!;
   bool get isLive => isActive && !isExpired && !isScheduled && !usageExhausted;
 
   String get valueLabel => switch (discountType) {
@@ -82,8 +83,7 @@ class Promotion {
         discountType: DiscountType.fromDb(J.strOrNull(json['discount_type'])),
         discountValue: J.toDouble(json['discount_value']),
         minOrderValue: J.toDouble(json['min_order_value']),
-        usageLimit:
-            json['usage_limit'] == null ? null : J.toInt(json['usage_limit']),
+        usageLimit: json['usage_limit'] == null ? null : J.toInt(json['usage_limit']),
         usageCount: J.toInt(json['usage_count']),
         isActive: J.toBool(json['is_active'], true),
         includedCategories: J.strList(json['included_categories']),
@@ -134,8 +134,7 @@ class PromoValidation {
   factory PromoValidation.invalid(String reason) =>
       PromoValidation(valid: false, reason: reason);
 
-  factory PromoValidation.fromJson(Map<String, dynamic> json) =>
-      PromoValidation(
+  factory PromoValidation.fromJson(Map<String, dynamic> json) => PromoValidation(
         valid: J.toBool(json['valid']),
         promotionId: J.strOrNull(json['promotion_id']),
         code: J.strOrNull(json['code']),

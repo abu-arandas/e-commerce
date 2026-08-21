@@ -182,7 +182,7 @@ class _ProductRow extends StatelessWidget {
             flex: 2,
             child: Switch(
               value: product.isActive,
-              activeColor: AppColors.gold,
+              activeThumbColor: AppColors.gold,
               onChanged: (_) => onToggle(),
             ),
           ),

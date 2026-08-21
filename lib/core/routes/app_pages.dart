@@ -1,5 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../views/admin/admin_dashboard_view.dart';
@@ -14,6 +15,7 @@ import '../../views/storefront/login_view.dart';
 import '../../views/storefront/order_confirmation_view.dart';
 import '../../views/storefront/product_detail_view.dart';
 import '../../views/storefront/shop_view.dart';
+import '../../views/storefront/wishlist_view.dart';
 import 'app_routes.dart';
 
 /// Redirects non-staff away from admin routes to the sign-in page.
@@ -58,6 +60,10 @@ abstract final class AppPages {
     GetPage(
         name: AppRoutes.account,
         page: () => const AccountView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.wishlist,
+        page: () => const WishlistView(),
         transition: Transition.fadeIn),
 
     // ---- Admin (staff-gated) ----

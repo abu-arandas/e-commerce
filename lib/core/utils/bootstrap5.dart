@@ -1,3 +1,5 @@
+library;
+
 import 'package:flutter/widgets.dart';
 
 /// A faithful, Dart-3 / Wasm-compatible re-implementation of the Bootstrap 5
@@ -132,13 +134,29 @@ Fb5Breakpoint _bpFromToken(String? token) {
   }
 }
 
+// Caches for the frequent string-parsing of classNames to improve performance.
+final _spanCache = <String, Map<Fb5Breakpoint, int>>{};
+final _offsetCache = <String, Map<Fb5Breakpoint, int>>{};
+
 Map<Fb5Breakpoint, int> _parseSpans(String classNames, RegExp re) {
+  final Map<String, Map<Fb5Breakpoint, int>>? cache =
+      re == _colRe ? _spanCache : (re == _offsetRe ? _offsetCache : null);
+
+  if (cache != null && cache.containsKey(classNames)) {
+    return cache[classNames]!;
+  }
+
   final result = <Fb5Breakpoint, int>{};
   for (final m in re.allMatches(classNames)) {
     final bp = _bpFromToken(m.group(1));
     final n = int.tryParse(m.group(2) ?? '');
     if (n != null && n >= 1 && n <= 12) result[bp] = n;
   }
+
+  if (cache != null) {
+    cache[classNames] = result;
+  }
+
   return result;
 }
 
@@ -253,8 +271,12 @@ class FB5Row extends StatelessWidget {
 
         final laidOut = <Widget>[];
         for (final child in children) {
-          final span = (child is FB5Col) ? child.resolveSpan(bp) : 12;
-          final offset = (child is FB5Col) ? child.resolveOffset(bp) : 0;
+          int span = 12;
+          int offset = 0;
+          if (child is FB5Col) {
+            span = child.resolveSpan(bp);
+            offset = child.resolveOffset(bp);
+          }
           // Subtract a hair to avoid float rounding pushing a full 12-row onto
           // a second line.
           final width = (unit * span) - 0.01;
