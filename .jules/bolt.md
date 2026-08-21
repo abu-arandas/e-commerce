@@ -1,3 +1,12 @@
+
+## 2024-05-18 - Avoid dart format .
+**Learning:** Running `dart format .` blindly will format all files and may pollute PRs with unrelated formatting changes.
+**Action:** Always format specific files modified in the PR using `dart format <specific_file>`.
+
+## 2024-05-18 - Use GetUtils for validation
+**Learning:** GetX has built-in utilities like `GetUtils.isEmail` which are more robust than simple manual checks.
+**Action:** Prefer `GetUtils` for common validations in GetX projects instead of writing custom regex.
+
 ## 2024-05-19 - Dart Environment Variable Parsing
 **Learning:** `double.fromEnvironment` is not available in Dart. Using `const int.fromEnvironment(...) * 1.0` limits it to integers. The best way is to use `double.tryParse(const String.fromEnvironment(...))` and make the constant variable `static final` rather than `static const`.
 **Action:** When fixing environment variable issues related to double values, use `double.tryParse` with `String.fromEnvironment`.
