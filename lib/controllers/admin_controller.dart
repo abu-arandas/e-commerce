@@ -40,13 +40,29 @@ class AdminController extends GetxController {
   final RxString error = ''.obs;
 
   Map<String, double>? _cachedRevenueByCategory;
+  // Cached totals
+  final RxInt _cachedTotalSkus = 0.obs;
+
+  late final RxList<LowStockEntry> _lowStock = <LowStockEntry>[].obs;
 
   @override
   void onInit() {
     super.onInit();
     ever(products, (_) => _cachedRevenueByCategory = null);
     ever(orders, (_) => _cachedRevenueByCategory = null);
+
+    // Performance optimization: calculate SKUs once reactively instead of dynamically
+    // flattening the deep product/group/item tree on every getter access.
+    ever(products, (_) => _updateTotalSkus());
+
+    // Re-evaluate low stock whenever the products list changes
+    ever(products, (_) => _updateLowStock());
+
     refreshAll();
+  }
+
+  void _updateTotalSkus() {
+    _cachedTotalSkus.value = products.fold<int>(0, (sum, p) => sum + p.allItems.length);
   }
 
   Future<void> refreshAll() async {
@@ -109,7 +125,10 @@ class AdminController extends GetxController {
   // ---------------------------------------------------------------------------
   int get totalProducts => products.length;
   int get activeProducts => products.where((p) => p.isActive).length;
-  int get totalSkus => products.fold(0, (sum, p) => sum + p.allItems.length);
+
+  // Uses a cached reactive value updated when the products list changes
+  // to avoid O(N*M) flattening cost on every build cycle.
+  int get totalSkus => _cachedTotalSkus.value;
 
   int get totalOrders => orders.length;
   int get pendingOrders =>
@@ -124,7 +143,9 @@ class AdminController extends GetxController {
 
   int get activePromotions => promotions.where((p) => p.isLive).length;
 
-  List<LowStockEntry> get lowStock {
+  List<LowStockEntry> get lowStock => _lowStock;
+
+  void _updateLowStock() {
     final entries = <LowStockEntry>[];
     for (final p in products) {
       for (final g in p.groups) {
@@ -143,7 +164,7 @@ class AdminController extends GetxController {
       }
     }
     entries.sort((a, b) => a.stock.compareTo(b.stock));
-    return entries;
+    _lowStock.assignAll(entries);
   }
 
   /// Revenue split by product category (for the dashboard breakdown chart).

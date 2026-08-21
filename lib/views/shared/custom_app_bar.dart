@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../controllers/cart_controller.dart';
+import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -59,6 +60,7 @@ class VanguardAppBar extends StatelessWidget implements PreferredSizeWidget {
                   tooltip: 'Search',
                   onPressed: () => _go(AppRoutes.shop),
                 ),
+                _WishlistButton(),
                 Obx(() {
                   final staff = auth.isStaff;
                   return staff
@@ -126,6 +128,39 @@ class _NavLink extends StatelessWidget {
   }
 }
 
+class _WishlistButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final wishlist = Get.find<WishlistController>();
+    return Obx(() {
+      final count = wishlist.count;
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.favorite_border),
+            tooltip: 'Wishlist',
+            onPressed: () => Get.toNamed(AppRoutes.wishlist),
+          ),
+          if (count > 0)
+            Positioned(
+              right: 4,
+              top: 4,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                decoration: const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Text('$count',
+                    style: const TextStyle(color: AppColors.textOnInk, fontSize: 10, fontWeight: FontWeight.w700)),
+              ),
+            ),
+        ],
+      );
+    });
+  }
+}
+
 class _CartButton extends StatelessWidget {
   const _CartButton({required this.cart});
   final CartController cart;
@@ -185,6 +220,7 @@ class VanguardNavDrawer extends StatelessWidget {
             _tile(context, Icons.dry_cleaning_outlined, 'Dresses', '${AppRoutes.shop}?category=Dresses'),
             _tile(context, Icons.ac_unit_outlined, 'Outerwear', '${AppRoutes.shop}?category=Outerwear'),
             const Divider(),
+            _tile(context, Icons.favorite_border, 'Wishlist', AppRoutes.wishlist),
             _tile(context, Icons.shopping_bag_outlined, 'Cart', AppRoutes.cart),
             Obx(() => _tile(
                   context,

@@ -45,7 +45,7 @@ void _setCanonical(String path) {
 
 _Element? _appendHead(String tag, Map<String, String> attrs) {
   final el = _document.createElement(tag);
-  attrs.forEach(el.setAttribute);
+  attrs.forEach((key, value) => el.setAttribute(key, value));
   _document.head?.appendChild(el);
   return el;
 }

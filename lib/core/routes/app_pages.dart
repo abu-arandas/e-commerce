@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,6 +15,7 @@ import '../../views/storefront/login_view.dart';
 import '../../views/storefront/order_confirmation_view.dart';
 import '../../views/storefront/product_detail_view.dart';
 import '../../views/storefront/shop_view.dart';
+import '../../views/storefront/wishlist_view.dart';
 import 'app_routes.dart';
 
 /// Redirects non-staff away from admin routes to the sign-in page.
@@ -28,14 +30,41 @@ class _StaffGuard extends GetMiddleware {
 abstract final class AppPages {
   static final List<GetPage> routes = [
     // ---- Storefront ----
-    GetPage(name: AppRoutes.home, page: () => const HomeView(), transition: Transition.fadeIn),
-    GetPage(name: AppRoutes.shop, page: () => const ShopView(), transition: Transition.fadeIn),
-    GetPage(name: AppRoutes.product, page: () => const ProductDetailView(), transition: Transition.fadeIn),
-    GetPage(name: AppRoutes.cart, page: () => const CartView(), transition: Transition.fadeIn),
-    GetPage(name: AppRoutes.checkout, page: () => const CheckoutView(), transition: Transition.fadeIn),
-    GetPage(name: AppRoutes.orderConfirmation, page: () => const OrderConfirmationView()),
-    GetPage(name: AppRoutes.login, page: () => const LoginView(), transition: Transition.fadeIn),
-    GetPage(name: AppRoutes.account, page: () => const AccountView(), transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.home,
+        page: () => const HomeView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.shop,
+        page: () => const ShopView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.product,
+        page: () => const ProductDetailView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.cart,
+        page: () => const CartView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.checkout,
+        page: () => const CheckoutView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.orderConfirmation,
+        page: () => const OrderConfirmationView()),
+    GetPage(
+        name: AppRoutes.login,
+        page: () => const LoginView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.account,
+        page: () => const AccountView(),
+        transition: Transition.fadeIn),
+    GetPage(
+        name: AppRoutes.wishlist,
+        page: () => const WishlistView(),
+        transition: Transition.fadeIn),
 
     // ---- Admin (staff-gated) ----
     GetPage(
