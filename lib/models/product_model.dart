@@ -43,36 +43,32 @@ class Product {
   bool get inStock => allItems.any((i) => i.inStock) || (!hasVariants && isActive);
   int get totalStock => allItems.fold(0, (sum, i) => sum + i.stockQuantity);
 
-  /// Lowest effective price across all variants (for "from $X" display).
-  double get fromPrice {
-    if (_cachedFromPrice != null) return _cachedFromPrice!;
+  /// Computes the min and max prices in a single pass to avoid repeated iteration.
+  (double, double) get _priceRange {
     double? minPrice;
+    double? maxPrice;
+
     for (final group in groups) {
       for (final item in group.items) {
         final price = item.effectivePrice(basePrice);
-        if (minPrice == null || price < minPrice) {
-          minPrice = price;
-        }
+        if (minPrice == null || price < minPrice) minPrice = price;
+        if (maxPrice == null || price > maxPrice) maxPrice = price;
       }
     }
-    return _cachedFromPrice = (minPrice ?? basePrice);
+
+    return (minPrice ?? basePrice, maxPrice ?? basePrice);
   }
 
-  double get maxPrice {
-    if (_cachedMaxPrice != null) return _cachedMaxPrice!;
-    double? maximumPrice;
-    for (final group in groups) {
-      for (final item in group.items) {
-        final price = item.effectivePrice(basePrice);
-        if (maximumPrice == null || price > maximumPrice) {
-          maximumPrice = price;
-        }
-      }
-    }
-    return _cachedMaxPrice = (maximumPrice ?? basePrice);
-  }
+  /// Lowest effective price across all variants (for "from $X" display).
+  double get fromPrice => _priceRange.$1;
 
-  bool get hasPriceRange => (maxPrice - fromPrice).abs() > 0.001;
+  /// Highest effective price across all variants.
+  double get maxPrice => _priceRange.$2;
+
+  bool get hasPriceRange {
+    final range = _priceRange;
+    return (range.$2 - range.$1).abs() > 0.001;
+  }
 
   /// Primary hero image: first image of the first group, if any.
   String? get heroImage {
