@@ -7,7 +7,7 @@ import 'app_typography.dart';
 /// Assembles the light (storefront) and dark (admin ink) [ThemeData].
 abstract final class AppTheme {
   static ThemeData get light {
-    final colorScheme = const ColorScheme.light(
+    const colorScheme = ColorScheme.light(
       primary: AppColors.ink,
       onPrimary: AppColors.textOnInk,
       secondary: AppColors.gold,
@@ -22,7 +22,8 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.paper,
-      textTheme: AppTypography.textTheme(AppColors.textPrimary, AppColors.textSecondary),
+      textTheme: AppTypography.textTheme(
+          AppColors.textPrimary, AppColors.textSecondary),
       dividerColor: AppColors.line,
       splashFactory: InkSparkle.splashFactory,
     );
@@ -40,8 +41,10 @@ abstract final class AppTheme {
           backgroundColor: AppColors.ink,
           foregroundColor: AppColors.textOnInk,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppSpacing.rSm)),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(AppSpacing.rSm)),
           textStyle: base.textTheme.labelLarge,
         ),
       ),
@@ -49,8 +52,10 @@ abstract final class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.ink,
           side: const BorderSide(color: AppColors.ink),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(AppSpacing.rSm)),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(AppSpacing.rSm)),
           textStyle: base.textTheme.labelLarge,
         ),
       ),
@@ -61,23 +66,25 @@ abstract final class AppTheme {
         color: AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(AppSpacing.rMd)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(AppSpacing.rMd)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
-        border: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.line),
+        contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: AppSpacing.md),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.line),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.line),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.line),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(AppSpacing.rSm),
-          borderSide: const BorderSide(color: AppColors.gold, width: 1.5),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(AppSpacing.rSm),
+          borderSide: BorderSide(color: AppColors.gold, width: 1.5),
         ),
         labelStyle: base.textTheme.bodyMedium,
         hintStyle: base.textTheme.bodyMedium?.copyWith(color: AppColors.mist),
@@ -88,7 +95,8 @@ abstract final class AppTheme {
         labelStyle: base.textTheme.labelMedium,
         shape: const StadiumBorder(),
       ),
-      dividerTheme: const DividerThemeData(color: AppColors.line, thickness: 1, space: 1),
+      dividerTheme:
+          const DividerThemeData(color: AppColors.line, thickness: 1, space: 1),
       snackBarTheme: const SnackBarThemeData(
         backgroundColor: AppColors.ink,
         contentTextStyle: TextStyle(color: AppColors.textOnInk),
@@ -99,7 +107,7 @@ abstract final class AppTheme {
 
   /// Ink theme used for the admin panel — a focused, low-glare dark surface.
   static ThemeData get dark {
-    final colorScheme = const ColorScheme.dark(
+    const colorScheme = ColorScheme.dark(
       primary: AppColors.gold,
       onPrimary: AppColors.ink,
       secondary: AppColors.goldSoft,
@@ -115,7 +123,8 @@ abstract final class AppTheme {
       brightness: Brightness.dark,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.ink,
-      textTheme: AppTypography.textTheme(AppColors.textOnInk, AppColors.textMutedOnInk),
+      textTheme: AppTypography.textTheme(
+          AppColors.textOnInk, AppColors.textMutedOnInk),
       dividerColor: const Color(0xFF2A2A30),
     );
 
@@ -129,9 +138,11 @@ abstract final class AppTheme {
         color: AppColors.inkSoft,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(AppSpacing.rMd)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(AppSpacing.rMd)),
       ),
-      dividerTheme: const DividerThemeData(color: Color(0xFF2A2A30), thickness: 1, space: 1),
+      dividerTheme: const DividerThemeData(
+          color: Color(0xFF2A2A30), thickness: 1, space: 1),
     );
   }
 }
