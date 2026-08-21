@@ -6,6 +6,7 @@ analyzer:
     # active development of the storefront and admin panels.
     unused_import: warning
     unused_element: warning
+    deprecated_member_use: ignore
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
