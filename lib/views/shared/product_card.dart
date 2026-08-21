@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -24,6 +25,8 @@ class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
+    final wishlist = Get.find<WishlistController>();
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
@@ -60,6 +63,30 @@ class _ProductCardState extends State<ProductCard> {
                       top: AppSpacing.sm,
                       child: _tag('Featured', AppColors.gold, dark: true),
                     ),
+                  Positioned(
+                    right: AppSpacing.xs,
+                    top: AppSpacing.xs,
+                    child: Obx(() {
+                      final saved = wishlist.isSaved(p.id);
+                      return Material(
+                        color: Colors.white.withAlpha(220),
+                        shape: const CircleBorder(),
+                        elevation: 1,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => wishlist.toggle(p),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Icon(
+                              saved ? Icons.favorite : Icons.favorite_border,
+                              size: 18,
+                              color: saved ? Colors.red.shade700 : AppColors.ink,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
                 ],
               ),
               Padding(
