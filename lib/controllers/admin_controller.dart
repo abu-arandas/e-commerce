@@ -39,6 +39,7 @@ class AdminController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
+  Map<String, double>? _cachedRevenueByCategory;
   // Cached totals
   final RxInt _cachedTotalSkus = 0.obs;
 
@@ -47,6 +48,8 @@ class AdminController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    ever(products, (_) => _cachedRevenueByCategory = null);
+    ever(orders, (_) => _cachedRevenueByCategory = null);
 
     // Performance optimization: calculate SKUs once reactively instead of dynamically
     // flattening the deep product/group/item tree on every getter access.
@@ -166,6 +169,10 @@ class AdminController extends GetxController {
 
   /// Revenue split by product category (for the dashboard breakdown chart).
   Map<String, double> get revenueByCategory {
+    if (_cachedRevenueByCategory != null) {
+      return _cachedRevenueByCategory!;
+    }
+
     // Demo/simple attribution: distribute each order's total across its lines'
     // products by matching titles to catalog categories.
     final byCat = <String, double>{};
@@ -176,6 +183,8 @@ class AdminController extends GetxController {
         byCat[cat] = (byCat[cat] ?? 0) + line.lineTotal;
       }
     }
+
+    _cachedRevenueByCategory = byCat;
     return byCat;
   }
 

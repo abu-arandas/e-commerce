@@ -1,3 +1,7 @@
+## 2024-11-20 - Memoization in GetX Controllers
+ **Learning:** In GetX, using `ever()` inside `onInit()` is a great way to invalidate cached getters. However, tests that instantiate a GetX controller directly (e.g. `final controller = AdminController();`) must also explicitly call `controller.onInit()` for those `ever()` workers to be registered.
+ **Action:** Always explicitly call `onInit()` in unit tests that test reactive controllers when not using `Get.put()`.
+
 ## 2024-08-02 - Testing Missing Implementation Detail
 
 **Learning:** When writing tests based on the source code, be careful not to hallucinate methods that were not provided in the original prompt or verified in the file. During test development for `formatters.dart`, I assumed a `dateTime` method existed because it was part of a larger file, but it wasn't mentioned in the core issue.
