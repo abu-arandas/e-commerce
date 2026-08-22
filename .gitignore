@@ -55,3 +55,6 @@ graphify-out/.graphify_analysis.json
 graphify-out/.graphify_python
 # absolute path to the machine that built the graph — never portable
 graphify-out/.graphify_root
+# dated snapshots graphify writes on every relabel — a full duplicate of the
+# graph each time, and they accumulate
+graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
