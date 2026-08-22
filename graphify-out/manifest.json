@@ -12,8 +12,8 @@
     "semantic_hash": "5615bbbb227bf7bc2ba815efd0c048d6"
   },
   "lib/controllers/cart_controller.dart": {
-    "mtime": 1787377307.5426955,
-    "seen": 1787378070.2887757,
+    "mtime": 1787384979.5429463,
+    "seen": 1787385081.3928642,
     "ast_hash": "af0073bc25638f1be8226fb5e7071451",
     "semantic_hash": "af0073bc25638f1be8226fb5e7071451"
   },
@@ -528,8 +528,8 @@
     "semantic_hash": "d433ceb2acaa2b6f54de97b001a23ff4"
   },
   "supabase/schema.sql": {
-    "mtime": 1787355896.236122,
-    "seen": 1787378088.4273288,
+    "mtime": 1787385004.4579716,
+    "seen": 1787385081.3929477,
     "ast_hash": "4786cc695d8755263055213b59d1dd4c",
     "semantic_hash": "4786cc695d8755263055213b59d1dd4c"
   },
@@ -546,10 +546,10 @@
     "semantic_hash": "77c48e3a571d8f95035ff3c0c235cbba"
   },
   "supabase/tests/10_tests.sql": {
-    "mtime": 1787351776.0542066,
-    "seen": 1787378088.427333,
-    "ast_hash": "f469fb374d8556c0ef67272f6d1a7b54",
-    "semantic_hash": "f469fb374d8556c0ef67272f6d1a7b54"
+    "mtime": 1787385044.184214,
+    "seen": 1787385081.3929508,
+    "ast_hash": "38157c367cec282f2dab1ce82ad637f3",
+    "semantic_hash": ""
   },
   ".jules/bolt.md": {
     "mtime": 1787351776.0529888,
@@ -627,6 +627,12 @@
     "mtime": 1787384123.5766912,
     "seen": 1787384160.337136,
     "ast_hash": "8999d98e43e8c232b7ef551e26265e82",
+    "semantic_hash": ""
+  },
+  "supabase/tests/20_contract.sh": {
+    "mtime": 1787385027.1783373,
+    "seen": 1787385081.392952,
+    "ast_hash": "8ed5b19786b15b484cd95591c53f7e5f",
     "semantic_hash": ""
   }
 }
