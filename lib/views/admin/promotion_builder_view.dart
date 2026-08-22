@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/app_constants.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/uuid.dart';
 import '../../models/promotion_model.dart';
 import 'admin_scaffold.dart';
 
@@ -48,7 +49,15 @@ class PromotionBuilderView extends StatelessWidget {
                 child: _PromoCard(
                   promo: p,
                   onEdit: () => _openEditor(context, admin, p),
-                  onDelete: () => admin.deletePromotion(p.id),
+                  onDelete: () async {
+                    final removed = await admin.deletePromotion(p.id);
+                    if (!removed) {
+                      Get.snackbar('Delete failed', admin.error.value,
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: AppColors.danger,
+                          colorText: AppColors.textOnInk);
+                    }
+                  },
                 ),
               ),
           ],
@@ -231,8 +240,7 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
 
   void _save() {
     final promo = Promotion(
-      id: widget.existing?.id ??
-          'promo-${DateTime.now().microsecondsSinceEpoch}',
+      id: widget.existing?.id ?? Uuid.v4(),
       code: _code.text.trim().toUpperCase(),
       description:
           _description.text.trim().isEmpty ? null : _description.text.trim(),

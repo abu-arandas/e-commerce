@@ -1,62 +1,60 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 import 'package:vanguard_fashion/controllers/admin_controller.dart';
 import 'package:vanguard_fashion/models/order_model.dart';
 import 'package:vanguard_fashion/models/product_model.dart';
 
+/// Guards the complexity of the dashboard aggregates rather than their wall
+/// time, so it does not flake on a loaded machine.
+///
+/// `totalSkus` and `revenueByCategory` are both cached. If either regresses to
+/// recomputing on every read, the work grows with the catalogue on every Obx
+/// rebuild — which is what made the dashboard crawl before they were memoised.
 void main() {
-  test('revenueByCategory benchmark', () {
-    final controller = AdminController();
+  test('repeated aggregate reads do no work proportional to the catalogue', () {
+    final c = AdminController();
+    c.onInit();
+    c.products.clear();
+    c.orders.clear();
 
-    // Create dummy products
-    for (var i = 0; i < 1000; i++) {
-      controller.products.add(Product(
+    for (var i = 0; i < 500; i++) {
+      c.products.add(Product(
         id: 'p$i',
         slug: 'slug-$i',
         title: 'Product $i',
-        description: 'Description $i',
-        category: 'Category ${i % 10}',
-        isActive: true,
-        isFeatured: false,
-        basePrice: 10.0,
-        groups: const [],
+        category: 'Category ${i % 5}',
+        basePrice: 10,
       ));
     }
-
-    // Create dummy orders
-    for (var i = 0; i < 5000; i++) {
-      final lines = <OrderLine>[];
-      for (var j = 0; j < 5; j++) {
-        lines.add(OrderLine(
-          id: 'l$i-$j',
-          productTitle: 'Product ${(i + j) % 1000}',
-          variantName: 'Var',
-          sizeLabel: 'M',
-          sku: 'SKU',
-          unitPrice: 10,
-          quantity: 1,
-          lineTotal: 10,
-        ));
-      }
-      controller.orders.add(Order(
+    for (var i = 0; i < 500; i++) {
+      c.orders.add(Order(
         id: 'o$i',
-        userId: 'u$i',
         status: OrderStatus.paid,
         subtotal: 50,
         discountTotal: 0,
         shippingTotal: 0,
         grandTotal: 50,
-        lines: lines,
-        createdAt: DateTime.now(),
+        lines: [
+          for (var j = 0; j < 5; j++)
+            OrderLine(
+              id: 'l$i-$j',
+              productTitle: 'Product ${(i + j) % 500}',
+              sku: 'SKU',
+              unitPrice: 10,
+              quantity: 1,
+              lineTotal: 10,
+            ),
+        ],
       ));
     }
 
-    // Benchmark
-    final watch = Stopwatch()..start();
-    for (var i = 0; i < 100; i++) {
-      final _ = controller.revenueByCategory;
+    final firstRevenue = c.revenueByCategory;
+    final firstSkus = c.totalSkus;
+
+    // 200 further reads must all be served from cache: same map instance every
+    // time, and a stable SKU count.
+    for (var i = 0; i < 200; i++) {
+      expect(identical(c.revenueByCategory, firstRevenue), isTrue);
+      expect(c.totalSkus, firstSkus);
     }
-    watch.stop();
-    print('Time taken for 100 accesses: ${watch.elapsedMilliseconds}ms');
   });
 }

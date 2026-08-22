@@ -122,7 +122,7 @@ void main() {
     test('discount reflects applied promo discount Amount, 0 if invalid or none', () {
       expect(cartController.discount, 0.0);
 
-      cartController.appliedPromo.value = PromoValidation(valid: true, discountAmount: 15.0);
+      cartController.appliedPromo.value = const PromoValidation(valid: true, discountAmount: 15.0);
       expect(cartController.discount, 15.0);
 
       cartController.appliedPromo.value = PromoValidation.invalid('Expired');
@@ -133,7 +133,7 @@ void main() {
       expect(cartController.hasFreeShipping, isFalse); // Empty cart, subtotal 0
 
       // Promo gives free shipping
-      cartController.appliedPromo.value = PromoValidation(valid: true, freeShipping: true);
+      cartController.appliedPromo.value = const PromoValidation(valid: true, freeShipping: true);
       expect(cartController.hasFreeShipping, isTrue);
 
       cartController.appliedPromo.value = null;
@@ -159,7 +159,7 @@ void main() {
       expect(cartController.shipping, Env.flatShippingFee);
 
       // Apply free shipping promo
-      cartController.appliedPromo.value = PromoValidation(valid: true, freeShipping: true);
+      cartController.appliedPromo.value = const PromoValidation(valid: true, freeShipping: true);
       expect(cartController.shipping, 0.0);
     });
 
@@ -169,11 +169,11 @@ void main() {
       expect(cartController.grandTotal, 50.0 + Env.flatShippingFee);
 
       // Apply discount
-      cartController.appliedPromo.value = PromoValidation(valid: true, discountAmount: 10.0);
+      cartController.appliedPromo.value = const PromoValidation(valid: true, discountAmount: 10.0);
       expect(cartController.grandTotal, 40.0 + Env.flatShippingFee);
 
       // Apply huge discount
-      cartController.appliedPromo.value = PromoValidation(valid: true, discountAmount: 100.0);
+      cartController.appliedPromo.value = const PromoValidation(valid: true, discountAmount: 100.0);
       expect(cartController.grandTotal, 0.0);
     });
 

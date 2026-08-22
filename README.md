@@ -11,6 +11,13 @@ promotions engine, and a Supabase (PostgreSQL) backend.
 
 ---
 
+## Where this is going
+
+[`docs/ENHANCEMENT_PLAN.md`](docs/ENHANCEMENT_PLAN.md) is a full audit of the
+project against what a shippable store needs — seven defects with file:line
+evidence, the functional gaps (payment, product imagery, saved addresses),
+the scale ceilings, and a five-phase build order. Read it before planning work.
+
 ## Highlights
 
 - **Nested variants** — Product → Colour group → Size/SKU, with independent
@@ -88,14 +95,37 @@ shipping over $100) · `KNIT25` (25% off Knitwear).
 
 ## Backend setup (Supabase)
 
-SQL lives in [`supabase/`](supabase/) as ordered migrations. Apply them with the
-Supabase CLI (`supabase db push`) or paste them into the SQL editor in order:
+**Fresh database — one file:**
 
-1. `migrations/0001_init_schema.sql` — tables, enums, profile trigger.
-2. `migrations/0002_functions.sql` — pricing, `validate_promotion`, atomic
-   `place_order`, `restock_order`.
-3. `migrations/0003_rls.sql` — Row-Level Security policies.
-4. `seed.sql` — demo catalog and promotions.
+```bash
+psql -v ON_ERROR_STOP=1 -f supabase/schema.sql   # or paste into the SQL editor
+psql -v ON_ERROR_STOP=1 -f supabase/seed.sql     # optional demo catalogue
+```
+
+[`supabase/schema.sql`](supabase/schema.sql) provisions the database from empty
+to production-ready in a single pass: tables, indexes, triggers, the pricing and
+checkout functions, the back-office RPCs, Row-Level Security, and execute
+grants. It is the **final** state — where a later migration replaced an earlier
+definition, only the surviving one appears, so nothing is defined twice. Re-runs
+are safe.
+
+**Already-deployed database — incremental:** apply the numbered migrations in
+[`supabase/migrations/`](supabase/migrations/) in order. `0004_hardening.sql`
+supersedes the `place_order`, `validate_promotion` and `restock_order`
+definitions from `0002`, and tightens two policies from `0003`.
+
+Both paths produce an identical database — verified by building each and
+diffing all 248 tables, columns, functions, policies, indexes and RLS flags.
+
+**Verifying:** [`supabase/tests/`](supabase/tests/) holds a behavioural suite
+(36 assertions) covering category-targeted discounts, server-side shipping,
+concurrent usage-limit claims, duplicate-line stock checks, restock idempotency
+and the staff gates:
+
+```bash
+psql -f supabase/tests/00_shim.sql   # only when running against plain Postgres
+psql -f supabase/schema.sql -f supabase/seed.sql -f supabase/tests/10_tests.sql
+```
 
 Deploy the promo-validation Edge Function:
 

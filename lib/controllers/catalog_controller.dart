@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:get/get.dart';
 
+import '../core/routes/app_routes.dart';
 import '../core/utils/app_constants.dart';
+import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/product_model.dart';
@@ -83,8 +85,9 @@ class CatalogController extends GetxController {
     final cat = categoryFilter.value;
     final q = searchQuery.value.trim().toLowerCase();
 
-    // ⚡ Bolt: Single-pass filter to avoid multiple intermediate list allocations
-    var list = products.where((p) {
+    // Single-pass filter: chained .where().toList() allocated an intermediate
+    // list per stage, on a getter that reruns on every keystroke.
+    final list = products.where((p) {
       if (!p.isActive) return false;
       if (cat != null && cat.isNotEmpty && p.category != cat) return false;
       if (q.isNotEmpty) {
@@ -150,13 +153,18 @@ class CatalogController extends GetxController {
     product ??= DemoData.products().firstWhereOrNull((p) => p.slug == slug);
 
     selected.value = product;
-    if (product != null) {
-      final group = (preselectColorSlug != null
-              ? product.groupBySlug(preselectColorSlug)
-              : null) ??
-          product.sortedGroups.firstOrNull;
-      _applyGroup(group);
+    if (product == null) {
+      // Clear the whole selection together. A stale group or size left behind a
+      // null product is what made the page render the previous item's variants.
+      _applyGroup(null);
+      return null;
     }
+
+    final group = (preselectColorSlug != null
+            ? product.groupBySlug(preselectColorSlug)
+            : null) ??
+        product.sortedGroups.firstOrNull;
+    _applyGroup(group);
     return product;
   }
 
@@ -170,8 +178,18 @@ class CatalogController extends GetxController {
         items.firstWhereOrNull((i) => i.inStock) ?? items.firstOrNull;
   }
 
-  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1).
-  void selectGroup(VariantGroup group) => _applyGroup(group);
+  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1),
+  /// and put that colour in the address bar so the exact variant is
+  /// shareable (PRD §6.3).
+  void selectGroup(VariantGroup group) {
+    _applyGroup(group);
+    final slug = selected.value?.slug;
+    if (slug != null) {
+      // replaceState, not a push: switching colour is not a separate history
+      // entry, and it must not rebuild the route.
+      Browser.replaceUrl(AppRoutes.productPath(slug, colorSlug: group.slug));
+    }
+  }
 
   /// User picked a size within the current colour.
   void selectSize(VariantItem item) {

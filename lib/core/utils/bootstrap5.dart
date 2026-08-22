@@ -35,6 +35,10 @@ enum Fb5Breakpoint {
 
   bool operator >=(Fb5Breakpoint other) => index >= other.index;
   bool operator <=(Fb5Breakpoint other) => index <= other.index;
+
+  /// Whether this band is [other] or wider — the mobile-first "md and up"
+  /// test, spelled without operator ambiguity.
+  bool atLeast(Fb5Breakpoint other) => index >= other.index;
 }
 
 /// Static helpers for resolving breakpoints and responsive values.

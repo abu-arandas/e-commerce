@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'app_constants.dart';
 import 'env.dart';
 
 /// Thin wrapper around Supabase initialisation and client access.
@@ -50,6 +51,10 @@ abstract final class SupabaseService {
   /// Public URL for an object in the products storage bucket.
   static String? storageUrl(String path) {
     if (!_ready) return null;
-    return client.storage.from('products').getPublicUrl(path);
+    // Named via AppConstants so the bucket lives in one place, which is the
+    // reason that constant exists — this call used to hardcode it.
+    return client.storage
+        .from(AppConstants.storageBucket)
+        .getPublicUrl(path);
   }
 }

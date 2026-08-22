@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../core/utils/app_constants.dart';
 import '../core/utils/demo_data.dart';
+import '../core/utils/json_parse.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/order_model.dart';
 import '../models/product_model.dart';
@@ -50,6 +51,11 @@ class AdminController extends GetxController {
     super.onInit();
     ever(products, (_) => _cachedRevenueByCategory = null);
     ever(orders, (_) => _cachedRevenueByCategory = null);
+    // The dashboard can read this before admin_stats() answers, caching the
+    // local fold over the newest 100 orders. When the server total lands it
+    // has to win, or the breakdown stays wrong until the catalogue or the
+    // order list happens to change.
+    ever(_stats, (_) => _cachedRevenueByCategory = null);
 
     // Performance optimization: calculate SKUs once reactively instead of dynamically
     // flattening the deep product/group/item tree on every getter access.
@@ -69,7 +75,8 @@ class AdminController extends GetxController {
     isLoading.value = true;
     error.value = '';
     try {
-      await Future.wait([_loadProducts(), _loadPromotions(), _loadOrders()]);
+      await Future.wait(
+          [_loadProducts(), _loadPromotions(), _loadOrders(), _loadStats()]);
     } catch (e) {
       error.value = 'Failed to load admin data: $e';
     } finally {
@@ -120,6 +127,27 @@ class AdminController extends GetxController {
     }
   }
 
+  /// Dashboard totals aggregated in the database.
+  ///
+  /// The order list is paged (the most recent 100), so folding revenue over it
+  /// under-reports as soon as the store passes one page. `admin_stats()` sums
+  /// over every order; these hold its answer, and the getters below fall back
+  /// to the local fold in demo mode.
+  final Rxn<Map<String, dynamic>> _stats = Rxn<Map<String, dynamic>>();
+
+  Future<void> _loadStats() async {
+    if (!SupabaseService.isReady) {
+      _stats.value = null;
+      return;
+    }
+    try {
+      final res = await SupabaseService.client.rpc(AppConstants.rpcAdminStats);
+      _stats.value = Map<String, dynamic>.from(res as Map);
+    } catch (_) {
+      _stats.value = null; // fall back to the local fold
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Dashboard analytics
   // ---------------------------------------------------------------------------
@@ -130,16 +158,30 @@ class AdminController extends GetxController {
   // to avoid O(N*M) flattening cost on every build cycle.
   int get totalSkus => _cachedTotalSkus.value;
 
-  int get totalOrders => orders.length;
-  int get pendingOrders =>
-      orders.where((o) => o.status == OrderStatus.pending || o.status == OrderStatus.paid).length;
+  int get totalOrders =>
+      J.toInt(_stats.value?['total_orders'], orders.length);
 
-  double get grossRevenue => orders
-      .where((o) => o.status != OrderStatus.cancelled && o.status != OrderStatus.refunded)
-      .fold(0.0, (sum, o) => sum + o.grandTotal);
+  int get pendingOrders => J.toInt(
+      _stats.value?['pending_orders'],
+      orders
+          .where((o) =>
+              o.status == OrderStatus.pending || o.status == OrderStatus.paid)
+          .length);
 
-  double get averageOrderValue =>
-      orders.isEmpty ? 0 : grossRevenue / orders.length;
+  double get grossRevenue => J.toDouble(
+      _stats.value?['gross_revenue'],
+      orders
+          .where((o) =>
+              o.status != OrderStatus.cancelled &&
+              o.status != OrderStatus.refunded)
+          .fold(0.0, (sum, o) => sum + o.grandTotal));
+
+  double get averageOrderValue {
+    // Averaged over the orders that contributed revenue, so cancellations and
+    // refunds do not drag the figure down.
+    final n = J.toInt(_stats.value?['revenue_orders'], orders.length);
+    return n == 0 ? 0 : grossRevenue / n;
+  }
 
   int get activePromotions => promotions.where((p) => p.isLive).length;
 
@@ -173,13 +215,23 @@ class AdminController extends GetxController {
       return _cachedRevenueByCategory!;
     }
 
+    final serverBreakdown = _stats.value?['revenue_by_category'];
+    if (serverBreakdown is Map) {
+      return _cachedRevenueByCategory = {
+        for (final e in serverBreakdown.entries)
+          e.key.toString(): J.toDouble(e.value),
+      };
+    }
+
     // Demo/simple attribution: distribute each order's total across its lines'
     // products by matching titles to catalog categories.
     final byCat = <String, double>{};
     final titleToCat = {for (final p in products) p.title: p.category ?? 'Other'};
     for (final o in orders) {
       for (final line in o.lines) {
-        final cat = titleToCat[line.productTitle] ?? 'Other';
+        // Prefer the category snapshotted on the line; fall back to matching
+        // the live catalogue by title for rows written before that column.
+        final cat = line.category ?? titleToCat[line.productTitle] ?? 'Other';
         byCat[cat] = (byCat[cat] ?? 0) + line.lineTotal;
       }
     }
@@ -195,9 +247,13 @@ class AdminController extends GetxController {
   // ---------------------------------------------------------------------------
   Future<void> saveProduct(Product product) async {
     if (SupabaseService.isReady) {
-      await SupabaseService.client
-          .from(AppConstants.tblProducts)
-          .upsert(product.toJson());
+      // save_product() writes the product together with its colour groups and
+      // SKUs, and prunes what the editor removed. A plain table upsert wrote
+      // only the product row, silently dropping the whole variant tree.
+      await SupabaseService.client.rpc(
+        AppConstants.rpcSaveProduct,
+        params: {'p_product': _productPayload(product)},
+      );
       await _loadProducts();
     } else {
       final idx = products.indexWhere((p) => p.id == product.id);
@@ -210,15 +266,40 @@ class AdminController extends GetxController {
     }
   }
 
+  /// The product with its groups and items nested, matching what
+  /// `save_product(jsonb)` expects.
+  Map<String, dynamic> _productPayload(Product product) => {
+        ...product.toJson(),
+        'groups': [
+          for (final g in product.groups)
+            {
+              ...g.toJson(),
+              'items': [for (final i in g.items) i.toJson()],
+            },
+        ],
+      };
+
   Future<void> toggleProductActive(Product product) async {
     await saveProduct(product.copyWith(isActive: !product.isActive));
   }
 
-  Future<void> deleteProduct(String id) async {
+  /// Returns true when the product is gone. A remote failure leaves the row in
+  /// place and reports why, rather than throwing into a fire-and-forget caller
+  /// where the dialog closes and nothing tells anyone it failed.
+  Future<bool> deleteProduct(String id) async {
     if (SupabaseService.isReady) {
-      await SupabaseService.client.from(AppConstants.tblProducts).delete().eq('id', id);
+      try {
+        await SupabaseService.client
+            .from(AppConstants.tblProducts)
+            .delete()
+            .eq('id', id);
+      } catch (e) {
+        error.value = 'Could not delete the product: $e';
+        return false;
+      }
     }
     products.removeWhere((p) => p.id == id);
+    return true;
   }
 
   /// Bulk-generate size variants for a colour group (PRD §3.2 "generate
@@ -268,22 +349,76 @@ class AdminController extends GetxController {
     }
   }
 
-  Future<void> deletePromotion(String id) async {
+  /// As [deleteProduct]: false means the promotion is still there.
+  Future<bool> deletePromotion(String id) async {
     if (SupabaseService.isReady) {
-      await SupabaseService.client.from(AppConstants.tblPromotions).delete().eq('id', id);
+      try {
+        await SupabaseService.client
+            .from(AppConstants.tblPromotions)
+            .delete()
+            .eq('id', id);
+      } catch (e) {
+        error.value = 'Could not delete the promotion: $e';
+        return false;
+      }
     }
     promotions.removeWhere((p) => p.id == id);
+    return true;
   }
 
   // ---------------------------------------------------------------------------
   // Orders / fulfillment
   // ---------------------------------------------------------------------------
+  /// Statuses that take an order out of fulfilment and should return its
+  /// stock to the shelf.
+  static const Set<OrderStatus> _restockingStatuses = {
+    OrderStatus.cancelled,
+    OrderStatus.refunded,
+  };
+
+  /// Whether moving an order [from] one status [to] another should credit its
+  /// units back. Only the transition *into* cancelled/refunded counts: an order
+  /// already out of the pipeline (cancelled then refunded, say) has been
+  /// credited once and must not be credited again.
+  /// Whether moving `from` -> `to` is the first entry into a status that
+  /// returns stock. Retained because it names the transition; the caller now
+  /// gates on [restocksInto] so a failed restock can be retried.
+  static bool restocksOn(OrderStatus from, OrderStatus to) =>
+      _restockingStatuses.contains(to) && !_restockingStatuses.contains(from);
+
+  /// Whether an order in this status should have its units back. Safe to act
+  /// on repeatedly: restock_order() claims the restock before crediting, so
+  /// only the first call of any sequence actually moves stock.
+  static bool restocksInto(OrderStatus to) => _restockingStatuses.contains(to);
+
   Future<void> updateOrderStatus(Order order, OrderStatus status) async {
     if (SupabaseService.isReady) {
       await SupabaseService.client
           .from(AppConstants.tblOrders)
           .update({'status': status.name}).eq('id', order.id);
+
+      // Cancelling or refunding has to put the units back. restock_order() is
+      // idempotent -- it claims the restock before crediting -- so cancel then
+      // refund, a double click or a retry all credit exactly once.
+      //
+      // Keyed on the destination rather than the transition. Gating on the
+      // transition meant a restock that failed on cancel was never attempted
+      // again: moving cancelled -> refunded is not a transition *into* a
+      // restocking status, so the units stayed missing with no way to recover
+      // them from the UI. Idempotency is what makes the looser test safe.
+      if (restocksInto(status)) {
+        try {
+          await SupabaseService.client.rpc(
+            AppConstants.rpcRestockOrder,
+            params: {'p_order_id': order.id},
+          );
+        } catch (e) {
+          error.value = 'Status saved, but restocking failed: $e';
+        }
+      }
+
       await _loadOrders();
+      await _loadProducts(); // stock changed underneath the catalogue
     } else {
       final idx = orders.indexWhere((o) => o.id == order.id);
       if (idx >= 0) {

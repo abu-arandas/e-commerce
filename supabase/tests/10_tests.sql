@@ -1,12 +1,25 @@
--- Behavioural tests for the 0004 hardening migration.
+-- Behavioural tests for the hardened schema: promotions, stock, and ordering.
 --
--- Run after applying 00_shim.sql, the four migrations, and seed.sql. Safe to
--- re-run against the same database: fixtures it creates are cleaned up, and
--- assertions are made relative to live counts rather than absolute ones.
+-- To run everything at once -- provisioning, schema/migration equivalence, the
+-- client contract, and this suite -- use `supabase/tests/20_contract.sh`. To
+-- run this file alone, read on.
 --
---   psql -v ON_ERROR_STOP=1 -f supabase/tests/10_tests.sql
+-- Needs a database that already has 00_shim.sql, the schema, and seed.sql --
+-- seed.sql is not optional, since the assertions below name promotion codes
+-- and SKUs it creates. Either provisioning path works:
 --
--- Any failure raises, so a non-zero exit means a regression.
+--   psql -v ON_ERROR_STOP=1 -d DB \
+--     -f supabase/tests/00_shim.sql \
+--     -f supabase/schema.sql \
+--     -f supabase/seed.sql \
+--     -f supabase/tests/10_tests.sql
+--
+-- ...or substitute migrations/0001..0006 in order for schema.sql; the two are
+-- equivalent (see 20_contract.sh, which checks exactly that).
+--
+-- Safe to re-run against the same database: fixtures it creates are cleaned
+-- up, and assertions are made relative to live counts rather than absolute
+-- ones. Any failure raises, so a non-zero exit means a regression.
 \set ON_ERROR_STOP on
 
 create or replace function assert_eq(actual anyelement, expected anyelement, label text)
@@ -349,6 +362,123 @@ begin
     if v_err like 'FAIL%' then raise; end if;
     perform assert_eq(v_err, 'Not authorised', 'restock_order refuses non-staff');
   end;
+end $$;
+
+
+-- ============================================================================
+-- 8. The write paths 0007 closed stay closed, and the read exception it opened
+--    is scoped to what the caller actually wishlisted.
+--
+--    These run as a real customer, not as the table owner: RLS is bypassed
+--    entirely for a superuser, so a probe that forgets to drop privileges
+--    reports "wide open" no matter what the policies say.
+-- ============================================================================
+do $$
+declare
+  v_customer uuid := '22222222-bbbb-4bbb-8bbb-222222222222';
+  v_other    uuid := '33333333-cccc-4ccc-8ccc-333333333333';
+  v_retired  uuid;
+  v_unsaved  uuid;
+  v_order    uuid;
+  v_n        integer;
+  v_err      text;
+begin
+  insert into auth.users (id, email) values
+    (v_customer, 'shopper@vanguard.test'),
+    (v_other,    'stranger@vanguard.test')
+  on conflict do nothing;
+
+  -- Two products taken off sale: one the shopper saved, one they did not.
+  select id into v_retired from public.products order by created_at limit 1;
+  select id into v_unsaved from public.products order by created_at offset 1 limit 1;
+  update public.products set is_active = false where id in (v_retired, v_unsaved);
+  insert into public.wishlists (user_id, product_id) values (v_customer, v_retired)
+    on conflict do nothing;
+
+  -- Become that customer for the rest of the block.
+  perform set_config('request.jwt.claim.sub', v_customer::text, true);
+  perform set_config('role', 'authenticated', true);
+  set local role authenticated;
+
+  -- --- the closed write paths -------------------------------------------
+  begin
+    insert into public.orders (user_id, subtotal, discount_total,
+                               shipping_total, grand_total, status)
+    values (v_customer, 0, 0, 0, 0, 'paid');
+    raise exception 'FAIL direct order insert was accepted';
+  exception when insufficient_privilege then
+    perform assert_eq(true, true, 'customers cannot insert orders directly');
+  when others then
+    get stacked diagnostics v_err = message_text;
+    if v_err like 'FAIL%' then raise; end if;
+    perform assert_eq(v_err like '%row-level security%', true,
+                      'customers cannot insert orders directly');
+  end;
+
+  begin
+    insert into public.order_items (order_id, product_title, unit_price,
+                                    quantity, line_total)
+    values (gen_random_uuid(), 'forged', 1, 1, 1);
+    raise exception 'FAIL direct order_items insert was accepted';
+  exception when insufficient_privilege then
+    perform assert_eq(true, true, 'customers cannot insert order lines directly');
+  when others then
+    get stacked diagnostics v_err = message_text;
+    if v_err like 'FAIL%' then raise; end if;
+    perform assert_eq(v_err like '%row-level security%', true,
+                      'customers cannot insert order lines directly');
+  end;
+
+  -- --- the scoped read exception ----------------------------------------
+  select count(*) into v_n from public.products where id = v_retired;
+  perform assert_eq(v_n, 1, 'a retired product the shopper saved is readable');
+
+  select count(*) into v_n from public.products where id = v_unsaved;
+  perform assert_eq(v_n, 0, 'a retired product they did not save stays hidden');
+
+  -- The variant tree resolves with it, otherwise the wishlist card is empty.
+  select count(*) into v_n from public.variant_groups where product_id = v_retired;
+  perform assert_eq(v_n > 0, true, 'its variant groups resolve too');
+
+  select count(*) into v_n from public.variant_groups where product_id = v_unsaved;
+  perform assert_eq(v_n, 0, 'variant groups of an unsaved retired product stay hidden');
+
+  select count(*) into v_n from public.variant_items vi
+    join public.variant_groups vg on vg.id = vi.group_id
+   where vg.product_id = v_unsaved;
+  perform assert_eq(v_n, 0, 'variant items of an unsaved retired product stay hidden');
+
+  reset role;
+
+  -- --- the accounting identity ------------------------------------------
+  -- Written as the owner, so RLS is out of the way and the CHECK is what is
+  -- actually under test.
+  begin
+    insert into public.orders (id, user_id, subtotal, discount_total,
+                               shipping_total, grand_total)
+    values (gen_random_uuid(), v_customer, 100, 10, 12, 999);
+    raise exception 'FAIL inconsistent totals were accepted';
+  exception when check_violation then
+    perform assert_eq(true, true, 'grand_total must equal subtotal - discount + shipping');
+  when others then
+    get stacked diagnostics v_err = message_text;
+    if v_err like 'FAIL%' then raise; end if;
+    raise;
+  end;
+
+  -- The identity place_order actually produces is accepted.
+  v_order := gen_random_uuid();
+  insert into public.orders (id, user_id, subtotal, discount_total,
+                             shipping_total, grand_total)
+  values (v_order, v_customer, 100, 10, 12, 102);
+  perform assert_eq(
+    (select grand_total from public.orders where id = v_order), 102::numeric,
+    'consistent totals are accepted');
+
+  -- Put the fixtures back.
+  delete from public.orders where id = v_order;
+  delete from public.wishlists where user_id in (v_customer, v_other);
+  update public.products set is_active = true where id in (v_retired, v_unsaved);
 end $$;
 
 select '=== ALL SQL TESTS PASSED ===' as result;

@@ -45,3 +45,19 @@ lib/generated_plugin_registrant.dart
 # Supabase local
 supabase/.branches
 supabase/.temp
+
+# graphify — knowledge graph output.
+# graph.json / GRAPH_REPORT.md / graph.html are committable if the team wants a
+# shared map (see README "Team setup"); the cache and cost ledger are local.
+graphify-out/cache/
+graphify-out/cost.json
+graphify-out/.graphify_analysis.json
+graphify-out/.graphify_python
+# absolute path to the machine that built the graph — never portable
+graphify-out/.graphify_root
+# dated snapshots graphify writes on every relabel — a full duplicate of the
+# graph each time, and they accumulate
+graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
+# incremental-rebuild index: keyed on file mtime, which a fresh clone rewrites,
+# so tracking it leaves every checkout dirty on the first rebuild
+graphify-out/manifest.json

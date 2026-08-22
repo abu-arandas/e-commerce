@@ -46,12 +46,17 @@ class OrderLine {
     required this.lineTotal,
     this.variantName,
     this.sizeLabel,
+    this.category,
   });
 
   final String id;
   final String productTitle;
   final String? variantName;
   final String? sizeLabel;
+
+  /// Snapshotted at checkout so revenue reporting survives a product being
+  /// re-categorised, renamed or deleted (order_items.category).
+  final String? category;
   final String sku;
   final double unitPrice;
   final int quantity;
@@ -67,6 +72,7 @@ class OrderLine {
         variantName: J.strOrNull(json['variant_name']),
         sizeLabel: J.strOrNull(json['size_label']),
         sku: J.str(json['sku']),
+        category: J.strOrNull(json['category']),
         unitPrice: J.toDouble(json['unit_price']),
         quantity: J.toInt(json['quantity']),
         lineTotal: J.toDouble(json['line_total']),

@@ -3,7 +3,7 @@
 // storefront can preview a promo code before checkout (PRD §4.1). Runs on Deno.
 //
 // Deploy:  supabase functions deploy validate-promo
-// Invoke:  POST { code, subtotal, categories?: string[] }
+// Invoke:  POST { code, lines: [{ category, line_total }] }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -13,10 +13,14 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+interface PromoLine {
+  category: string | null;
+  line_total: number;
+}
+
 interface PromoRequest {
   code: string;
-  subtotal: number;
-  categories?: string[];
+  lines?: PromoLine[];
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -36,14 +40,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   const code = (body.code ?? "").trim();
-  const subtotal = Number(body.subtotal ?? 0);
-  const categories = Array.isArray(body.categories) ? body.categories : [];
+  const lines = Array.isArray(body.lines) ? body.lines : [];
 
   if (!code) {
     return json({ valid: false, reason: "Missing promo code" }, 400);
   }
-  if (!Number.isFinite(subtotal) || subtotal < 0) {
-    return json({ valid: false, reason: "Invalid subtotal" }, 400);
+  // A category-targeted promotion discounts only the lines it covers, so the
+  // basket is sent line by line rather than as a single subtotal.
+  if (lines.some((l) => !Number.isFinite(Number(l?.line_total)) || Number(l.line_total) < 0)) {
+    return json({ valid: false, reason: "Invalid line total" }, 400);
   }
 
   const supabase = createClient(
@@ -55,8 +60,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   const { data, error } = await supabase.rpc("validate_promotion", {
     p_code: code,
-    p_subtotal: subtotal,
-    p_categories: categories,
+    p_lines: lines.map((l) => ({
+      category: l.category ?? null,
+      line_total: Number(l.line_total),
+    })),
   });
 
   if (error) {

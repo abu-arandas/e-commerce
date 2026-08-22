@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/app_constants.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/uuid.dart';
 import '../../models/product_model.dart';
 import '../../models/variant_model.dart';
 import 'admin_scaffold.dart';
@@ -81,9 +82,17 @@ class ProductManagerView extends StatelessWidget {
           TextButton(
               onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            onPressed: () {
-              admin.deleteProduct(p.id);
-              Navigator.pop(ctx);
+            onPressed: () async {
+              // Awaited, so a failed delete is reported instead of becoming an
+              // unhandled async error behind a dialog that already closed.
+              final removed = await admin.deleteProduct(p.id);
+              if (ctx.mounted) Navigator.pop(ctx);
+              if (!removed) {
+                Get.snackbar('Delete failed', admin.error.value,
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: AppColors.danger,
+                    colorText: AppColors.textOnInk);
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
             child: const Text('Delete'),
@@ -253,12 +262,14 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
   String _slugify(String s) =>
       s.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 
-  void _save() {
+  Future<void> _save() async {
     final base = double.tryParse(_price.text.trim()) ?? 0;
     final slug =
         _slug.text.trim().isEmpty ? _slugify(_title.text) : _slug.text.trim();
     final product = Product(
-      id: widget.existing?.id ?? 'new-${DateTime.now().microsecondsSinceEpoch}',
+      // Postgres keys these by uuid; a 'new-1723...' id is rejected outright
+      // with `invalid input syntax for type uuid`.
+      id: widget.existing?.id ?? Uuid.v4(),
       slug: slug,
       title: _title.text.trim(),
       description: _description.text.trim(),
@@ -268,7 +279,20 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
       isFeatured: widget.existing?.isFeatured ?? false,
       groups: _groups,
     );
-    widget.admin.saveProduct(product);
+    // Awaited, not fired and forgotten. save_product() reports permission,
+    // constraint and payload failures by throwing; closing the editor on top
+    // of an unawaited call turned that into an unhandled async error while the
+    // dialog claimed the product -- and its whole variant tree -- was saved.
+    try {
+      await widget.admin.saveProduct(product);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save "${product.title}": $e')),
+      );
+      return;
+    }
+    if (!mounted) return;
     Navigator.pop(context);
   }
 
@@ -513,7 +537,7 @@ class _ColorGroupDialogState extends State<_ColorGroupDialog> {
             Navigator.pop(
               context,
               VariantGroup(
-                id: 'grp-${DateTime.now().microsecondsSinceEpoch}',
+                id: Uuid.v4(),
                 productId: '',
                 name: _name.text.trim(),
                 colorHex: _hex.text.trim(),

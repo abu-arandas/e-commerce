@@ -1,15 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../core/utils/app_constants.dart';
+import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
-import '../core/utils/env.dart';
+import '../core/utils/store_settings.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/cart_item_model.dart';
 import '../models/order_model.dart';
 import '../models/product_model.dart';
 import '../models/promotion_model.dart';
 import '../models/variant_model.dart';
+import 'catalog_controller.dart';
 
 /// Shopping cart + promotions engine (PRD §3.1 "Dynamic Promotions"). Totals are
 /// fully reactive; an applied promo code is re-validated on every cart change so
@@ -23,6 +27,95 @@ class CartController extends GetxController {
   final RxBool isApplyingPromo = false.obs;
   final RxBool isPlacingOrder = false.obs;
 
+  /// localStorage key holding the serialised bag.
+  static const String _storageKey = 'vf_cart_v1';
+
+  @override
+  void onInit() {
+    super.onInit();
+    _restore();
+    // Persist on every change rather than at each call site, so no mutation can
+    // forget to. `ever` fires on add/remove/refresh alike.
+    ever(items, (_) => _persist());
+    // A bag restored from a previous visit carries the stock figures from
+    // whenever it was saved. Reconcile against the catalogue as it arrives, so
+    // a line that sold out in the meantime is corrected here rather than
+    // surviving all the way to a rejected checkout.
+    //
+    // Optional on purpose: the cart is useful on its own and must stay
+    // constructable without the catalogue registered. Where there is no
+    // catalogue there is nothing to reconcile against, and the server still
+    // refuses to oversell at checkout.
+    if (Get.isRegistered<CatalogController>()) {
+      final catalog = Get.find<CatalogController>();
+      ever(catalog.products, (_) => _reconcileStock());
+      if (catalog.products.isNotEmpty) _reconcileStock();
+    }
+  }
+
+  /// Clamp restored quantities to what is actually in stock, and drop lines
+  /// whose SKU has sold out entirely. A SKU the catalogue does not carry is
+  /// left alone -- absence there means "not loaded", not "gone".
+  void _reconcileStock() {
+    if (items.isEmpty || !Get.isRegistered<CatalogController>()) return;
+
+    final stock = <String, int>{
+      for (final p in Get.find<CatalogController>().products)
+        for (final g in p.groups)
+          for (final v in g.items) v.id: v.stockQuantity,
+    };
+    if (stock.isEmpty) return;
+
+    var changed = false;
+    final kept = <CartItem>[];
+    for (final line in items) {
+      final available = stock[line.variantItemId];
+      if (available == null) {
+        kept.add(line);
+        continue;
+      }
+      if (available <= 0) {
+        changed = true; // sold out entirely
+        continue;
+      }
+      if (line.quantity > available || line.maxStock != available) {
+        changed = true;
+        kept.add(line.withStock(available));
+      } else {
+        kept.add(line);
+      }
+    }
+    if (changed) items.assignAll(kept);
+  }
+
+  /// Reload a bag left behind by a previous visit. Anything malformed is
+  /// discarded rather than thrown -- a corrupt entry must not brick the store.
+  void _restore() {
+    final raw = Browser.read(_storageKey);
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return;
+      items.assignAll(decoded
+          .whereType<Map>()
+          .map((e) => CartItem.fromJson(Map<String, dynamic>.from(e))));
+    } catch (_) {
+      Browser.remove(_storageKey);
+    }
+  }
+
+  void _persist() {
+    if (items.isEmpty) {
+      Browser.remove(_storageKey);
+      return;
+    }
+    try {
+      Browser.write(_storageKey, jsonEncode(items.map((c) => c.toJson()).toList()));
+    } catch (_) {
+      // Storage full or blocked; the bag still works for this session.
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Mutations
   // ---------------------------------------------------------------------------
@@ -32,6 +125,10 @@ class CartController extends GetxController {
     required VariantItem item,
     int quantity = 1,
   }) {
+    // Nothing to reserve: a sold-out SKU is not addable. Guarding here also
+    // avoids clamp(1, 0), which throws rather than clamping.
+    if (item.stockQuantity <= 0) return;
+
     final existing = items.firstWhereOrNull((c) => c.key == item.id);
     if (existing != null) {
       existing.quantity =
@@ -92,17 +189,27 @@ class CartController extends GetxController {
   List<String> get categories =>
       items.map((c) => c.category).whereType<String>().toSet().toList();
 
+  /// The basket as the promotions engine sees it: one entry per line, carrying
+  /// the category the discount targeting is judged on and what that line is
+  /// worth. A category-targeted code discounts only its own lines, so a single
+  /// subtotal is not enough information.
+  List<PromoLine> get promoLines => items
+      .map((c) => PromoLine(category: c.category, lineTotal: c.lineTotal))
+      .toList();
+
   double get discount => appliedPromo.value?.valid == true
       ? appliedPromo.value!.discountAmount
       : 0;
 
   bool get hasFreeShipping =>
       appliedPromo.value?.freeShipping == true ||
-      subtotal >= Env.freeShippingThreshold;
+      subtotal >= StoreSettings.freeShippingThreshold.value;
 
   double get baseShipping {
     if (isEmpty) return 0;
-    return subtotal >= Env.freeShippingThreshold ? 0 : Env.flatShippingFee;
+    return subtotal >= StoreSettings.freeShippingThreshold.value
+        ? 0
+        : StoreSettings.flatShippingFee.value;
   }
 
   double get shipping => hasFreeShipping ? 0 : baseShipping;
@@ -113,7 +220,7 @@ class CartController extends GetxController {
   }
 
   double get amountToFreeShipping {
-    final remaining = Env.freeShippingThreshold - subtotal;
+    final remaining = StoreSettings.freeShippingThreshold.value - subtotal;
     return remaining > 0 ? remaining : 0;
   }
 
@@ -160,6 +267,9 @@ class CartController extends GetxController {
     if (result.valid) {
       appliedPromo.value = result;
     } else {
+      // Clear the code as well. A lingering code is still sent to place_order,
+      // which rejects an invalid promotion and fails the whole checkout.
+      appliedCode.value = null;
       appliedPromo.value = null;
       promoError.value = result.reason ?? 'Promo no longer applies';
     }
@@ -168,12 +278,13 @@ class CartController extends GetxController {
   Future<PromoValidation> _validate(String code) async {
     if (SupabaseService.isReady) {
       try {
+        // validate_promotion(text, jsonb) — the basket goes over line by line
+        // so the server can discount only the categories a promotion targets.
         final res = await SupabaseService.client.rpc(
           AppConstants.rpcValidatePromotion,
           params: {
             'p_code': code,
-            'p_subtotal': subtotal,
-            'p_categories': categories,
+            'p_lines': promoLines.map((l) => l.toJson()).toList(),
           },
         );
         return PromoValidation.fromJson(Map<String, dynamic>.from(res as Map));
@@ -181,7 +292,7 @@ class CartController extends GetxController {
         return PromoValidation.invalid('Validation failed: $e');
       }
     }
-    return DemoData.validatePromo(code, subtotal, categories);
+    return DemoData.validatePromo(code, promoLines);
   }
 
   // ---------------------------------------------------------------------------
@@ -197,12 +308,14 @@ class CartController extends GetxController {
       if (SupabaseService.isReady) {
         final res = await SupabaseService.client.rpc(
           AppConstants.rpcPlaceOrder,
+          // place_order(jsonb, text, jsonb, text). The shipping charge is not
+          // passed: the server reads it from store_settings, so a caller
+          // cannot ship itself for free.
           params: {
             'p_items': items.map((e) => e.toOrderLine()).toList(),
             'p_promo_code': appliedCode.value,
             'p_shipping_address': shippingAddress,
             'p_contact_email': contactEmail,
-            'p_flat_shipping': baseShipping,
           },
         );
         final map = Map<String, dynamic>.from(res as Map);
@@ -257,6 +370,7 @@ class CartController extends GetxController {
             variantName: c.colorName,
             sizeLabel: c.sizeLabel,
             sku: c.sku,
+            category: c.category,
             unitPrice: c.unitPrice,
             quantity: c.quantity,
             lineTotal: c.lineTotal,

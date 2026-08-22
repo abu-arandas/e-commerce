@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 import '../core/utils/app_constants.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/user_model.dart';
+import 'orders_controller.dart';
 
 /// Authentication + session/role state (PRD §2). Backed by Supabase Auth when
 /// configured; in demo mode it supports a "Preview as…" path so the role-gated
@@ -151,6 +152,11 @@ class AuthController extends GetxController {
       await SupabaseService.auth.signOut();
     }
     user.value = null;
+    // Drop the previous account's order history rather than letting it show
+    // to whoever signs in next on this device.
+    if (Get.isRegistered<OrdersController>()) {
+      Get.find<OrdersController>().clear();
+    }
   }
 
   /// Demo-only: preview a staff persona without a backend so the admin panels

@@ -19,6 +19,8 @@ abstract final class AppConstants {
   static const String rpcValidatePromotion = 'validate_promotion';
   static const String rpcPlaceOrder = 'place_order';
   static const String rpcRestockOrder = 'restock_order';
+  static const String rpcSaveProduct = 'save_product';
+  static const String rpcAdminStats = 'admin_stats';
 
   static const String storageBucket = 'products';
 

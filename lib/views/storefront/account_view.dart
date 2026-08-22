@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/admin_controller.dart';
 import '../../controllers/auth_controller.dart';
+import '../../controllers/orders_controller.dart';
 import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
@@ -126,7 +126,7 @@ class AccountView extends StatelessWidget {
                           children: [
                             Text('Order History', style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: AppSpacing.md),
-                            _OrderHistoryList(),
+                            const _OrderHistoryList(),
                           ],
                         ),
                       ),
@@ -142,17 +142,36 @@ class AccountView extends StatelessWidget {
   }
 }
 
-class _OrderHistoryList extends StatelessWidget {
+class _OrderHistoryList extends StatefulWidget {
+  const _OrderHistoryList();
+
+  @override
+  State<_OrderHistoryList> createState() => _OrderHistoryListState();
+}
+
+class _OrderHistoryListState extends State<_OrderHistoryList> {
+  final OrdersController orders = Get.find<OrdersController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // The shopper's own orders, scoped by RLS to the signed-in user. This used
+    // to read AdminController.orders, which is the back-office view of *every*
+    // order in the store.
+    WidgetsBinding.instance.addPostFrameCallback((_) => orders.fetch());
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<AdminController>()) {
-      Get.put(AdminController());
-    }
-    final admin = Get.find<AdminController>();
-
     return Obx(() {
-      final orders = admin.orders;
-      if (orders.isEmpty) {
+      if (orders.isLoading.value && orders.orders.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Center(child: CircularProgressIndicator(color: AppColors.ink)),
+        );
+      }
+      final list = orders.orders;
+      if (list.isEmpty) {
         return const EmptyState(
           icon: Icons.receipt_long_outlined,
           title: 'No orders yet',
@@ -162,7 +181,7 @@ class _OrderHistoryList extends StatelessWidget {
 
       return Column(
         children: [
-          for (final o in orders)
+          for (final o in list)
             Card(
               margin: const EdgeInsets.only(bottom: AppSpacing.md),
               elevation: 0,
