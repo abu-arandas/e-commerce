@@ -53,3 +53,5 @@ graphify-out/cache/
 graphify-out/cost.json
 graphify-out/.graphify_analysis.json
 graphify-out/.graphify_python
+# absolute path to the machine that built the graph — never portable
+graphify-out/.graphify_root
