@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../core/utils/app_constants.dart';
+import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
 import '../core/utils/store_settings.dart';
 import '../core/utils/supabase_service.dart';
@@ -22,6 +25,46 @@ class CartController extends GetxController {
   final RxString promoError = ''.obs;
   final RxBool isApplyingPromo = false.obs;
   final RxBool isPlacingOrder = false.obs;
+
+  /// localStorage key holding the serialised bag.
+  static const String _storageKey = 'vf_cart_v1';
+
+  @override
+  void onInit() {
+    super.onInit();
+    _restore();
+    // Persist on every change rather than at each call site, so no mutation can
+    // forget to. `ever` fires on add/remove/refresh alike.
+    ever(items, (_) => _persist());
+  }
+
+  /// Reload a bag left behind by a previous visit. Anything malformed is
+  /// discarded rather than thrown -- a corrupt entry must not brick the store.
+  void _restore() {
+    final raw = Browser.read(_storageKey);
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return;
+      items.assignAll(decoded
+          .whereType<Map>()
+          .map((e) => CartItem.fromJson(Map<String, dynamic>.from(e))));
+    } catch (_) {
+      Browser.remove(_storageKey);
+    }
+  }
+
+  void _persist() {
+    if (items.isEmpty) {
+      Browser.remove(_storageKey);
+      return;
+    }
+    try {
+      Browser.write(_storageKey, jsonEncode(items.map((c) => c.toJson()).toList()));
+    } catch (_) {
+      // Storage full or blocked; the bag still works for this session.
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Mutations

@@ -70,7 +70,7 @@ class OrderConfirmationView extends StatelessWidget {
                         Text('A confirmation has been sent to ${order.contactEmail}.',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
                       const SizedBox(height: AppSpacing.lg),
-                      _OrderProgressTracker(),
+                      _OrderProgressTracker(status: order.status),
                       const SizedBox(height: AppSpacing.xl),
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -165,11 +165,29 @@ class OrderConfirmationView extends StatelessWidget {
   }
 }
 
+/// Where an order sits on the four-step storefront timeline. `pending` and
+/// `paid` both read as "placed" to a shopper; a cancelled or refunded order has
+/// left the pipeline and shows no progress beyond placement.
+///
+/// Top-level so it can be asserted directly — the tracker used to hardcode 0,
+/// which meant a delivered order still displayed "Order Placed".
+int orderProgressStep(OrderStatus status) => switch (status) {
+      OrderStatus.pending || OrderStatus.paid => 0,
+      OrderStatus.processing => 1,
+      OrderStatus.shipped => 2,
+      OrderStatus.delivered => 3,
+      OrderStatus.cancelled || OrderStatus.refunded => 0,
+    };
+
 class _OrderProgressTracker extends StatelessWidget {
+  const _OrderProgressTracker({required this.status});
+
+  final OrderStatus status;
+
   @override
   Widget build(BuildContext context) {
     const steps = ['Order Placed', 'Processing', 'Shipped', 'Delivered'];
-    const activeStep = 0;
+    final activeStep = orderProgressStep(status);
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),

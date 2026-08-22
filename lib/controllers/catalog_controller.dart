@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:get/get.dart';
 
+import '../core/routes/app_routes.dart';
 import '../core/utils/app_constants.dart';
+import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/product_model.dart';
@@ -176,8 +178,18 @@ class CatalogController extends GetxController {
         items.firstWhereOrNull((i) => i.inStock) ?? items.firstOrNull;
   }
 
-  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1).
-  void selectGroup(VariantGroup group) => _applyGroup(group);
+  /// User picked a colour — refresh available sizes/pricing/stock (PRD §3.1),
+  /// and put that colour in the address bar so the exact variant is
+  /// shareable (PRD §6.3).
+  void selectGroup(VariantGroup group) {
+    _applyGroup(group);
+    final slug = selected.value?.slug;
+    if (slug != null) {
+      // replaceState, not a push: switching colour is not a separate history
+      // entry, and it must not rebuild the route.
+      Browser.replaceUrl(AppRoutes.productPath(slug, colorSlug: group.slug));
+    }
+  }
 
   /// User picked a size within the current colour.
   void selectSize(VariantItem item) {

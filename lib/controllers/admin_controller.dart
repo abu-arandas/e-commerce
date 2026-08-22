@@ -342,12 +342,42 @@ class AdminController extends GetxController {
   // ---------------------------------------------------------------------------
   // Orders / fulfillment
   // ---------------------------------------------------------------------------
+  /// Statuses that take an order out of fulfilment and should return its
+  /// stock to the shelf.
+  static const Set<OrderStatus> _restockingStatuses = {
+    OrderStatus.cancelled,
+    OrderStatus.refunded,
+  };
+
+  /// Whether moving an order [from] one status [to] another should credit its
+  /// units back. Only the transition *into* cancelled/refunded counts: an order
+  /// already out of the pipeline (cancelled then refunded, say) has been
+  /// credited once and must not be credited again.
+  static bool restocksOn(OrderStatus from, OrderStatus to) =>
+      _restockingStatuses.contains(to) && !_restockingStatuses.contains(from);
+
   Future<void> updateOrderStatus(Order order, OrderStatus status) async {
     if (SupabaseService.isReady) {
       await SupabaseService.client
           .from(AppConstants.tblOrders)
           .update({'status': status.name}).eq('id', order.id);
+
+      // Cancelling or refunding has to put the units back. restock_order() is
+      // idempotent -- it claims the restock before crediting -- so cancel then
+      // refund, a double click or a retry all credit exactly once.
+      if (restocksOn(order.status, status)) {
+        try {
+          await SupabaseService.client.rpc(
+            AppConstants.rpcRestockOrder,
+            params: {'p_order_id': order.id},
+          );
+        } catch (e) {
+          error.value = 'Status saved, but restocking failed: $e';
+        }
+      }
+
       await _loadOrders();
+      await _loadProducts(); // stock changed underneath the catalogue
     } else {
       final idx = orders.indexWhere((o) => o.id == order.id);
       if (idx >= 0) {
