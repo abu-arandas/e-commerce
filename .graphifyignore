@@ -1,7 +1,7 @@
-# graphify's own installed skill and reference docs. Without this they are
-# extracted as project content — "What You Must Do When Invoked" ranked as the
-# 4th most-connected node in the graph, above CartController.
-.claude/skills/
+# graphify's own installed skill, reference docs and the assistant config it
+# writes. Without this they are extracted as project content — "What You Must Do
+# When Invoked" ranked as the 4th most-connected node, above CartController.
+.claude/
 
 # graphify's own output, so a rebuild never indexes the previous graph.
 graphify-out/
