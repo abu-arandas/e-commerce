@@ -262,7 +262,7 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
   String _slugify(String s) =>
       s.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 
-  void _save() {
+  Future<void> _save() async {
     final base = double.tryParse(_price.text.trim()) ?? 0;
     final slug =
         _slug.text.trim().isEmpty ? _slugify(_title.text) : _slug.text.trim();
@@ -279,7 +279,20 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
       isFeatured: widget.existing?.isFeatured ?? false,
       groups: _groups,
     );
-    widget.admin.saveProduct(product);
+    // Awaited, not fired and forgotten. save_product() reports permission,
+    // constraint and payload failures by throwing; closing the editor on top
+    // of an unawaited call turned that into an unhandled async error while the
+    // dialog claimed the product -- and its whole variant tree -- was saved.
+    try {
+      await widget.admin.saveProduct(product);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save "${product.title}": $e')),
+      );
+      return;
+    }
+    if (!mounted) return;
     Navigator.pop(context);
   }
 

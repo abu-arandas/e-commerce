@@ -205,7 +205,11 @@ create table if not exists public.orders (
     check (subtotal >= 0 and discount_total >= 0
            and shipping_total >= 0 and grand_total >= 0),
   constraint orders_discount_within_subtotal
-    check (discount_total <= subtotal)
+    check (discount_total <= subtotal),
+  -- The accounting identity itself. Without it the three parts and the total
+  -- can each be individually plausible and still disagree with one another.
+  constraint orders_totals_consistent
+    check (grand_total = subtotal - discount_total + shipping_total)
 );
 create index if not exists orders_user_idx    on public.orders (user_id);
 create index if not exists orders_status_idx  on public.orders (status);
@@ -937,6 +941,47 @@ create policy vitems_write_upd on public.variant_items
 create policy vitems_write_del on public.variant_items
   for delete using ((select public.is_staff()));
 
+-- A shopper can read a product they have wishlisted even once it is retired.
+-- products_read is `is_active or is_staff()`, which is right for the storefront
+-- but defeats the wishlist: the client resolves saved ids the catalogue listing
+-- does not carry, precisely so a piece taken off sale still appears.
+--
+-- Every reference to the row under test is table-qualified. `wishlists` has a
+-- `product_id` of its own, so an unqualified `product_id` inside these
+-- subqueries binds to the wishlist row, not the row being checked -- which
+-- reads as `w.product_id = w.product_id` and grants everything.
+drop policy if exists products_read_wishlisted on public.products;
+create policy products_read_wishlisted on public.products
+  for select using (
+    exists (
+      select 1 from public.wishlists w
+       where w.product_id = public.products.id
+         and w.user_id = (select auth.uid())
+    )
+  );
+
+drop policy if exists vgroups_read_wishlisted on public.variant_groups;
+create policy vgroups_read_wishlisted on public.variant_groups
+  for select using (
+    exists (
+      select 1 from public.wishlists w
+       where w.product_id = public.variant_groups.product_id
+         and w.user_id = (select auth.uid())
+    )
+  );
+
+drop policy if exists vitems_read_wishlisted on public.variant_items;
+create policy vitems_read_wishlisted on public.variant_items
+  for select using (
+    exists (
+      select 1
+        from public.variant_groups vg
+        join public.wishlists w on w.product_id = vg.product_id
+       where vg.id = public.variant_items.group_id
+         and w.user_id = (select auth.uid())
+    )
+  );
+
 -- ---- Promotions: codes are never bulk-readable; redemption goes through
 --      validate_promotion(), which is SECURITY DEFINER and answers only for a
 --      code the caller already knows. ----
@@ -998,9 +1043,6 @@ drop policy if exists orders_read on public.orders;
 create policy orders_read on public.orders
   for select using (user_id = (select auth.uid()) or (select public.is_staff()));
 
-drop policy if exists orders_insert on public.orders;
-create policy orders_insert on public.orders
-  for insert with check ((select auth.uid()) is not null and user_id = (select auth.uid()));
 
 drop policy if exists orders_staff_update on public.orders;
 create policy orders_staff_update on public.orders
@@ -1017,17 +1059,6 @@ create policy order_items_read on public.order_items
     )
   );
 
-drop policy if exists order_items_insert on public.order_items;
-create policy order_items_insert on public.order_items
-  for insert with check (
-    (select public.is_staff())
-    or exists (
-      select 1 from public.orders o
-       where o.id = order_id
-         and (select auth.uid()) is not null
-         and o.user_id = (select auth.uid())
-    )
-  );
 
 -- ============================================================================
 -- 8. Execute grants

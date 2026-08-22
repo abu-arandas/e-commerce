@@ -51,6 +51,11 @@ class AdminController extends GetxController {
     super.onInit();
     ever(products, (_) => _cachedRevenueByCategory = null);
     ever(orders, (_) => _cachedRevenueByCategory = null);
+    // The dashboard can read this before admin_stats() answers, caching the
+    // local fold over the newest 100 orders. When the server total lands it
+    // has to win, or the breakdown stays wrong until the catalogue or the
+    // order list happens to change.
+    ever(_stats, (_) => _cachedRevenueByCategory = null);
 
     // Performance optimization: calculate SKUs once reactively instead of dynamically
     // flattening the deep product/group/item tree on every getter access.
@@ -375,8 +380,16 @@ class AdminController extends GetxController {
   /// units back. Only the transition *into* cancelled/refunded counts: an order
   /// already out of the pipeline (cancelled then refunded, say) has been
   /// credited once and must not be credited again.
+  /// Whether moving `from` -> `to` is the first entry into a status that
+  /// returns stock. Retained because it names the transition; the caller now
+  /// gates on [restocksInto] so a failed restock can be retried.
   static bool restocksOn(OrderStatus from, OrderStatus to) =>
       _restockingStatuses.contains(to) && !_restockingStatuses.contains(from);
+
+  /// Whether an order in this status should have its units back. Safe to act
+  /// on repeatedly: restock_order() claims the restock before crediting, so
+  /// only the first call of any sequence actually moves stock.
+  static bool restocksInto(OrderStatus to) => _restockingStatuses.contains(to);
 
   Future<void> updateOrderStatus(Order order, OrderStatus status) async {
     if (SupabaseService.isReady) {
@@ -387,7 +400,13 @@ class AdminController extends GetxController {
       // Cancelling or refunding has to put the units back. restock_order() is
       // idempotent -- it claims the restock before crediting -- so cancel then
       // refund, a double click or a retry all credit exactly once.
-      if (restocksOn(order.status, status)) {
+      //
+      // Keyed on the destination rather than the transition. Gating on the
+      // transition meant a restock that failed on cancel was never attempted
+      // again: moving cancelled -> refunded is not a transition *into* a
+      // restocking status, so the units stayed missing with no way to recover
+      // them from the UI. Idempotency is what makes the looser test safe.
+      if (restocksInto(status)) {
         try {
           await SupabaseService.client.rpc(
             AppConstants.rpcRestockOrder,

@@ -39,6 +39,25 @@ class CartItem {
 
   double get lineTotal => unitPrice * quantity;
 
+  /// The same line against a new stock figure, with the quantity clamped to it.
+  /// [maxStock] is final because it is a snapshot; refreshing it means a new
+  /// line, not a mutated one.
+  CartItem withStock(int available) => CartItem(
+        productId: productId,
+        productSlug: productSlug,
+        productTitle: productTitle,
+        category: category,
+        variantGroupId: variantGroupId,
+        variantItemId: variantItemId,
+        sku: sku,
+        colorName: colorName,
+        sizeLabel: sizeLabel,
+        unitPrice: unitPrice,
+        quantity: quantity > available ? available : quantity,
+        imageUrl: imageUrl,
+        maxStock: available,
+      );
+
   /// Stable identity for a cart line — the same SKU stacks rather than duplicates.
   String get key => variantItemId;
 

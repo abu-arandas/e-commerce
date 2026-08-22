@@ -38,16 +38,34 @@ class WishlistController extends GetxController {
 
   Future<void> fetchWishlist() async {
     final user = Get.find<AuthController>().user.value;
-    if (user == null || !SupabaseService.isReady) {
-      _resolve();
+
+    // Signing out has to empty the wishlist, not just stop refreshing it.
+    // These ids belong to the account that saved them: leaving them behind
+    // shows the next person to use this browser the previous shopper's saved
+    // pieces, and the `catch` below would keep showing them even after their
+    // own fetch failed.
+    if (user == null) {
+      wishlistProductIds.clear();
+      savedProducts.clear();
+      unavailableCount.value = 0;
       return;
     }
+
+    if (!SupabaseService.isReady) {
+      await _resolve();
+      return;
+    }
+
     isLoading.value = true;
     try {
       final rows = await SupabaseService.client
           .from(AppConstants.tblWishlists)
           .select('product_id')
           .eq('user_id', user.id);
+      // The account can change while this is in flight -- sign out, or sign in
+      // as someone else. Dropping a response that outlived its owner keeps a
+      // slow request for the previous user from overwriting the current one.
+      if (Get.find<AuthController>().user.value?.id != user.id) return;
       wishlistProductIds
           .assignAll((rows as List).map((r) => r['product_id'].toString()));
     } catch (_) {

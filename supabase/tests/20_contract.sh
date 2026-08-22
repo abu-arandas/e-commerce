@@ -54,7 +54,7 @@ else
 fi
 
 # --------------------------------------------------------------------------
-say "2. schema.sql == migrations/0001..0006"
+say "2. schema.sql == migrations/$(ls "$SQL"/migrations/*.sql | head -1 | xargs basename | cut -d_ -f1)..$(ls "$SQL"/migrations/*.sql | tail -1 | xargs basename | cut -d_ -f1)"
 # --------------------------------------------------------------------------
 q -d postgres -c "drop database if exists $DB_MIGR" -c "create database $DB_MIGR" >/dev/null
 mig_args=(-f "$SQL/tests/00_shim.sql")

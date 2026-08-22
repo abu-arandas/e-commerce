@@ -13,6 +13,7 @@ import '../models/order_model.dart';
 import '../models/product_model.dart';
 import '../models/promotion_model.dart';
 import '../models/variant_model.dart';
+import 'catalog_controller.dart';
 
 /// Shopping cart + promotions engine (PRD §3.1 "Dynamic Promotions"). Totals are
 /// fully reactive; an applied promo code is re-validated on every cart change so
@@ -36,6 +37,55 @@ class CartController extends GetxController {
     // Persist on every change rather than at each call site, so no mutation can
     // forget to. `ever` fires on add/remove/refresh alike.
     ever(items, (_) => _persist());
+    // A bag restored from a previous visit carries the stock figures from
+    // whenever it was saved. Reconcile against the catalogue as it arrives, so
+    // a line that sold out in the meantime is corrected here rather than
+    // surviving all the way to a rejected checkout.
+    //
+    // Optional on purpose: the cart is useful on its own and must stay
+    // constructable without the catalogue registered. Where there is no
+    // catalogue there is nothing to reconcile against, and the server still
+    // refuses to oversell at checkout.
+    if (Get.isRegistered<CatalogController>()) {
+      final catalog = Get.find<CatalogController>();
+      ever(catalog.products, (_) => _reconcileStock());
+      if (catalog.products.isNotEmpty) _reconcileStock();
+    }
+  }
+
+  /// Clamp restored quantities to what is actually in stock, and drop lines
+  /// whose SKU has sold out entirely. A SKU the catalogue does not carry is
+  /// left alone -- absence there means "not loaded", not "gone".
+  void _reconcileStock() {
+    if (items.isEmpty || !Get.isRegistered<CatalogController>()) return;
+
+    final stock = <String, int>{
+      for (final p in Get.find<CatalogController>().products)
+        for (final g in p.groups)
+          for (final v in g.items) v.id: v.stockQuantity,
+    };
+    if (stock.isEmpty) return;
+
+    var changed = false;
+    final kept = <CartItem>[];
+    for (final line in items) {
+      final available = stock[line.variantItemId];
+      if (available == null) {
+        kept.add(line);
+        continue;
+      }
+      if (available <= 0) {
+        changed = true; // sold out entirely
+        continue;
+      }
+      if (line.quantity > available || line.maxStock != available) {
+        changed = true;
+        kept.add(line.withStock(available));
+      } else {
+        kept.add(line);
+      }
+    }
+    if (changed) items.assignAll(kept);
   }
 
   /// Reload a bag left behind by a previous visit. Anything malformed is
