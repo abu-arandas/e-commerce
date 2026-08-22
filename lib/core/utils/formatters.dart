@@ -20,9 +20,11 @@ abstract final class Formatters {
   static String date(DateTime dt) => _date.format(dt.toLocal());
   static String dateTime(DateTime dt) => _dateTime.format(dt.toLocal());
 
-  static String stockLabel(int qty, {int lowThreshold = 5}) {
+  /// Stock wording. [compact] drops the leading qualifier for tight spaces
+  /// ("3 left" rather than "Only 3 left").
+  static String stockLabel(int qty, {int lowThreshold = 5, bool compact = false}) {
     if (qty <= 0) return 'Sold out';
-    if (qty <= lowThreshold) return 'Only $qty left';
+    if (qty <= lowThreshold) return compact ? '$qty left' : 'Only $qty left';
     return 'In stock';
   }
 }

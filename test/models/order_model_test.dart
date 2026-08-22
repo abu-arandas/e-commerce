@@ -51,25 +51,25 @@ void main() {
     });
 
     test('variantSummary handles missing or null variants and sizes', () {
-      final line1 = OrderLine(
+      const line1 = OrderLine(
         id: '1', productTitle: 'A', sku: 'A', unitPrice: 10, quantity: 1, lineTotal: 10,
         variantName: 'Red', sizeLabel: 'M',
       );
       expect(line1.variantSummary, 'Red · M');
 
-      final line2 = OrderLine(
+      const line2 = OrderLine(
         id: '2', productTitle: 'B', sku: 'B', unitPrice: 10, quantity: 1, lineTotal: 10,
         variantName: 'Red', sizeLabel: null,
       );
       expect(line2.variantSummary, 'Red');
 
-      final line3 = OrderLine(
+      const line3 = OrderLine(
         id: '3', productTitle: 'C', sku: 'C', unitPrice: 10, quantity: 1, lineTotal: 10,
         variantName: null, sizeLabel: 'M',
       );
       expect(line3.variantSummary, 'M');
 
-      final line4 = OrderLine(
+      const line4 = OrderLine(
         id: '4', productTitle: 'D', sku: 'D', unitPrice: 10, quantity: 1, lineTotal: 10,
         variantName: null, sizeLabel: null,
       );
@@ -141,21 +141,21 @@ void main() {
     });
 
     test('itemCount sums quantities correctly', () {
-      final order = Order(
+      const order = Order(
         id: '1', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0,
         lines: [
-          const OrderLine(id: 'l1', productTitle: 'A', sku: 'A', unitPrice: 10, quantity: 2, lineTotal: 20),
-          const OrderLine(id: 'l2', productTitle: 'B', sku: 'B', unitPrice: 15, quantity: 3, lineTotal: 45),
+          OrderLine(id: 'l1', productTitle: 'A', sku: 'A', unitPrice: 10, quantity: 2, lineTotal: 20),
+          OrderLine(id: 'l2', productTitle: 'B', sku: 'B', unitPrice: 15, quantity: 3, lineTotal: 45),
         ],
       );
       expect(order.itemCount, 5);
     });
 
     test('reference returns correct short string based on UUID', () {
-      final order1 = Order(id: '1234567890abcdef', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0);
+      const order1 = Order(id: '1234567890abcdef', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0);
       expect(order1.reference, '#12345678');
 
-      final order2 = Order(id: 'short', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0);
+      const order2 = Order(id: 'short', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0);
       expect(order2.reference, '#short');
     });
   });

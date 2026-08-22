@@ -1,3 +1,4 @@
+import '../core/utils/json_parse.dart';
 import 'product_model.dart';
 import 'variant_model.dart';
 
@@ -85,19 +86,23 @@ class CartItem {
         'quantity': quantity,
       };
 
+  /// Restores a line from persisted JSON. Numerics go through [J] rather than
+  /// a cast: a cart round-tripped through localStorage — or a row read back
+  /// from Postgres, which serialises numeric columns as strings on some
+  /// drivers — brings them back as text, and `as num?` throws on that.
   factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-        productId: json['product_id']?.toString() ?? '',
-        productSlug: json['product_slug']?.toString() ?? '',
-        productTitle: json['product_title']?.toString() ?? '',
-        category: json['category']?.toString(),
-        variantGroupId: json['variant_group_id']?.toString() ?? '',
-        variantItemId: json['variant_item_id']?.toString() ?? '',
-        sku: json['sku']?.toString() ?? '',
-        colorName: json['color_name']?.toString() ?? '',
-        sizeLabel: json['size_label']?.toString() ?? '',
-        unitPrice: (json['unit_price'] as num?)?.toDouble() ?? 0,
-        imageUrl: json['image_url']?.toString(),
-        maxStock: (json['max_stock'] as num?)?.toInt() ?? 99,
-        quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+        productId: J.str(json['product_id']),
+        productSlug: J.str(json['product_slug']),
+        productTitle: J.str(json['product_title']),
+        category: J.strOrNull(json['category']),
+        variantGroupId: J.str(json['variant_group_id']),
+        variantItemId: J.str(json['variant_item_id']),
+        sku: J.str(json['sku']),
+        colorName: J.str(json['color_name']),
+        sizeLabel: J.str(json['size_label']),
+        unitPrice: J.toDouble(json['unit_price']),
+        imageUrl: J.strOrNull(json['image_url']),
+        maxStock: J.toInt(json['max_stock'], 99),
+        quantity: J.toInt(json['quantity'], 1),
       );
 }

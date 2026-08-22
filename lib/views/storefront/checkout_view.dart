@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../controllers/cart_controller.dart';
+import '../../controllers/orders_controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -73,6 +74,9 @@ class _CheckoutViewState extends State<CheckoutView> {
       },
     );
     if (order != null) {
+      // Show it in the account history straight away rather than waiting for a
+      // round-trip — and in demo mode this is the only record of it.
+      Get.find<OrdersController>().record(order);
       Get.offNamed(AppRoutes.orderConfirmation, arguments: order);
     } else {
       Get.snackbar(

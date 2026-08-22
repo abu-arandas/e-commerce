@@ -6,6 +6,7 @@ import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/app_constants.dart';
+import 'core/utils/store_settings.dart';
 import 'core/utils/supabase_service.dart';
 import 'core/utils/url_strategy/url_strategy.dart';
 
@@ -18,6 +19,12 @@ Future<void> main() async {
   // Initialise Supabase if credentials were provided via --dart-define; the app
   // otherwise runs against in-memory demo data.
   await SupabaseService.init();
+
+  // Shipping fee and free-shipping threshold are authoritative on the server —
+  // place_order charges from the same row. Load them so the figures the shopper
+  // is quoted match the ones they are charged. Falls back to the compile-time
+  // Env defaults if unavailable.
+  await StoreSettings.load();
 
   runApp(const VanguardApp());
 }

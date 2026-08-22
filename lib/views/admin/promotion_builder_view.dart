@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/app_constants.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/uuid.dart';
 import '../../models/promotion_model.dart';
 import 'admin_scaffold.dart';
 
@@ -231,8 +232,7 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
 
   void _save() {
     final promo = Promotion(
-      id: widget.existing?.id ??
-          'promo-${DateTime.now().microsecondsSinceEpoch}',
+      id: widget.existing?.id ?? Uuid.v4(),
       code: _code.text.trim().toUpperCase(),
       description:
           _description.text.trim().isEmpty ? null : _description.text.trim(),

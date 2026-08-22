@@ -108,6 +108,23 @@ class Promotion {
       };
 }
 
+/// One cart line reduced to what the promotions engine needs: which category
+/// it belongs to, and what it is worth. A category-targeted promotion discounts
+/// only the lines it covers, so the engine has to see the basket line by line
+/// rather than as a single subtotal.
+class PromoLine {
+  const PromoLine({required this.category, required this.lineTotal});
+
+  final String? category;
+  final double lineTotal;
+
+  /// Wire form for the `validate_promotion(text, jsonb)` RPC.
+  Map<String, dynamic> toJson() => {
+        'category': category,
+        'line_total': lineTotal,
+      };
+}
+
 /// Result of validating a promo code against a cart subtotal — mirrors the
 /// jsonb returned by the `validate_promotion` SQL function.
 class PromoValidation {
@@ -117,6 +134,7 @@ class PromoValidation {
     this.code,
     this.discountType,
     this.discountAmount = 0,
+    this.eligibleSubtotal = 0,
     this.freeShipping = false,
     this.description,
     this.reason,
@@ -127,6 +145,10 @@ class PromoValidation {
   final String? code;
   final DiscountType? discountType;
   final double discountAmount;
+
+  /// The portion of the basket the discount was computed against. Equal to the
+  /// subtotal for an untargeted promotion; only the covered lines otherwise.
+  final double eligibleSubtotal;
   final bool freeShipping;
   final String? description;
   final String? reason;
@@ -142,6 +164,7 @@ class PromoValidation {
             ? null
             : DiscountType.fromDb(J.strOrNull(json['discount_type'])),
         discountAmount: J.toDouble(json['discount_amount']),
+        eligibleSubtotal: J.toDouble(json['eligible_subtotal']),
         freeShipping: J.toBool(json['free_shipping']),
         description: J.strOrNull(json['description']),
         reason: J.strOrNull(json['reason']),

@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/app_constants.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/uuid.dart';
 import '../../models/product_model.dart';
 import '../../models/variant_model.dart';
 import 'admin_scaffold.dart';
@@ -258,7 +259,9 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
     final slug =
         _slug.text.trim().isEmpty ? _slugify(_title.text) : _slug.text.trim();
     final product = Product(
-      id: widget.existing?.id ?? 'new-${DateTime.now().microsecondsSinceEpoch}',
+      // Postgres keys these by uuid; a 'new-1723...' id is rejected outright
+      // with `invalid input syntax for type uuid`.
+      id: widget.existing?.id ?? Uuid.v4(),
       slug: slug,
       title: _title.text.trim(),
       description: _description.text.trim(),
@@ -513,7 +516,7 @@ class _ColorGroupDialogState extends State<_ColorGroupDialog> {
             Navigator.pop(
               context,
               VariantGroup(
-                id: 'grp-${DateTime.now().microsecondsSinceEpoch}',
+                id: Uuid.v4(),
                 productId: '',
                 name: _name.text.trim(),
                 colorHex: _hex.text.trim(),

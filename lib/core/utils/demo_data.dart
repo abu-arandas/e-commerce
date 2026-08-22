@@ -214,48 +214,85 @@ abstract final class DemoData {
     ];
   }
 
-  /// Local mirror of the SQL `validate_promotion` function for demo mode.
-  static PromoValidation validatePromo(String code, double subtotal, List<String> categories) {
-    final promo = promotions().where((p) => p.code.toUpperCase() == code.toUpperCase()).firstOrNull;
+  /// Local mirror of `validate_promotion` in
+  /// `supabase/migrations/0004_hardening.sql`. The same basket must produce the
+  /// same discount in demo mode as it does against Postgres, so this follows
+  /// the SQL step for step — in particular the discount base is the *eligible*
+  /// lines, not the whole bag.
+  static PromoValidation validatePromo(String code, List<PromoLine> lines) {
+    if (code.trim().isEmpty) {
+      return PromoValidation.invalid('Enter a promo code');
+    }
+
+    final promo = promotions()
+        .where((p) => p.code.toUpperCase() == code.trim().toUpperCase())
+        .firstOrNull;
     if (promo == null) return PromoValidation.invalid('Code not found');
     if (!promo.isActive) return PromoValidation.invalid('Promotion inactive');
-    if (promo.isScheduled) return PromoValidation.invalid('Promotion not yet active');
+    if (promo.isScheduled) {
+      return PromoValidation.invalid('Promotion not yet active');
+    }
     if (promo.isExpired) return PromoValidation.invalid('Promotion expired');
-    if (promo.usageExhausted) return PromoValidation.invalid('Usage limit reached');
+    if (promo.usageExhausted) {
+      return PromoValidation.invalid('Usage limit reached');
+    }
+
+    final subtotal = lines.fold<double>(0, (sum, l) => sum + l.lineTotal);
+
+    // The minimum-order rule is judged on the whole basket, as shoppers expect.
     if (subtotal < promo.minOrderValue) {
-      return PromoValidation.invalid('Requires a minimum order of \$${promo.minOrderValue.toStringAsFixed(0)}');
+      return PromoValidation.invalid(
+          'Requires a minimum order of \$${promo.minOrderValue.toStringAsFixed(2)}');
     }
-    if (promo.includedCategories.isNotEmpty &&
-        !categories.any(promo.includedCategories.contains)) {
-      return PromoValidation.invalid('No eligible items in cart');
-    }
+
+    // Excluded categories disqualify the promotion outright.
     if (promo.excludedCategories.isNotEmpty &&
-        categories.any(promo.excludedCategories.contains)) {
+        lines.any((l) => promo.excludedCategories.contains(l.category))) {
       return PromoValidation.invalid('Cart contains excluded items');
+    }
+
+    // Discount base: the targeted lines only when the promotion is restricted.
+    double eligible;
+    if (promo.includedCategories.isEmpty) {
+      eligible = subtotal;
+    } else {
+      eligible = lines
+          .where((l) => promo.includedCategories.contains(l.category))
+          .fold<double>(0, (sum, l) => sum + l.lineTotal);
+      if (eligible <= 0) {
+        return PromoValidation.invalid('No eligible items in cart');
+      }
     }
 
     double discount = 0;
     bool freeShip = false;
     switch (promo.discountType) {
       case DiscountType.percentage:
-        discount = (subtotal * promo.discountValue / 100);
-        discount = double.parse(discount.toStringAsFixed(2));
+        // Clamped, matching the SQL: a mis-keyed percentage above 100 must
+        // never discount more than the lines it applies to.
+        discount = _round2(eligible * promo.discountValue / 100);
+        if (discount > eligible) discount = eligible;
         break;
       case DiscountType.fixedAmount:
-        discount = promo.discountValue < subtotal ? promo.discountValue : subtotal;
+        discount = _round2(
+            promo.discountValue < eligible ? promo.discountValue : eligible);
         break;
       case DiscountType.freeShipping:
         freeShip = true;
         break;
     }
+
     return PromoValidation(
       valid: true,
       promotionId: promo.id,
       code: promo.code,
       discountType: promo.discountType,
       discountAmount: discount,
+      eligibleSubtotal: eligible,
       freeShipping: freeShip,
       description: promo.description,
     );
   }
+
+  static double _round2(double v) => (v * 100).roundToDouble() / 100;
 }

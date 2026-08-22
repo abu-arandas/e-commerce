@@ -103,8 +103,9 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Obx(() {
-                      if (auth.error.value.isEmpty)
+                      if (auth.error.value.isEmpty) {
                         return const SizedBox.shrink();
+                      }
                       return Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                         child: Text(auth.error.value,

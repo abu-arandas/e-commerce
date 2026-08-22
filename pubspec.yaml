@@ -6,11 +6,20 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  # Floor aligned to Flutter 3.24 (Dart 3.5): the theme APIs used here
-  # (CardThemeData, etc.) landed in 3.24. Caret ranges let `pub` resolve newer
-  # compatible package versions against whatever Flutter the developer has.
-  sdk: ">=3.5.0 <4.0.0"
-  flutter: ">=3.24.0"
+  # Floor is Flutter 3.35 (Dart 3.9), set by the newest framework API in use:
+  #
+  #   DropdownButtonFormField(initialValue:)  — replaced `value:`, which the SDK
+  #     marks "deprecated after v3.33.0-1.0.pre"; the first *stable* release
+  #     carrying it is 3.35.0 (stable goes 3.32 -> 3.35; there is no 3.33/3.34).
+  #   Switch(activeThumbColor:)               — replaced `activeColor:`,
+  #     deprecated after v3.31.0-2.0.pre.
+  #   Color.withValues(alpha:)                — the wide-gamut colour API, 3.27.
+  #
+  # The floor previously read 3.24, where none of those exist and the project
+  # does not compile. Caret ranges still let `pub` resolve newer compatible
+  # package versions against whatever Flutter the developer has.
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: ">=3.35.0"
 
 dependencies:
   flutter:

@@ -83,8 +83,9 @@ class CatalogController extends GetxController {
     final cat = categoryFilter.value;
     final q = searchQuery.value.trim().toLowerCase();
 
-    // ⚡ Bolt: Single-pass filter to avoid multiple intermediate list allocations
-    var list = products.where((p) {
+    // Single-pass filter: chained .where().toList() allocated an intermediate
+    // list per stage, on a getter that reruns on every keystroke.
+    final list = products.where((p) {
       if (!p.isActive) return false;
       if (cat != null && cat.isNotEmpty && p.category != cat) return false;
       if (q.isNotEmpty) {
@@ -150,13 +151,18 @@ class CatalogController extends GetxController {
     product ??= DemoData.products().firstWhereOrNull((p) => p.slug == slug);
 
     selected.value = product;
-    if (product != null) {
-      final group = (preselectColorSlug != null
-              ? product.groupBySlug(preselectColorSlug)
-              : null) ??
-          product.sortedGroups.firstOrNull;
-      _applyGroup(group);
+    if (product == null) {
+      // Clear the whole selection together. A stale group or size left behind a
+      // null product is what made the page render the previous item's variants.
+      _applyGroup(null);
+      return null;
     }
+
+    final group = (preselectColorSlug != null
+            ? product.groupBySlug(preselectColorSlug)
+            : null) ??
+        product.sortedGroups.firstOrNull;
+    _applyGroup(group);
     return product;
   }
 
