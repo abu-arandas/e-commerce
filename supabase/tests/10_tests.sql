@@ -1,12 +1,25 @@
--- Behavioural tests for the 0004 hardening migration.
+-- Behavioural tests for the hardened schema: promotions, stock, and ordering.
 --
--- Run after applying 00_shim.sql, the four migrations, and seed.sql. Safe to
--- re-run against the same database: fixtures it creates are cleaned up, and
--- assertions are made relative to live counts rather than absolute ones.
+-- To run everything at once -- provisioning, schema/migration equivalence, the
+-- client contract, and this suite -- use `supabase/tests/20_contract.sh`. To
+-- run this file alone, read on.
 --
---   psql -v ON_ERROR_STOP=1 -f supabase/tests/10_tests.sql
+-- Needs a database that already has 00_shim.sql, the schema, and seed.sql --
+-- seed.sql is not optional, since the assertions below name promotion codes
+-- and SKUs it creates. Either provisioning path works:
 --
--- Any failure raises, so a non-zero exit means a regression.
+--   psql -v ON_ERROR_STOP=1 -d DB \
+--     -f supabase/tests/00_shim.sql \
+--     -f supabase/schema.sql \
+--     -f supabase/seed.sql \
+--     -f supabase/tests/10_tests.sql
+--
+-- ...or substitute migrations/0001..0006 in order for schema.sql; the two are
+-- equivalent (see 20_contract.sh, which checks exactly that).
+--
+-- Safe to re-run against the same database: fixtures it creates are cleaned
+-- up, and assertions are made relative to live counts rather than absolute
+-- ones. Any failure raises, so a non-zero exit means a regression.
 \set ON_ERROR_STOP on
 
 create or replace function assert_eq(actual anyelement, expected anyelement, label text)
