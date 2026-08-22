@@ -82,9 +82,17 @@ class ProductManagerView extends StatelessWidget {
           TextButton(
               onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            onPressed: () {
-              admin.deleteProduct(p.id);
-              Navigator.pop(ctx);
+            onPressed: () async {
+              // Awaited, so a failed delete is reported instead of becoming an
+              // unhandled async error behind a dialog that already closed.
+              final removed = await admin.deleteProduct(p.id);
+              if (ctx.mounted) Navigator.pop(ctx);
+              if (!removed) {
+                Get.snackbar('Delete failed', admin.error.value,
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: AppColors.danger,
+                    colorText: AppColors.textOnInk);
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
             child: const Text('Delete'),

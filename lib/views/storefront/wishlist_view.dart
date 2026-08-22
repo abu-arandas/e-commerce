@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/wishlist_controller.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/bootstrap5.dart';
 import '../shared/product_card.dart';
@@ -22,6 +23,7 @@ class WishlistView extends StatelessWidget {
         child: FB5Container(
           child: Obx(() {
             final items = wishlist.savedProducts;
+            final unavailable = wishlist.unavailableCount.value;
 
             if (wishlist.isEmpty) {
               return EmptyState(
@@ -40,8 +42,23 @@ class WishlistView extends StatelessWidget {
               children: [
                 SectionHeading(
                   eyebrow: 'Saved pieces',
-                  title: 'Wishlist (${items.length})',
+                  // Counts saved pieces, matching the header badge. Anything
+                  // that cannot be shown is accounted for just below rather
+                  // than silently dropped from the total.
+                  title: 'Wishlist (${wishlist.count})',
                 ),
+                if (unavailable > 0) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    unavailable == 1
+                        ? '1 saved piece is no longer available.'
+                        : '$unavailable saved pieces are no longer available.',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: AppColors.slate),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xl),
                 FB5Row(
                   classNames: 'gx-4 gy-4',

@@ -278,11 +278,23 @@ class AdminController extends GetxController {
     await saveProduct(product.copyWith(isActive: !product.isActive));
   }
 
-  Future<void> deleteProduct(String id) async {
+  /// Returns true when the product is gone. A remote failure leaves the row in
+  /// place and reports why, rather than throwing into a fire-and-forget caller
+  /// where the dialog closes and nothing tells anyone it failed.
+  Future<bool> deleteProduct(String id) async {
     if (SupabaseService.isReady) {
-      await SupabaseService.client.from(AppConstants.tblProducts).delete().eq('id', id);
+      try {
+        await SupabaseService.client
+            .from(AppConstants.tblProducts)
+            .delete()
+            .eq('id', id);
+      } catch (e) {
+        error.value = 'Could not delete the product: $e';
+        return false;
+      }
     }
     products.removeWhere((p) => p.id == id);
+    return true;
   }
 
   /// Bulk-generate size variants for a colour group (PRD §3.2 "generate
@@ -332,11 +344,21 @@ class AdminController extends GetxController {
     }
   }
 
-  Future<void> deletePromotion(String id) async {
+  /// As [deleteProduct]: false means the promotion is still there.
+  Future<bool> deletePromotion(String id) async {
     if (SupabaseService.isReady) {
-      await SupabaseService.client.from(AppConstants.tblPromotions).delete().eq('id', id);
+      try {
+        await SupabaseService.client
+            .from(AppConstants.tblPromotions)
+            .delete()
+            .eq('id', id);
+      } catch (e) {
+        error.value = 'Could not delete the promotion: $e';
+        return false;
+      }
     }
     promotions.removeWhere((p) => p.id == id);
+    return true;
   }
 
   // ---------------------------------------------------------------------------

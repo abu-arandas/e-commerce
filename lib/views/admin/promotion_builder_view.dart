@@ -49,7 +49,15 @@ class PromotionBuilderView extends StatelessWidget {
                 child: _PromoCard(
                   promo: p,
                   onEdit: () => _openEditor(context, admin, p),
-                  onDelete: () => admin.deletePromotion(p.id),
+                  onDelete: () async {
+                    final removed = await admin.deletePromotion(p.id);
+                    if (!removed) {
+                      Get.snackbar('Delete failed', admin.error.value,
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: AppColors.danger,
+                          colorText: AppColors.textOnInk);
+                    }
+                  },
                 ),
               ),
           ],
