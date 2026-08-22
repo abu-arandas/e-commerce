@@ -156,10 +156,10 @@
     "semantic_hash": "41c968bce25ff2d82c523f4424bcd9f5"
   },
   "lib/core/utils/supabase_service.dart": {
-    "mtime": 1787351592.4703593,
-    "seen": 1787378070.2888184,
-    "ast_hash": "80b6fabe5af6a7c4a8a28ea03a5c78fc",
-    "semantic_hash": "80b6fabe5af6a7c4a8a28ea03a5c78fc"
+    "mtime": 1787383994.5526867,
+    "seen": 1787384160.337066,
+    "ast_hash": "1826efa34234070cd32b79fa02b333fd",
+    "semantic_hash": ""
   },
   "lib/core/utils/url_strategy/url_strategy.dart": {
     "mtime": 1787347995.5452158,
@@ -627,6 +627,18 @@
     "mtime": 1787351776.0546236,
     "seen": 1787380254.0751364,
     "ast_hash": "9fae8dbb84dabb8813b330d4e7b902b3",
+    "semantic_hash": ""
+  },
+  "test/orders_controller_test.dart": {
+    "mtime": 1787384012.465608,
+    "seen": 1787384160.337132,
+    "ast_hash": "90be7f641fc5adb8afb45eda2112622f",
+    "semantic_hash": ""
+  },
+  "test/roles_and_promotions_test.dart": {
+    "mtime": 1787384123.5766912,
+    "seen": 1787384160.337136,
+    "ast_hash": "8999d98e43e8c232b7ef551e26265e82",
     "semantic_hash": ""
   }
 }
