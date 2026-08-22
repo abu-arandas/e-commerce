@@ -11,6 +11,13 @@ promotions engine, and a Supabase (PostgreSQL) backend.
 
 ---
 
+## Where this is going
+
+[`docs/ENHANCEMENT_PLAN.md`](docs/ENHANCEMENT_PLAN.md) is a full audit of the
+project against what a shippable store needs — seven defects with file:line
+evidence, the functional gaps (payment, product imagery, saved addresses),
+the scale ceilings, and a five-phase build order. Read it before planning work.
+
 ## Highlights
 
 - **Nested variants** — Product → Colour group → Size/SKU, with independent
