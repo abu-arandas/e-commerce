@@ -72,7 +72,7 @@ class CatalogController extends GetxController {
       }
     } catch (e) {
       error.value = 'Could not load products: $e';
-      if (products.isEmpty) products.assignAll(DemoData.products());
+      if (!SupabaseService.isReady && products.isEmpty) { products.assignAll(DemoData.products()); }
     } finally {
       isLoading.value = false;
     }
@@ -148,9 +148,14 @@ class CatalogController extends GetxController {
         if (row != null) {
           product = Product.fromJson(Map<String, dynamic>.from(row));
         }
-      } catch (_) {/* fall through to demo */}
+      } catch (e) {
+        error.value = 'Could not load product: $e';
+      }
     }
-    product ??= DemoData.products().firstWhereOrNull((p) => p.slug == slug);
+
+    if (!SupabaseService.isReady) {
+      product ??= DemoData.products().firstWhereOrNull((p) => p.slug == slug);
+    }
 
     selected.value = product;
     if (product == null) {
