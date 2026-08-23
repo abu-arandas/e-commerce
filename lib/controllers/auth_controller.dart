@@ -14,11 +14,6 @@ class AuthController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
-  // Rate limiting variables
-  final Map<String, int> _loginAttempts = {};
-  final Map<String, DateTime> _lockouts = {};
-  static const int _maxAttempts = 5;
-  static const Duration _lockoutDuration = Duration(minutes: 15);
 
   bool get isLoggedIn => user.value != null;
   bool get isStaff => user.value?.role.isStaff ?? false;
@@ -57,8 +52,11 @@ class AuthController extends GetxController {
       } else {
         user.value = AppUser(id: id, email: email ?? '');
       }
-    } catch (_) {
-      user.value = AppUser(id: id, email: email ?? '');
+    } catch (e) {
+      if (user.value == null) {
+        user.value = AppUser(id: id, email: email ?? '');
+      }
+      error.value = 'Failed to load profile: $e';
     }
   }
 
@@ -66,54 +64,32 @@ class AuthController extends GetxController {
     isLoading.value = true;
     error.value = '';
 
-    final normalizedEmail = email.trim().toLowerCase();
-
-    // Check rate limit
-    if (_lockouts.containsKey(normalizedEmail)) {
-      if (DateTime.now().difference(_lockouts[normalizedEmail]!) < _lockoutDuration) {
-        isLoading.value = false;
-        error.value = 'Too many failed attempts. Please try again later.';
-        return false;
-      } else {
-        _lockouts.remove(normalizedEmail);
-        _loginAttempts[normalizedEmail] = 0;
-      }
-    }
+    // Note: True rate limiting/brute-force protection must be enforced
+    // server-side via Supabase Auth rate limits or a server-side tracking logic.
+    // Client-side rate limiting has been removed as it was decorative and bypassed by refresh.
 
     try {
       if (!SupabaseService.isReady) {
         // Demo: accept any credentials as a customer.
         user.value = AppUser(id: 'demo-customer', email: email, fullName: null);
-        _loginAttempts.remove(normalizedEmail);
         return true;
       }
       final res = await SupabaseService.auth
           .signInWithPassword(email: email, password: password);
       if (res.user != null) {
         await _loadProfile(res.user!.id, res.user!.email);
-        _loginAttempts.remove(normalizedEmail);
         return true;
       }
-      _recordFailedAttempt(normalizedEmail);
       error.value = 'Invalid credentials';
       return false;
     } on sb.AuthException catch (e) {
-      _recordFailedAttempt(normalizedEmail);
       error.value = e.message;
       return false;
     } catch (e) {
-      _recordFailedAttempt(normalizedEmail);
       error.value = 'Sign-in failed: $e';
       return false;
     } finally {
       isLoading.value = false;
-    }
-  }
-
-  void _recordFailedAttempt(String email) {
-    _loginAttempts[email] = (_loginAttempts[email] ?? 0) + 1;
-    if (_loginAttempts[email]! >= _maxAttempts) {
-      _lockouts[email] = DateTime.now();
     }
   }
 
