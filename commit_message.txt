@@ -1,0 +1,6 @@
+🧹 [code health] Extract private widgets in AppFooter
+
+🎯 What: Refactored the `AppFooter` build method by extracting the brand info, links, and newsletter columns into their own stateless widgets (`_BrandColumn`, `_LinksColumn`, `_NewsletterColumn`).
+💡 Why: The `AppFooter.build` method was previously very long and deeply nested, making it hard to read and maintain. Extracting logical chunks into stateless widgets improves readability and promotes better widget composition. Replaced the `_links` helper method with `_LinksColumn` stateless widget, as using widgets instead of methods for building UI is the recommended Flutter pattern for better performance and maintainability.
+✅ Verification: Ran `dart format`, `flutter analyze` (0 issues), and `flutter test` (all tests passing).
+✨ Result: `AppFooter.build` is now significantly shorter, cleaner, and easier to understand.
