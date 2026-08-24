@@ -22,7 +22,10 @@ class AccountView extends StatelessWidget {
 
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.xl,
+          horizontal: AppSpacing.md,
+        ),
         child: FB5Container(
           child: Obx(() {
             final user = auth.user.value;
@@ -31,7 +34,10 @@ class AccountView extends StatelessWidget {
                 icon: Icons.person_outline,
                 title: 'You are signed out',
                 message: 'Sign in to view your profile and orders.',
-                action: GoldButton(label: 'Sign in', onPressed: () => Get.toNamed(AppRoutes.login)),
+                action: GoldButton(
+                  label: 'Sign in',
+                  onPressed: () => Get.toNamed(AppRoutes.login),
+                ),
               );
             }
             return Column(
@@ -50,7 +56,9 @@ class AccountView extends StatelessWidget {
                             padding: const EdgeInsets.all(AppSpacing.lg),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
-                              borderRadius: const BorderRadius.all(AppSpacing.rMd),
+                              borderRadius: const BorderRadius.all(
+                                AppSpacing.rMd,
+                              ),
                               border: Border.all(color: AppColors.line),
                             ),
                             child: Column(
@@ -61,17 +69,35 @@ class AccountView extends StatelessWidget {
                                     CircleAvatar(
                                       radius: 28,
                                       backgroundColor: AppColors.ink,
-                                      child: Text(user.initials,
-                                          style: const TextStyle(color: AppColors.textOnInk, fontWeight: FontWeight.w700)),
+                                      child: Text(
+                                        user.initials,
+                                        style: const TextStyle(
+                                          color: AppColors.textOnInk,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(width: AppSpacing.md),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Text(user.displayName, style: Theme.of(context).textTheme.titleLarge),
-                                          Text(user.email,
-                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.slate)),
+                                          Text(
+                                            user.displayName,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleLarge,
+                                          ),
+                                          Text(
+                                            user.email,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: AppColors.slate,
+                                                ),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -82,7 +108,10 @@ class AccountView extends StatelessWidget {
                                 const SizedBox(height: AppSpacing.md),
                                 ListTile(
                                   contentPadding: EdgeInsets.zero,
-                                  leading: const Icon(Icons.favorite_outline, color: AppColors.ink),
+                                  leading: const Icon(
+                                    Icons.favorite_outline,
+                                    color: AppColors.ink,
+                                  ),
                                   title: const Text('Saved Wishlist'),
                                   subtitle: Text('${wishlist.count} items'),
                                   trailing: const Icon(Icons.chevron_right),
@@ -94,7 +123,8 @@ class AccountView extends StatelessWidget {
                                     label: 'Open admin panel',
                                     expand: true,
                                     icon: Icons.dashboard_customize_outlined,
-                                    onPressed: () => Get.toNamed(AppRoutes.adminDashboard),
+                                    onPressed: () =>
+                                        Get.toNamed(AppRoutes.adminDashboard),
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
                                 ],
@@ -124,7 +154,10 @@ class AccountView extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Order History', style: Theme.of(context).textTheme.titleLarge),
+                            Text(
+                              'Order History',
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
                             const SizedBox(height: AppSpacing.md),
                             const _OrderHistoryList(),
                           ],
@@ -175,7 +208,8 @@ class _OrderHistoryListState extends State<_OrderHistoryList> {
         return const EmptyState(
           icon: Icons.receipt_long_outlined,
           title: 'No orders yet',
-          message: 'Your order history will appear here once you make a purchase.',
+          message:
+              'Your order history will appear here once you make a purchase.',
         );
       }
 
@@ -192,7 +226,10 @@ class _OrderHistoryListState extends State<_OrderHistoryList> {
               child: ExpansionTile(
                 title: Row(
                   children: [
-                    Text('Order ${o.reference}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      'Order ${o.reference}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     const SizedBox(width: AppSpacing.sm),
                     _statusBadge(o.status.label),
                   ],
@@ -203,7 +240,10 @@ class _OrderHistoryListState extends State<_OrderHistoryList> {
                 ),
                 trailing: Text(
                   Formatters.price(o.grandTotal),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
                 children: [
                   Padding(
@@ -217,7 +257,9 @@ class _OrderHistoryListState extends State<_OrderHistoryList> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: Text('${line.productTitle} (${line.variantSummary}) x${line.quantity}'),
+                                  child: Text(
+                                    '${line.productTitle} (${line.variantSummary}) x${line.quantity}',
+                                  ),
                                 ),
                                 Text(Formatters.price(line.lineTotal)),
                               ],
@@ -225,8 +267,13 @@ class _OrderHistoryListState extends State<_OrderHistoryList> {
                           ),
                         const Divider(),
                         if (o.trackingNumber != null)
-                          Text('Tracking: ${o.trackingNumber}',
-                              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.goldDeep)),
+                          Text(
+                            'Tracking: ${o.trackingNumber}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.goldDeep,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -248,7 +295,11 @@ class _OrderHistoryListState extends State<_OrderHistoryList> {
       ),
       child: Text(
         label.toUpperCase(),
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.ink),
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: AppColors.ink,
+        ),
       ),
     );
   }

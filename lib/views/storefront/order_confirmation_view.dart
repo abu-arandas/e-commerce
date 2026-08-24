@@ -21,7 +21,9 @@ class OrderConfirmationView extends StatelessWidget {
     return StorefrontScaffold(
       child: Container(
         padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.xxl, horizontal: AppSpacing.md),
+          vertical: AppSpacing.xxl,
+          horizontal: AppSpacing.md,
+        ),
         child: FB5Container(
           child: order == null
               ? EmptyState(
@@ -29,8 +31,9 @@ class OrderConfirmationView extends StatelessWidget {
                   title: 'No recent order',
                   message: 'Your order details are no longer available.',
                   action: GoldButton(
-                      label: 'Back to shop',
-                      onPressed: () => Get.toNamed(AppRoutes.shop)),
+                    label: 'Back to shop',
+                    onPressed: () => Get.toNamed(AppRoutes.shop),
+                  ),
                 )
               : ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 720),
@@ -42,8 +45,9 @@ class OrderConfirmationView extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.sm),
                             decoration: const BoxDecoration(
-                                color: AppColors.success,
-                                shape: BoxShape.circle),
+                              color: AppColors.success,
+                              shape: BoxShape.circle,
+                            ),
                             child: const Icon(Icons.check, color: Colors.white),
                           ),
                           const SizedBox(width: AppSpacing.md),
@@ -51,15 +55,17 @@ class OrderConfirmationView extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Thank you for your order',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displaySmall),
-                                Text('Order ${order.reference}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge
-                                        ?.copyWith(color: AppColors.slate)),
+                                Text(
+                                  'Thank you for your order',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.displaySmall,
+                                ),
+                                Text(
+                                  'Order ${order.reference}',
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(color: AppColors.slate),
+                                ),
                               ],
                             ),
                           ),
@@ -67,8 +73,11 @@ class OrderConfirmationView extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       if (order.contactEmail != null)
-                        Text('A confirmation has been sent to ${order.contactEmail}.',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+                        Text(
+                          'A confirmation has been sent to ${order.contactEmail}.',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
                       const SizedBox(height: AppSpacing.lg),
                       _OrderProgressTracker(status: order.status),
                       const SizedBox(height: AppSpacing.xl),
@@ -89,43 +98,59 @@ class OrderConfirmationView extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(line.productTitle,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium),
                                         Text(
-                                            '${line.variantSummary} · Qty ${line.quantity}',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall
-                                                ?.copyWith(
-                                                    color: AppColors.slate)),
+                                          line.productTitle,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium,
+                                        ),
+                                        Text(
+                                          '${line.variantSummary} · Qty ${line.quantity}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: AppColors.slate,
+                                              ),
+                                        ),
                                       ],
                                     ),
                                   ),
-                                  Text(Formatters.price(line.lineTotal),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium),
+                                  Text(
+                                    Formatters.price(line.lineTotal),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium,
+                                  ),
                                 ],
                               ),
                               const Divider(),
                             ],
-                            _totalRow(context, 'Subtotal',
-                                Formatters.price(order.subtotal)),
-                            if (order.discountTotal > 0)
-                              _totalRow(context, 'Discount',
-                                  '-${Formatters.price(order.discountTotal)}'),
                             _totalRow(
+                              context,
+                              'Subtotal',
+                              Formatters.price(order.subtotal),
+                            ),
+                            if (order.discountTotal > 0)
+                              _totalRow(
                                 context,
-                                'Shipping',
-                                order.shippingTotal == 0
-                                    ? 'Free'
-                                    : Formatters.price(order.shippingTotal)),
+                                'Discount',
+                                '-${Formatters.price(order.discountTotal)}',
+                              ),
+                            _totalRow(
+                              context,
+                              'Shipping',
+                              order.shippingTotal == 0
+                                  ? 'Free'
+                                  : Formatters.price(order.shippingTotal),
+                            ),
                             const SizedBox(height: AppSpacing.xs),
-                            _totalRow(context, 'Total paid',
-                                Formatters.price(order.grandTotal),
-                                bold: true),
+                            _totalRow(
+                              context,
+                              'Total paid',
+                              Formatters.price(order.grandTotal),
+                              bold: true,
+                            ),
                           ],
                         ),
                       ),
@@ -134,10 +159,16 @@ class OrderConfirmationView extends StatelessWidget {
                         spacing: AppSpacing.sm,
                         runSpacing: AppSpacing.sm,
                         children: [
-                          GoldButton(label: 'Continue shopping', onPressed: () => Get.toNamed(AppRoutes.shop)),
+                          GoldButton(
+                            label: 'Continue shopping',
+                            onPressed: () => Get.toNamed(AppRoutes.shop),
+                          ),
                           OutlinedButton.icon(
                             onPressed: () => Get.toNamed(AppRoutes.account),
-                            icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.receipt_long_outlined,
+                              size: 18,
+                            ),
                             label: const Text('View order history'),
                           ),
                         ],
@@ -150,8 +181,12 @@ class OrderConfirmationView extends StatelessWidget {
     );
   }
 
-  Widget _totalRow(BuildContext context, String label, String value,
-      {bool bold = false}) {
+  Widget _totalRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool bold = false,
+  }) {
     final style = bold
         ? Theme.of(context).textTheme.titleLarge
         : Theme.of(context).textTheme.bodyLarge;
@@ -159,7 +194,10 @@ class OrderConfirmationView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(label, style: style), Text(value, style: style)],
+        children: [
+          Text(label, style: style),
+          Text(value, style: style),
+        ],
       ),
     );
   }
@@ -172,12 +210,12 @@ class OrderConfirmationView extends StatelessWidget {
 /// Top-level so it can be asserted directly — the tracker used to hardcode 0,
 /// which meant a delivered order still displayed "Order Placed".
 int orderProgressStep(OrderStatus status) => switch (status) {
-      OrderStatus.pending || OrderStatus.paid => 0,
-      OrderStatus.processing => 1,
-      OrderStatus.shipped => 2,
-      OrderStatus.delivered => 3,
-      OrderStatus.cancelled || OrderStatus.refunded => 0,
-    };
+  OrderStatus.pending || OrderStatus.paid => 0,
+  OrderStatus.processing => 1,
+  OrderStatus.shipped => 2,
+  OrderStatus.delivered => 3,
+  OrderStatus.cancelled || OrderStatus.refunded => 0,
+};
 
 class _OrderProgressTracker extends StatelessWidget {
   const _OrderProgressTracker({required this.status});
@@ -203,7 +241,9 @@ class _OrderProgressTracker extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: i <= activeStep ? AppColors.gold : AppColors.line,
+                  backgroundColor: i <= activeStep
+                      ? AppColors.gold
+                      : AppColors.line,
                   child: Icon(
                     i <= activeStep ? Icons.check : Icons.circle,
                     size: 14,
@@ -215,7 +255,9 @@ class _OrderProgressTracker extends StatelessWidget {
                   steps[i],
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: i == activeStep ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: i == activeStep
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     color: i <= activeStep ? AppColors.ink : AppColors.slate,
                   ),
                 ),

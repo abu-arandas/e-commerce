@@ -16,17 +16,23 @@ void main() {
   /// The demo catalogue with one SKU's stock forced to [stock].
   List<Product> catalogueWith(String variantItemId, int stock) =>
       DemoData.products()
-          .map((p) => p.copyWith(
-                groups: p.groups
-                    .map((g) => g.copyWith(
-                          items: g.items
-                              .map((i) => i.id == variantItemId
-                                  ? i.copyWith(stockQuantity: stock)
-                                  : i)
-                              .toList(),
-                        ))
-                    .toList(),
-              ))
+          .map(
+            (p) => p.copyWith(
+              groups: p.groups
+                  .map(
+                    (g) => g.copyWith(
+                      items: g.items
+                          .map(
+                            (i) => i.id == variantItemId
+                                ? i.copyWith(stockQuantity: stock)
+                                : i,
+                          )
+                          .toList(),
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
           .toList();
 
   CartItem lineFor({int quantity = 2}) {
@@ -34,7 +40,11 @@ void main() {
     final group = product.sortedGroups.firstWhere((g) => g.hasStock);
     final item = group.sortedItems.firstWhere((i) => i.inStock);
     return CartItem.from(
-        product: product, group: group, item: item, quantity: quantity);
+      product: product,
+      group: group,
+      item: item,
+      quantity: quantity,
+    );
   }
 
   setUp(() {
@@ -84,16 +94,18 @@ void main() {
     expect(cart.items.single.quantity, 1);
   });
 
-  test('an empty catalogue means "not loaded", not "everything is gone"',
-      () async {
-    final line = lineFor(quantity: 3);
-    final cart = cartHolding(line);
+  test(
+    'an empty catalogue means "not loaded", not "everything is gone"',
+    () async {
+      final line = lineFor(quantity: 3);
+      final cart = cartHolding(line);
 
-    catalog.products.clear();
-    await Future<void>.delayed(Duration.zero);
+      catalog.products.clear();
+      await Future<void>.delayed(Duration.zero);
 
-    expect(cart.items.single.quantity, 3);
-  });
+      expect(cart.items.single.quantity, 3);
+    },
+  );
 
   test('the cart still works with no catalogue registered at all', () {
     Get.delete<CatalogController>();

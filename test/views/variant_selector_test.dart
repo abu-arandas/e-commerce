@@ -22,13 +22,15 @@ void main() {
   tearDown(Get.reset);
 
   Future<void> pump(WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: VariantSelector(controller: catalog),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: VariantSelector(controller: catalog),
+          ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
   }
 
@@ -42,7 +44,9 @@ void main() {
     }
   });
 
-  testWidgets('choosing a colour swaps in that colour\'s sizes', (tester) async {
+  testWidgets('choosing a colour swaps in that colour\'s sizes', (
+    tester,
+  ) async {
     await pump(tester);
 
     // Oatmeal carries only M and L.
@@ -66,8 +70,9 @@ void main() {
     expect(catalog.selectedItem.value!.sizeLabel, 'L');
   });
 
-  testWidgets('a sold-out size is struck through and not selectable',
-      (tester) async {
+  testWidgets('a sold-out size is struck through and not selectable', (
+    tester,
+  ) async {
     await pump(tester);
 
     // Midnight Blue XL is sold out in the demo catalogue.
@@ -78,8 +83,11 @@ void main() {
     await tester.tap(find.text('XL'));
     await tester.pumpAndSettle();
 
-    expect(catalog.selectedItem.value!.sizeLabel, before,
-        reason: 'tapping a sold-out size must not change the selection');
+    expect(
+      catalog.selectedItem.value!.sizeLabel,
+      before,
+      reason: 'tapping a sold-out size must not change the selection',
+    );
   });
 
   testWidgets('the stock badge follows the selected size', (tester) async {

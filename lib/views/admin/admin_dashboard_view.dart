@@ -37,25 +37,54 @@ class AdminDashboardView extends StatelessWidget {
             FB5Row(
               classNames: 'gx-3 gy-3',
               children: [
-                _kpi('Revenue', Formatters.price(admin.grossRevenue),
-                    Icons.payments_outlined, AppColors.gold),
-                _kpi('Orders', '${admin.totalOrders}',
-                    Icons.receipt_long_outlined, AppColors.info),
-                _kpi('Pending', '${admin.pendingOrders}',
-                    Icons.hourglass_bottom, AppColors.warning),
-                _kpi('Avg. order', Formatters.price(admin.averageOrderValue),
-                    Icons.trending_up, AppColors.success),
                 _kpi(
-                    'Products',
-                    '${admin.activeProducts}/${admin.totalProducts}',
-                    Icons.checkroom_outlined,
-                    AppColors.mist),
-                _kpi('SKUs', '${admin.totalSkus}', Icons.qr_code_2,
-                    AppColors.mist),
-                _kpi('Live promos', '${admin.activePromotions}',
-                    Icons.sell_outlined, AppColors.gold),
-                _kpi('Low stock', '${admin.lowStock.length}',
-                    Icons.warning_amber_rounded, AppColors.danger),
+                  'Revenue',
+                  Formatters.price(admin.grossRevenue),
+                  Icons.payments_outlined,
+                  AppColors.gold,
+                ),
+                _kpi(
+                  'Orders',
+                  '${admin.totalOrders}',
+                  Icons.receipt_long_outlined,
+                  AppColors.info,
+                ),
+                _kpi(
+                  'Pending',
+                  '${admin.pendingOrders}',
+                  Icons.hourglass_bottom,
+                  AppColors.warning,
+                ),
+                _kpi(
+                  'Avg. order',
+                  Formatters.price(admin.averageOrderValue),
+                  Icons.trending_up,
+                  AppColors.success,
+                ),
+                _kpi(
+                  'Products',
+                  '${admin.activeProducts}/${admin.totalProducts}',
+                  Icons.checkroom_outlined,
+                  AppColors.mist,
+                ),
+                _kpi(
+                  'SKUs',
+                  '${admin.totalSkus}',
+                  Icons.qr_code_2,
+                  AppColors.mist,
+                ),
+                _kpi(
+                  'Live promos',
+                  '${admin.activePromotions}',
+                  Icons.sell_outlined,
+                  AppColors.gold,
+                ),
+                _kpi(
+                  'Low stock',
+                  '${admin.lowStock.length}',
+                  Icons.warning_amber_rounded,
+                  AppColors.danger,
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -63,11 +92,13 @@ class AdminDashboardView extends StatelessWidget {
               classNames: 'gx-4 gy-4',
               children: [
                 FB5Col(
-                    classNames: 'col-12 col-lg-7',
-                    child: _RecentOrders(admin: admin)),
+                  classNames: 'col-12 col-lg-7',
+                  child: _RecentOrders(admin: admin),
+                ),
                 FB5Col(
-                    classNames: 'col-12 col-lg-5',
-                    child: _LowStock(admin: admin)),
+                  classNames: 'col-12 col-lg-5',
+                  child: _LowStock(admin: admin),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -81,29 +112,32 @@ class AdminDashboardView extends StatelessWidget {
   Widget _kpi(String label, String value, IconData icon, Color accent) {
     return FB5Col(
       classNames: 'col-6 col-md-3',
-      child: Builder(builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.inkSoft,
-            borderRadius: const BorderRadius.all(AppSpacing.rMd),
-            border: Border.all(color: const Color(0xFF2A2A30)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: accent, size: 22),
-              const SizedBox(height: AppSpacing.sm),
-              Text(value, style: Theme.of(context).textTheme.headlineSmall),
-              Text(label.toUpperCase(),
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: AppColors.textMutedOnInk)),
-            ],
-          ),
-        );
-      }),
+      child: Builder(
+        builder: (context) {
+          return Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.inkSoft,
+              borderRadius: const BorderRadius.all(AppSpacing.rMd),
+              border: Border.all(color: const Color(0xFF2A2A30)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: accent, size: 22),
+                const SizedBox(height: AppSpacing.sm),
+                Text(value, style: Theme.of(context).textTheme.headlineSmall),
+                Text(
+                  label.toUpperCase(),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textMutedOnInk,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -154,23 +188,27 @@ class _RecentOrders extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(o.reference,
-                            style: Theme.of(context).textTheme.titleSmall),
-                        Text(o.contactEmail ?? '—',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.textMutedOnInk)),
+                        Text(
+                          o.reference,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        Text(
+                          o.contactEmail ?? '—',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textMutedOnInk),
+                        ),
                       ],
                     ),
                   ),
                   Expanded(child: _StatusPill(status: o.status)),
                   Expanded(
-                    child: Text(Formatters.price(o.grandTotal),
-                        textAlign: TextAlign.right,
-                        style: Theme.of(context).textTheme.titleSmall),
+                    child: Text(
+                      Formatters.price(o.grandTotal),
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                   ),
                 ],
               ),
@@ -178,8 +216,10 @@ class _RecentOrders extends StatelessWidget {
           if (admin.recentOrders.isEmpty)
             const Padding(
               padding: EdgeInsets.all(AppSpacing.lg),
-              child: Text('No orders yet.',
-                  style: TextStyle(color: AppColors.textMutedOnInk)),
+              child: Text(
+                'No orders yet.',
+                style: TextStyle(color: AppColors.textMutedOnInk),
+              ),
             ),
         ],
       ),
@@ -197,22 +237,26 @@ class _LowStock extends StatelessWidget {
     return _Panel(
       title: 'Low-stock alerts',
       child: entries.isEmpty
-          ? const Text('All SKUs are healthy.',
-              style: TextStyle(color: AppColors.textMutedOnInk))
+          ? const Text(
+              'All SKUs are healthy.',
+              style: TextStyle(color: AppColors.textMutedOnInk),
+            )
           : Column(
               children: [
                 for (final e in entries)
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     child: Row(
                       children: [
                         Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color:
-                                e.isOut ? AppColors.danger : AppColors.warning,
+                            color: e.isOut
+                                ? AppColors.danger
+                                : AppColors.warning,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -222,26 +266,28 @@ class _LowStock extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  '${e.productTitle} · ${e.colorName} · ${e.sizeLabel}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium),
-                              Text(e.sku,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                          color: AppColors.textMutedOnInk)),
+                                '${e.productTitle} · ${e.colorName} · ${e.sizeLabel}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              Text(
+                                e.sku,
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(color: AppColors.textMutedOnInk),
+                              ),
                             ],
                           ),
                         ),
-                        Text(e.isOut ? 'Out' : '${e.stock} left',
-                            style: TextStyle(
-                                color: e.isOut
-                                    ? AppColors.danger
-                                    : AppColors.warning,
-                                fontWeight: FontWeight.w600)),
+                        Text(
+                          e.isOut ? 'Out' : '${e.stock} left',
+                          style: TextStyle(
+                            color: e.isOut
+                                ? AppColors.danger
+                                : AppColors.warning,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -258,31 +304,39 @@ class _RevenueByCategory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = admin.revenueByCategory;
-    final max =
-        data.values.isEmpty ? 1.0 : data.values.reduce((a, b) => a > b ? a : b);
+    final max = data.values.isEmpty
+        ? 1.0
+        : data.values.reduce((a, b) => a > b ? a : b);
     return _Panel(
       title: 'Revenue by category',
       child: data.isEmpty
-          ? const Text('No sales data yet.',
-              style: TextStyle(color: AppColors.textMutedOnInk))
+          ? const Text(
+              'No sales data yet.',
+              style: TextStyle(color: AppColors.textMutedOnInk),
+            )
           : Column(
               children: [
                 for (final entry in data.entries)
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
                     child: Row(
                       children: [
                         SizedBox(
-                            width: 96,
-                            child: Text(entry.key,
-                                style: Theme.of(context).textTheme.bodyMedium)),
+                          width: 96,
+                          child: Text(
+                            entry.key,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
                         Expanded(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
-                              value:
-                                  (entry.value / max).clamp(0.02, 1).toDouble(),
+                              value: (entry.value / max)
+                                  .clamp(0.02, 1)
+                                  .toDouble(),
                               minHeight: 10,
                               backgroundColor: AppColors.ink,
                               color: AppColors.gold,
@@ -292,9 +346,11 @@ class _RevenueByCategory extends StatelessWidget {
                         const SizedBox(width: AppSpacing.sm),
                         SizedBox(
                           width: 80,
-                          child: Text(Formatters.price(entry.value),
-                              textAlign: TextAlign.right,
-                              style: Theme.of(context).textTheme.bodyMedium),
+                          child: Text(
+                            Formatters.price(entry.value),
+                            textAlign: TextAlign.right,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                         ),
                       ],
                     ),
@@ -310,30 +366,37 @@ class _StatusPill extends StatelessWidget {
   final OrderStatus status;
 
   Color get _color => switch (status) {
-        OrderStatus.pending => AppColors.warning,
-        OrderStatus.paid => AppColors.info,
-        OrderStatus.processing => AppColors.info,
-        OrderStatus.shipped => AppColors.gold,
-        OrderStatus.delivered => AppColors.success,
-        OrderStatus.cancelled => AppColors.danger,
-        OrderStatus.refunded => AppColors.danger,
-      };
+    OrderStatus.pending => AppColors.warning,
+    OrderStatus.paid => AppColors.info,
+    OrderStatus.processing => AppColors.info,
+    OrderStatus.shipped => AppColors.gold,
+    OrderStatus.delivered => AppColors.success,
+    OrderStatus.cancelled => AppColors.danger,
+    OrderStatus.refunded => AppColors.danger,
+  };
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.center,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 3,
+        ),
         decoration: BoxDecoration(
           color: _color.withValues(alpha: 0.16),
           borderRadius: const BorderRadius.all(AppSpacing.rSm),
           border: Border.all(color: _color.withValues(alpha: 0.5)),
         ),
-        child: Text(status.label,
-            style: TextStyle(
-                color: _color, fontSize: 11, fontWeight: FontWeight.w600)),
+        child: Text(
+          status.label,
+          style: TextStyle(
+            color: _color,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

@@ -43,20 +43,20 @@ class CartItem {
   /// [maxStock] is final because it is a snapshot; refreshing it means a new
   /// line, not a mutated one.
   CartItem withStock(int available) => CartItem(
-        productId: productId,
-        productSlug: productSlug,
-        productTitle: productTitle,
-        category: category,
-        variantGroupId: variantGroupId,
-        variantItemId: variantItemId,
-        sku: sku,
-        colorName: colorName,
-        sizeLabel: sizeLabel,
-        unitPrice: unitPrice,
-        quantity: quantity > available ? available : quantity,
-        imageUrl: imageUrl,
-        maxStock: available,
-      );
+    productId: productId,
+    productSlug: productSlug,
+    productTitle: productTitle,
+    category: category,
+    variantGroupId: variantGroupId,
+    variantItemId: variantItemId,
+    sku: sku,
+    colorName: colorName,
+    sizeLabel: sizeLabel,
+    unitPrice: unitPrice,
+    quantity: quantity > available ? available : quantity,
+    imageUrl: imageUrl,
+    maxStock: available,
+  );
 
   /// Stable identity for a cart line — the same SKU stacks rather than duplicates.
   String get key => variantItemId;
@@ -67,61 +67,60 @@ class CartItem {
     required VariantGroup group,
     required VariantItem item,
     int quantity = 1,
-  }) =>
-      CartItem(
-        productId: product.id,
-        productSlug: product.slug,
-        productTitle: product.title,
-        category: product.category,
-        variantGroupId: group.id,
-        variantItemId: item.id,
-        sku: item.sku,
-        colorName: group.name,
-        sizeLabel: item.sizeLabel,
-        unitPrice: item.effectivePrice(product.basePrice),
-        imageUrl: group.primaryImage ?? product.heroImage,
-        maxStock: item.stockQuantity,
-        quantity: quantity,
-      );
+  }) => CartItem(
+    productId: product.id,
+    productSlug: product.slug,
+    productTitle: product.title,
+    category: product.category,
+    variantGroupId: group.id,
+    variantItemId: item.id,
+    sku: item.sku,
+    colorName: group.name,
+    sizeLabel: item.sizeLabel,
+    unitPrice: item.effectivePrice(product.basePrice),
+    imageUrl: group.primaryImage ?? product.heroImage,
+    maxStock: item.stockQuantity,
+    quantity: quantity,
+  );
 
   Map<String, dynamic> toOrderLine() => {
-        'variant_item_id': variantItemId,
-        'quantity': quantity,
-      };
+    'variant_item_id': variantItemId,
+    'quantity': quantity,
+  };
 
   Map<String, dynamic> toJson() => {
-        'product_id': productId,
-        'product_slug': productSlug,
-        'product_title': productTitle,
-        'category': category,
-        'variant_group_id': variantGroupId,
-        'variant_item_id': variantItemId,
-        'sku': sku,
-        'color_name': colorName,
-        'size_label': sizeLabel,
-        'unit_price': unitPrice,
-        'image_url': imageUrl,
-        'max_stock': maxStock,
-        'quantity': quantity,
-      };
+    'product_id': productId,
+    'product_slug': productSlug,
+    'product_title': productTitle,
+    'category': category,
+    'variant_group_id': variantGroupId,
+    'variant_item_id': variantItemId,
+    'sku': sku,
+    'color_name': colorName,
+    'size_label': sizeLabel,
+    'unit_price': unitPrice,
+    'image_url': imageUrl,
+    'max_stock': maxStock,
+    'quantity': quantity,
+  };
 
   /// Restores a line from persisted JSON. Numerics go through [J] rather than
   /// a cast: a cart round-tripped through localStorage — or a row read back
   /// from Postgres, which serialises numeric columns as strings on some
   /// drivers — brings them back as text, and `as num?` throws on that.
   factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-        productId: J.str(json['product_id']),
-        productSlug: J.str(json['product_slug']),
-        productTitle: J.str(json['product_title']),
-        category: J.strOrNull(json['category']),
-        variantGroupId: J.str(json['variant_group_id']),
-        variantItemId: J.str(json['variant_item_id']),
-        sku: J.str(json['sku']),
-        colorName: J.str(json['color_name']),
-        sizeLabel: J.str(json['size_label']),
-        unitPrice: J.toDouble(json['unit_price']),
-        imageUrl: J.strOrNull(json['image_url']),
-        maxStock: J.toInt(json['max_stock'], 99),
-        quantity: J.toInt(json['quantity'], 1),
-      );
+    productId: J.str(json['product_id']),
+    productSlug: J.str(json['product_slug']),
+    productTitle: J.str(json['product_title']),
+    category: J.strOrNull(json['category']),
+    variantGroupId: J.str(json['variant_group_id']),
+    variantItemId: J.str(json['variant_item_id']),
+    sku: J.str(json['sku']),
+    colorName: J.str(json['color_name']),
+    sizeLabel: J.str(json['size_label']),
+    unitPrice: J.toDouble(json['unit_price']),
+    imageUrl: J.strOrNull(json['image_url']),
+    maxStock: J.toInt(json['max_stock'], 99),
+    quantity: J.toInt(json['quantity'], 1),
+  );
 }

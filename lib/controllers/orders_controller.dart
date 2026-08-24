@@ -39,9 +39,11 @@ class OrdersController extends GetxController {
           .eq('user_id', userId)
           .order('created_at', ascending: false)
           .limit(50);
-      orders.assignAll((rows as List)
-          .map((e) => Order.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList());
+      orders.assignAll(
+        (rows as List)
+            .map((e) => Order.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList(),
+      );
     } catch (e) {
       error.value = 'Could not load your orders right now.';
       orders.assignAll(_sessionOrders.reversed);

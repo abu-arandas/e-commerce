@@ -10,28 +10,67 @@ import 'package:vanguard_fashion/models/order_model.dart';
 void main() {
   group('which transitions return stock', () {
     test('leaving the pipeline restocks', () {
-      expect(AdminController.restocksOn(OrderStatus.pending, OrderStatus.cancelled), isTrue);
-      expect(AdminController.restocksOn(OrderStatus.paid, OrderStatus.refunded), isTrue);
-      expect(AdminController.restocksOn(OrderStatus.shipped, OrderStatus.cancelled), isTrue);
+      expect(
+        AdminController.restocksOn(OrderStatus.pending, OrderStatus.cancelled),
+        isTrue,
+      );
+      expect(
+        AdminController.restocksOn(OrderStatus.paid, OrderStatus.refunded),
+        isTrue,
+      );
+      expect(
+        AdminController.restocksOn(OrderStatus.shipped, OrderStatus.cancelled),
+        isTrue,
+      );
     });
 
     test('ordinary fulfilment progress does not', () {
-      expect(AdminController.restocksOn(OrderStatus.pending, OrderStatus.paid), isFalse);
-      expect(AdminController.restocksOn(OrderStatus.paid, OrderStatus.processing), isFalse);
-      expect(AdminController.restocksOn(OrderStatus.processing, OrderStatus.shipped), isFalse);
-      expect(AdminController.restocksOn(OrderStatus.shipped, OrderStatus.delivered), isFalse);
+      expect(
+        AdminController.restocksOn(OrderStatus.pending, OrderStatus.paid),
+        isFalse,
+      );
+      expect(
+        AdminController.restocksOn(OrderStatus.paid, OrderStatus.processing),
+        isFalse,
+      );
+      expect(
+        AdminController.restocksOn(OrderStatus.processing, OrderStatus.shipped),
+        isFalse,
+      );
+      expect(
+        AdminController.restocksOn(OrderStatus.shipped, OrderStatus.delivered),
+        isFalse,
+      );
     });
 
     test('an order already out of the pipeline does not restock twice', () {
       // cancelled -> refunded is a real transition in the fulfilment grid, and
       // it must not credit the stock a second time.
-      expect(AdminController.restocksOn(OrderStatus.cancelled, OrderStatus.refunded), isFalse);
-      expect(AdminController.restocksOn(OrderStatus.refunded, OrderStatus.cancelled), isFalse);
-      expect(AdminController.restocksOn(OrderStatus.cancelled, OrderStatus.cancelled), isFalse);
+      expect(
+        AdminController.restocksOn(OrderStatus.cancelled, OrderStatus.refunded),
+        isFalse,
+      );
+      expect(
+        AdminController.restocksOn(OrderStatus.refunded, OrderStatus.cancelled),
+        isFalse,
+      );
+      expect(
+        AdminController.restocksOn(
+          OrderStatus.cancelled,
+          OrderStatus.cancelled,
+        ),
+        isFalse,
+      );
     });
 
     test('reinstating an order does not restock', () {
-      expect(AdminController.restocksOn(OrderStatus.cancelled, OrderStatus.processing), isFalse);
+      expect(
+        AdminController.restocksOn(
+          OrderStatus.cancelled,
+          OrderStatus.processing,
+        ),
+        isFalse,
+      );
     });
   });
 
@@ -57,14 +96,20 @@ void main() {
       expect(AdminController.restocksInto(OrderStatus.delivered), isFalse);
     });
 
-    test('cancelled -> refunded retries, where restocksOn would have skipped',
-        () {
-      // The exact gap: the transition test says no, the status test says yes,
-      // and idempotency makes the second answer the safe one.
-      expect(
-          AdminController.restocksOn(OrderStatus.cancelled, OrderStatus.refunded),
-          isFalse);
-      expect(AdminController.restocksInto(OrderStatus.refunded), isTrue);
-    });
+    test(
+      'cancelled -> refunded retries, where restocksOn would have skipped',
+      () {
+        // The exact gap: the transition test says no, the status test says yes,
+        // and idempotency makes the second answer the safe one.
+        expect(
+          AdminController.restocksOn(
+            OrderStatus.cancelled,
+            OrderStatus.refunded,
+          ),
+          isFalse,
+        );
+        expect(AdminController.restocksInto(OrderStatus.refunded), isTrue);
+      },
+    );
   });
 }

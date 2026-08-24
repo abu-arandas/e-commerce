@@ -19,18 +19,25 @@ void main() {
   });
 
   CartItem lineFor(String category) {
-    final product =
-        DemoData.products().firstWhere((p) => p.category == category);
+    final product = DemoData.products().firstWhere(
+      (p) => p.category == category,
+    );
     final group = product.sortedGroups.firstWhere((g) => g.hasStock);
     final item = group.sortedItems.firstWhere((i) => i.inStock);
-    return CartItem.from(product: product, group: group, item: item, quantity: 2);
+    return CartItem.from(
+      product: product,
+      group: group,
+      item: item,
+      quantity: 2,
+    );
   }
 
   test('a bag round-trips through JSON without loss', () {
     final original = lineFor('Knitwear');
 
     final restored = CartItem.fromJson(
-        jsonDecode(jsonEncode(original.toJson())) as Map<String, dynamic>);
+      jsonDecode(jsonEncode(original.toJson())) as Map<String, dynamic>,
+    );
 
     expect(restored.variantItemId, original.variantItemId);
     expect(restored.sku, original.sku);
@@ -75,8 +82,11 @@ void main() {
 
     final encoded = jsonEncode(cart.items.map((c) => c.toJson()).toList());
     final revived = CartController()..onInit();
-    revived.items.assignAll((jsonDecode(encoded) as List)
-        .map((e) => CartItem.fromJson(Map<String, dynamic>.from(e as Map))));
+    revived.items.assignAll(
+      (jsonDecode(encoded) as List).map(
+        (e) => CartItem.fromJson(Map<String, dynamic>.from(e as Map)),
+      ),
+    );
 
     expect(revived.subtotal, closeTo(expectedSubtotal, 0.001));
     expect(revived.itemCount, cart.itemCount);

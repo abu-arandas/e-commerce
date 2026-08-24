@@ -13,7 +13,8 @@ import 'package:vanguard_fashion/models/variant_model.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 
-class FakePostgrestFilterBuilder<T> extends Fake implements PostgrestFilterBuilder<T> {
+class FakePostgrestFilterBuilder<T> extends Fake
+    implements PostgrestFilterBuilder<T> {
   final Object? _value;
   final bool _shouldThrow;
 
@@ -21,7 +22,10 @@ class FakePostgrestFilterBuilder<T> extends Fake implements PostgrestFilterBuild
   FakePostgrestFilterBuilder.error(this._value) : _shouldThrow = true;
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(T value) onValue, {Function? onError}) {
+  Future<R> then<R>(
+    FutureOr<R> Function(T value) onValue, {
+    Function? onError,
+  }) {
     if (_shouldThrow) {
       return Future<T>.error(_value as Object).then(onValue, onError: onError);
     }
@@ -55,9 +59,13 @@ class FakePostgrestFilterBuilder<T> extends Fake implements PostgrestFilterBuild
   @override
   Future<T> timeout(Duration timeLimit, {FutureOr<T> Function()? onTimeout}) {
     if (_shouldThrow) {
-      return Future<T>.error(_value as Object).timeout(timeLimit, onTimeout: onTimeout);
+      return Future<T>.error(
+        _value as Object,
+      ).timeout(timeLimit, onTimeout: onTimeout);
     }
-    return Future<T>.value(_value as T).timeout(timeLimit, onTimeout: onTimeout);
+    return Future<T>.value(
+      _value as T,
+    ).timeout(timeLimit, onTimeout: onTimeout);
   }
 }
 
@@ -105,8 +113,12 @@ void main() {
 
     test('subtotal correctly calculates sum of lineTotal', () {
       expect(cartController.subtotal, 0.0);
-      cartController.items.add(createCartItem(id: '1', unitPrice: 10.0, quantity: 2)); // 20.0
-      cartController.items.add(createCartItem(id: '2', unitPrice: 15.0, quantity: 1)); // 15.0
+      cartController.items.add(
+        createCartItem(id: '1', unitPrice: 10.0, quantity: 2),
+      ); // 20.0
+      cartController.items.add(
+        createCartItem(id: '2', unitPrice: 15.0, quantity: 1),
+      ); // 15.0
       expect(cartController.subtotal, 35.0);
     });
 
@@ -115,31 +127,48 @@ void main() {
       cartController.items.add(createCartItem(id: '1', category: 'Shirts'));
       cartController.items.add(createCartItem(id: '2', category: 'Pants'));
       cartController.items.add(createCartItem(id: '3', category: 'Shirts'));
-      cartController.items.add(createCartItem(id: '4', category: null)); // Should be ignored
+      cartController.items.add(
+        createCartItem(id: '4', category: null),
+      ); // Should be ignored
       expect(cartController.categories, unorderedEquals(['Shirts', 'Pants']));
     });
 
-    test('discount reflects applied promo discount Amount, 0 if invalid or none', () {
-      expect(cartController.discount, 0.0);
+    test(
+      'discount reflects applied promo discount Amount, 0 if invalid or none',
+      () {
+        expect(cartController.discount, 0.0);
 
-      cartController.appliedPromo.value = const PromoValidation(valid: true, discountAmount: 15.0);
-      expect(cartController.discount, 15.0);
+        cartController.appliedPromo.value = const PromoValidation(
+          valid: true,
+          discountAmount: 15.0,
+        );
+        expect(cartController.discount, 15.0);
 
-      cartController.appliedPromo.value = PromoValidation.invalid('Expired');
-      expect(cartController.discount, 0.0);
-    });
+        cartController.appliedPromo.value = PromoValidation.invalid('Expired');
+        expect(cartController.discount, 0.0);
+      },
+    );
 
     test('hasFreeShipping resolves true based on subtotal or promo', () {
       expect(cartController.hasFreeShipping, isFalse); // Empty cart, subtotal 0
 
       // Promo gives free shipping
-      cartController.appliedPromo.value = const PromoValidation(valid: true, freeShipping: true);
+      cartController.appliedPromo.value = const PromoValidation(
+        valid: true,
+        freeShipping: true,
+      );
       expect(cartController.hasFreeShipping, isTrue);
 
       cartController.appliedPromo.value = null;
 
       // Subtotal reaches threshold
-      cartController.items.add(createCartItem(id: '1', unitPrice: Env.freeShippingThreshold, quantity: 1));
+      cartController.items.add(
+        createCartItem(
+          id: '1',
+          unitPrice: Env.freeShippingThreshold,
+          quantity: 1,
+        ),
+      );
       expect(cartController.hasFreeShipping, isTrue);
     });
 
@@ -147,40 +176,62 @@ void main() {
       expect(cartController.baseShipping, 0.0); // Empty cart
 
       cartController.items.add(createCartItem(id: '1', unitPrice: 50.0));
-      expect(cartController.baseShipping, Env.flatShippingFee); // Subtotal < threshold
+      expect(
+        cartController.baseShipping,
+        Env.flatShippingFee,
+      ); // Subtotal < threshold
 
-      cartController.items.add(createCartItem(id: '2', unitPrice: Env.freeShippingThreshold));
+      cartController.items.add(
+        createCartItem(id: '2', unitPrice: Env.freeShippingThreshold),
+      );
       expect(cartController.baseShipping, 0.0); // Subtotal >= threshold
     });
 
-    test('shipping applies 0 when hasFreeShipping is true, else baseShipping', () {
-      // Setup subtotal < threshold
-      cartController.items.add(createCartItem(id: '1', unitPrice: 50.0));
-      expect(cartController.shipping, Env.flatShippingFee);
+    test(
+      'shipping applies 0 when hasFreeShipping is true, else baseShipping',
+      () {
+        // Setup subtotal < threshold
+        cartController.items.add(createCartItem(id: '1', unitPrice: 50.0));
+        expect(cartController.shipping, Env.flatShippingFee);
 
-      // Apply free shipping promo
-      cartController.appliedPromo.value = const PromoValidation(valid: true, freeShipping: true);
-      expect(cartController.shipping, 0.0);
-    });
+        // Apply free shipping promo
+        cartController.appliedPromo.value = const PromoValidation(
+          valid: true,
+          freeShipping: true,
+        );
+        expect(cartController.shipping, 0.0);
+      },
+    );
 
-    test('grandTotal calculates subtotal - discount + shipping and avoids negative', () {
-      // Setup subtotal 50, shipping is Env.flatShippingFee
-      cartController.items.add(createCartItem(id: '1', unitPrice: 50.0));
-      expect(cartController.grandTotal, 50.0 + Env.flatShippingFee);
+    test(
+      'grandTotal calculates subtotal - discount + shipping and avoids negative',
+      () {
+        // Setup subtotal 50, shipping is Env.flatShippingFee
+        cartController.items.add(createCartItem(id: '1', unitPrice: 50.0));
+        expect(cartController.grandTotal, 50.0 + Env.flatShippingFee);
 
-      // Apply discount
-      cartController.appliedPromo.value = const PromoValidation(valid: true, discountAmount: 10.0);
-      expect(cartController.grandTotal, 40.0 + Env.flatShippingFee);
+        // Apply discount
+        cartController.appliedPromo.value = const PromoValidation(
+          valid: true,
+          discountAmount: 10.0,
+        );
+        expect(cartController.grandTotal, 40.0 + Env.flatShippingFee);
 
-      // Apply huge discount
-      cartController.appliedPromo.value = const PromoValidation(valid: true, discountAmount: 100.0);
-      expect(cartController.grandTotal, 0.0);
-    });
+        // Apply huge discount
+        cartController.appliedPromo.value = const PromoValidation(
+          valid: true,
+          discountAmount: 100.0,
+        );
+        expect(cartController.grandTotal, 0.0);
+      },
+    );
 
     test('amountToFreeShipping calculates remaining amount to threshold', () {
       expect(cartController.amountToFreeShipping, Env.freeShippingThreshold);
 
-      cartController.items.add(createCartItem(id: '1', unitPrice: Env.freeShippingThreshold - 20));
+      cartController.items.add(
+        createCartItem(id: '1', unitPrice: Env.freeShippingThreshold - 20),
+      );
       expect(cartController.amountToFreeShipping, 20.0);
 
       cartController.items.add(createCartItem(id: '2', unitPrice: 30.0));
@@ -246,10 +297,11 @@ void main() {
     test('clearPromo resets promo state', () async {
       final product = DemoData.products().first;
       cart.add(
-          product: product,
-          group: product.groups.first,
-          item: product.groups.first.items.first,
-          quantity: 5);
+        product: product,
+        group: product.groups.first,
+        item: product.groups.first.items.first,
+        quantity: 5,
+      );
 
       await cart.applyPromo('FALL20');
       expect(cart.appliedCode.value, 'FALL20');
@@ -261,29 +313,31 @@ void main() {
       expect(cart.discount, 0.0);
     });
 
-    test('cart changes invalidate promo if conditions no longer apply',
-        () async {
-      final product = DemoData.products().first;
-      final group = product.groups.first;
-      final item = group.items.first;
-      final key = item.id;
+    test(
+      'cart changes invalidate promo if conditions no longer apply',
+      () async {
+        final product = DemoData.products().first;
+        final group = product.groups.first;
+        final item = group.items.first;
+        final key = item.id;
 
-      cart.add(product: product, group: group, item: item, quantity: 5);
+        cart.add(product: product, group: group, item: item, quantity: 5);
 
-      // Fall20 minimum is $150
-      final success = await cart.applyPromo('FALL20');
-      expect(success, isTrue);
-      expect(cart.appliedCode.value, 'FALL20');
+        // Fall20 minimum is $150
+        final success = await cart.applyPromo('FALL20');
+        expect(success, isTrue);
+        expect(cart.appliedCode.value, 'FALL20');
 
-      // Reduce quantity so subtotal drops below minimum order
-      cart.updateQuantity(key, 0); // Remove all items
+        // Reduce quantity so subtotal drops below minimum order
+        cart.updateQuantity(key, 0); // Remove all items
 
-      // Needs to wait for the internal `_refreshPromo` Future to complete
-      await Future.delayed(Duration.zero);
+        // Needs to wait for the internal `_refreshPromo` Future to complete
+        await Future.delayed(Duration.zero);
 
-      expect(cart.appliedCode.value, isNull);
-      expect(cart.appliedPromo.value, isNull);
-    });
+        expect(cart.appliedCode.value, isNull);
+        expect(cart.appliedPromo.value, isNull);
+      },
+    );
   });
 
   late CartController controller;
@@ -345,7 +399,12 @@ void main() {
       // Arrange
       SupabaseService.setMockClient(mockSupabaseClient);
 
-      controller.add(product: testProduct, group: testGroup, item: testItem, quantity: 1);
+      controller.add(
+        product: testProduct,
+        group: testGroup,
+        item: testItem,
+        quantity: 1,
+      );
 
       final mockResponse = {
         'order_id': 'order123',
@@ -355,13 +414,16 @@ void main() {
         'grand_total': 100.0,
       };
 
-      when(() => mockSupabaseClient.rpc(
-        any(),
-        params: any(named: 'params'),
-      )).thenAnswer((_) => FakePostgrestFilterBuilder<dynamic>.value(mockResponse));
+      when(
+        () => mockSupabaseClient.rpc(any(), params: any(named: 'params')),
+      ).thenAnswer(
+        (_) => FakePostgrestFilterBuilder<dynamic>.value(mockResponse),
+      );
 
       // Act
-      final order = await controller.placeOrder(contactEmail: 'test@example.com');
+      final order = await controller.placeOrder(
+        contactEmail: 'test@example.com',
+      );
 
       // Assert
       expect(order, isNotNull);
@@ -371,43 +433,107 @@ void main() {
       expect(controller.isPlacingOrder.value, isFalse);
     });
 
-    test('exception path handles Supabase errors and keeps cart items', () async {
-      // Arrange
-      SupabaseService.setMockClient(mockSupabaseClient);
+    test(
+      'accepts string-encoded totals from a committed order response',
+      () async {
+        SupabaseService.setMockClient(mockSupabaseClient);
+        controller.add(
+          product: testProduct,
+          group: testGroup,
+          item: testItem,
+          quantity: 1,
+        );
 
-      controller.add(product: testProduct, group: testGroup, item: testItem, quantity: 1);
+        final mockResponse = {
+          'order_id': 'order-string-totals',
+          'subtotal': '100.00',
+          'discount_total': '5.50',
+          'shipping_total': '12.00',
+          'grand_total': '106.50',
+        };
 
-      when(() => mockSupabaseClient.rpc(
-        any(),
-        params: any(named: 'params'),
-      )).thenAnswer((_) => FakePostgrestFilterBuilder<dynamic>.error(Exception('Supabase RPC failure')));
+        when(
+          () => mockSupabaseClient.rpc(any(), params: any(named: 'params')),
+        ).thenAnswer(
+          (_) => FakePostgrestFilterBuilder<dynamic>.value(mockResponse),
+        );
 
-      // Act
-      final order = await controller.placeOrder(
-        contactEmail: 'test@example.com',
-      );
+        final order = await controller.placeOrder(
+          contactEmail: 'test@example.com',
+        );
 
-      // Assert
-      expect(order, isNull);
-      expect(controller.promoError.value, contains('Supabase RPC failure'));
-      expect(controller.isPlacingOrder.value, isFalse);
-      expect(controller.items.isNotEmpty, isTrue); // Cart shouldn't be cleared on error
-    });
+        expect(order, isNotNull);
+        expect(order!.id, 'order-string-totals');
+        expect(order.subtotal, 100.0);
+        expect(order.discountTotal, 5.5);
+        expect(order.shippingTotal, 12.0);
+        expect(order.grandTotal, 106.5);
+        expect(controller.items, isEmpty);
+        expect(controller.promoError.value, isEmpty);
+      },
+    );
 
-    test('demo fallback path creates a demo order when Supabase is not ready', () async {
-      // Arrange
-      // Do NOT setMockClient, so SupabaseService.isReady is false
+    test(
+      'exception path handles Supabase errors and keeps cart items',
+      () async {
+        // Arrange
+        SupabaseService.setMockClient(mockSupabaseClient);
 
-      controller.add(product: testProduct, group: testGroup, item: testItem, quantity: 1);
+        controller.add(
+          product: testProduct,
+          group: testGroup,
+          item: testItem,
+          quantity: 1,
+        );
 
-      // Act
-      final order = await controller.placeOrder(contactEmail: 'demo@example.com');
+        when(
+          () => mockSupabaseClient.rpc(any(), params: any(named: 'params')),
+        ).thenAnswer(
+          (_) => FakePostgrestFilterBuilder<dynamic>.error(
+            Exception('Supabase RPC failure'),
+          ),
+        );
 
-      // Assert
-      expect(order, isNotNull);
-      expect(order!.contactEmail, 'demo@example.com');
-      expect(controller.items.isEmpty, isTrue); // Cart cleared
-      expect(controller.isPlacingOrder.value, isFalse);
-    });
+        // Act
+        final order = await controller.placeOrder(
+          contactEmail: 'test@example.com',
+        );
+
+        // Assert
+        expect(order, isNull);
+        expect(controller.promoError.value, contains('Supabase RPC failure'));
+        expect(controller.isPlacingOrder.value, isFalse);
+        expect(
+          controller.items.isNotEmpty,
+          isTrue,
+        ); // Cart shouldn't be cleared on error
+      },
+    );
+
+    test(
+      'demo fallback path creates a demo order when Supabase is not ready',
+      () async {
+        // Arrange
+        // Do NOT setMockClient, so SupabaseService.isReady is false
+
+        controller.add(
+          product: testProduct,
+          group: testGroup,
+          item: testItem,
+          quantity: 1,
+        );
+
+        // Act
+        final order = await controller.placeOrder(
+          contactEmail: 'demo@example.com',
+        );
+
+        // Assert
+        expect(order, isNotNull);
+        expect(order!.contactEmail, 'demo@example.com');
+        expect(controller.items.isEmpty, isTrue); // Cart cleared
+        expect(controller.isPlacingOrder.value, isFalse);
+      },
+    );
   });
 }

@@ -68,15 +68,22 @@ class AdminController extends GetxController {
   }
 
   void _updateTotalSkus() {
-    _cachedTotalSkus.value = products.fold<int>(0, (sum, p) => sum + p.allItems.length);
+    _cachedTotalSkus.value = products.fold<int>(
+      0,
+      (sum, p) => sum + p.allItems.length,
+    );
   }
 
   Future<void> refreshAll() async {
     isLoading.value = true;
     error.value = '';
     try {
-      await Future.wait(
-          [_loadProducts(), _loadPromotions(), _loadOrders(), _loadStats()]);
+      await Future.wait([
+        _loadProducts(),
+        _loadPromotions(),
+        _loadOrders(),
+        _loadStats(),
+      ]);
     } catch (e) {
       error.value = 'Failed to load admin data: $e';
     } finally {
@@ -90,9 +97,11 @@ class AdminController extends GetxController {
           .from(AppConstants.tblProducts)
           .select('*, variant_groups(*, variant_items(*))')
           .order('created_at');
-      products.assignAll((rows as List)
-          .map((e) => Product.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList());
+      products.assignAll(
+        (rows as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList(),
+      );
     } else {
       products.assignAll(DemoData.products());
     }
@@ -104,9 +113,11 @@ class AdminController extends GetxController {
           .from(AppConstants.tblPromotions)
           .select()
           .order('created_at', ascending: false);
-      promotions.assignAll((rows as List)
-          .map((e) => Promotion.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList());
+      promotions.assignAll(
+        (rows as List)
+            .map((e) => Promotion.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList(),
+      );
     } else {
       promotions.assignAll(DemoData.promotions());
     }
@@ -119,9 +130,11 @@ class AdminController extends GetxController {
           .select('*, order_items(*)')
           .order('created_at', ascending: false)
           .limit(100);
-      orders.assignAll((rows as List)
-          .map((e) => Order.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList());
+      orders.assignAll(
+        (rows as List)
+            .map((e) => Order.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList(),
+      );
     } else {
       orders.assignAll(_demoOrders());
     }
@@ -158,23 +171,28 @@ class AdminController extends GetxController {
   // to avoid O(N*M) flattening cost on every build cycle.
   int get totalSkus => _cachedTotalSkus.value;
 
-  int get totalOrders =>
-      J.toInt(_stats.value?['total_orders'], orders.length);
+  int get totalOrders => J.toInt(_stats.value?['total_orders'], orders.length);
 
   int get pendingOrders => J.toInt(
-      _stats.value?['pending_orders'],
-      orders
-          .where((o) =>
-              o.status == OrderStatus.pending || o.status == OrderStatus.paid)
-          .length);
+    _stats.value?['pending_orders'],
+    orders
+        .where(
+          (o) =>
+              o.status == OrderStatus.pending || o.status == OrderStatus.paid,
+        )
+        .length,
+  );
 
   double get grossRevenue => J.toDouble(
-      _stats.value?['gross_revenue'],
-      orders
-          .where((o) =>
+    _stats.value?['gross_revenue'],
+    orders
+        .where(
+          (o) =>
               o.status != OrderStatus.cancelled &&
-              o.status != OrderStatus.refunded)
-          .fold(0.0, (sum, o) => sum + o.grandTotal));
+              o.status != OrderStatus.refunded,
+        )
+        .fold(0.0, (sum, o) => sum + o.grandTotal),
+  );
 
   double get averageOrderValue {
     // Averaged over the orders that contributed revenue, so cancellations and
@@ -193,14 +211,16 @@ class AdminController extends GetxController {
       for (final g in p.groups) {
         for (final i in g.items) {
           if (i.stockQuantity <= i.lowStockThreshold) {
-            entries.add(LowStockEntry(
-              productTitle: p.title,
-              colorName: g.name,
-              sizeLabel: i.sizeLabel,
-              sku: i.sku,
-              stock: i.stockQuantity,
-              threshold: i.lowStockThreshold,
-            ));
+            entries.add(
+              LowStockEntry(
+                productTitle: p.title,
+                colorName: g.name,
+                sizeLabel: i.sizeLabel,
+                sku: i.sku,
+                stock: i.stockQuantity,
+                threshold: i.lowStockThreshold,
+              ),
+            );
           }
         }
       }
@@ -226,7 +246,9 @@ class AdminController extends GetxController {
     // Demo/simple attribution: distribute each order's total across its lines'
     // products by matching titles to catalog categories.
     final byCat = <String, double>{};
-    final titleToCat = {for (final p in products) p.title: p.category ?? 'Other'};
+    final titleToCat = {
+      for (final p in products) p.title: p.category ?? 'Other',
+    };
     for (final o in orders) {
       for (final line in o.lines) {
         // Prefer the category snapshotted on the line; fall back to matching
@@ -269,15 +291,15 @@ class AdminController extends GetxController {
   /// The product with its groups and items nested, matching what
   /// `save_product(jsonb)` expects.
   Map<String, dynamic> _productPayload(Product product) => {
-        ...product.toJson(),
-        'groups': [
-          for (final g in product.groups)
-            {
-              ...g.toJson(),
-              'items': [for (final i in g.items) i.toJson()],
-            },
-        ],
-      };
+    ...product.toJson(),
+    'groups': [
+      for (final g in product.groups)
+        {
+          ...g.toJson(),
+          'items': [for (final i in g.items) i.toJson()],
+        },
+    ],
+  };
 
   Future<void> toggleProductActive(Product product) async {
     await saveProduct(product.copyWith(isActive: !product.isActive));
@@ -316,15 +338,17 @@ class AdminController extends GetxController {
     for (var i = 0; i < sizes.length; i++) {
       final size = sizes[i].trim();
       if (size.isEmpty) continue;
-      items.add(VariantItem(
-        id: '',
-        groupId: groupId,
-        sku: '$skuPrefix-${size.toUpperCase()}',
-        sizeLabel: size,
-        stockQuantity: stockPerSize,
-        priceOverride: priceOverride,
-        sortOrder: i,
-      ));
+      items.add(
+        VariantItem(
+          id: '',
+          groupId: groupId,
+          sku: '$skuPrefix-${size.toUpperCase()}',
+          sizeLabel: size,
+          stockQuantity: stockPerSize,
+          priceOverride: priceOverride,
+          sortOrder: i,
+        ),
+      );
     }
     return items;
   }
@@ -395,7 +419,8 @@ class AdminController extends GetxController {
     if (SupabaseService.isReady) {
       await SupabaseService.client
           .from(AppConstants.tblOrders)
-          .update({'status': status.name}).eq('id', order.id);
+          .update({'status': status.name})
+          .eq('id', order.id);
 
       // Cancelling or refunding has to put the units back. restock_order() is
       // idempotent -- it claims the restock before crediting -- so cancel then
@@ -456,8 +481,26 @@ class AdminController extends GetxController {
         contactEmail: 'ada@example.com',
         createdAt: now.subtract(const Duration(hours: 3)),
         lines: const [
-          OrderLine(id: 'l1', productTitle: 'Cashmere Turtleneck', variantName: 'Midnight Blue', sizeLabel: 'M', sku: 'CASH-TURT-BLU-M', unitPrice: 245, quantity: 1, lineTotal: 245),
-          OrderLine(id: 'l2', productTitle: 'Tailored Wool Trouser', variantName: 'Charcoal', sizeLabel: '32', sku: 'WOOL-TROU-CHR-32', unitPrice: 189, quantity: 1, lineTotal: 189),
+          OrderLine(
+            id: 'l1',
+            productTitle: 'Cashmere Turtleneck',
+            variantName: 'Midnight Blue',
+            sizeLabel: 'M',
+            sku: 'CASH-TURT-BLU-M',
+            unitPrice: 245,
+            quantity: 1,
+            lineTotal: 245,
+          ),
+          OrderLine(
+            id: 'l2',
+            productTitle: 'Tailored Wool Trouser',
+            variantName: 'Charcoal',
+            sizeLabel: '32',
+            sku: 'WOOL-TROU-CHR-32',
+            unitPrice: 189,
+            quantity: 1,
+            lineTotal: 189,
+          ),
         ],
       ),
       Order(
@@ -470,7 +513,16 @@ class AdminController extends GetxController {
         contactEmail: 'grace@example.com',
         createdAt: now.subtract(const Duration(days: 1, hours: 2)),
         lines: const [
-          OrderLine(id: 'l3', productTitle: 'Bias-Cut Silk Slip Dress', variantName: 'Onyx', sizeLabel: 'S', sku: 'SILK-SLIP-ONX-S', unitPrice: 320, quantity: 1, lineTotal: 320),
+          OrderLine(
+            id: 'l3',
+            productTitle: 'Bias-Cut Silk Slip Dress',
+            variantName: 'Onyx',
+            sizeLabel: 'S',
+            sku: 'SILK-SLIP-ONX-S',
+            unitPrice: 320,
+            quantity: 1,
+            lineTotal: 320,
+          ),
         ],
       ),
       Order(
@@ -484,7 +536,16 @@ class AdminController extends GetxController {
         trackingNumber: 'VF-TRACK-88213',
         createdAt: now.subtract(const Duration(days: 2, hours: 5)),
         lines: const [
-          OrderLine(id: 'l4', productTitle: 'Structured Cotton Trench', variantName: 'Sand', sizeLabel: 'M', sku: 'TRENCH-SND-M', unitPrice: 410, quantity: 1, lineTotal: 410),
+          OrderLine(
+            id: 'l4',
+            productTitle: 'Structured Cotton Trench',
+            variantName: 'Sand',
+            sizeLabel: 'M',
+            sku: 'TRENCH-SND-M',
+            unitPrice: 410,
+            quantity: 1,
+            lineTotal: 410,
+          ),
         ],
       ),
       Order(
@@ -498,7 +559,16 @@ class AdminController extends GetxController {
         contactEmail: 'edsger@example.com',
         createdAt: now.subtract(const Duration(days: 4)),
         lines: const [
-          OrderLine(id: 'l5', productTitle: 'Cashmere Turtleneck', variantName: 'Crimson', sizeLabel: 'L', sku: 'CASH-TURT-CRM-L', unitPrice: 245, quantity: 2, lineTotal: 490),
+          OrderLine(
+            id: 'l5',
+            productTitle: 'Cashmere Turtleneck',
+            variantName: 'Crimson',
+            sizeLabel: 'L',
+            sku: 'CASH-TURT-CRM-L',
+            unitPrice: 245,
+            quantity: 2,
+            lineTotal: 490,
+          ),
         ],
       ),
     ];

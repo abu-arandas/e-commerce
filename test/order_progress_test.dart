@@ -17,10 +17,13 @@ void main() {
       expect(orderProgressStep(OrderStatus.delivered), 3);
     });
 
-    test('an order that left the pipeline shows no progress beyond placement', () {
-      expect(orderProgressStep(OrderStatus.cancelled), 0);
-      expect(orderProgressStep(OrderStatus.refunded), 0);
-    });
+    test(
+      'an order that left the pipeline shows no progress beyond placement',
+      () {
+        expect(orderProgressStep(OrderStatus.cancelled), 0);
+        expect(orderProgressStep(OrderStatus.refunded), 0);
+      },
+    );
 
     test('every status maps to a real step', () {
       for (final s in OrderStatus.values) {

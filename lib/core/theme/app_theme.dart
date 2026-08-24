@@ -23,7 +23,9 @@ abstract final class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.paper,
       textTheme: AppTypography.textTheme(
-          AppColors.textPrimary, AppColors.textSecondary),
+        AppColors.textPrimary,
+        AppColors.textSecondary,
+      ),
       dividerColor: AppColors.line,
       splashFactory: InkSparkle.splashFactory,
     );
@@ -42,9 +44,12 @@ abstract final class AppTheme {
           foregroundColor: AppColors.textOnInk,
           elevation: 0,
           padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(AppSpacing.rSm)),
+            borderRadius: BorderRadius.all(AppSpacing.rSm),
+          ),
           textStyle: base.textTheme.labelLarge,
         ),
       ),
@@ -53,9 +58,12 @@ abstract final class AppTheme {
           foregroundColor: AppColors.ink,
           side: const BorderSide(color: AppColors.ink),
           padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(AppSpacing.rSm)),
+            borderRadius: BorderRadius.all(AppSpacing.rSm),
+          ),
           textStyle: base.textTheme.labelLarge,
         ),
       ),
@@ -67,13 +75,16 @@ abstract final class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(AppSpacing.rMd)),
+          borderRadius: BorderRadius.all(AppSpacing.rMd),
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md, vertical: AppSpacing.md),
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(AppSpacing.rSm),
           borderSide: BorderSide(color: AppColors.line),
@@ -95,8 +106,11 @@ abstract final class AppTheme {
         labelStyle: base.textTheme.labelMedium,
         shape: const StadiumBorder(),
       ),
-      dividerTheme:
-          const DividerThemeData(color: AppColors.line, thickness: 1, space: 1),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.line,
+        thickness: 1,
+        space: 1,
+      ),
       snackBarTheme: const SnackBarThemeData(
         backgroundColor: AppColors.ink,
         contentTextStyle: TextStyle(color: AppColors.textOnInk),
@@ -124,7 +138,9 @@ abstract final class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.ink,
       textTheme: AppTypography.textTheme(
-          AppColors.textOnInk, AppColors.textMutedOnInk),
+        AppColors.textOnInk,
+        AppColors.textMutedOnInk,
+      ),
       dividerColor: const Color(0xFF2A2A30),
     );
 
@@ -139,10 +155,14 @@ abstract final class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(AppSpacing.rMd)),
+          borderRadius: BorderRadius.all(AppSpacing.rMd),
+        ),
       ),
       dividerTheme: const DividerThemeData(
-          color: Color(0xFF2A2A30), thickness: 1, space: 1),
+        color: Color(0xFF2A2A30),
+        thickness: 1,
+        space: 1,
+      ),
     );
   }
 }

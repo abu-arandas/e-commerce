@@ -14,7 +14,6 @@ class AuthController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
-
   bool get isLoggedIn => user.value != null;
   bool get isStaff => user.value?.role.isStaff ?? false;
   AppRole get role => user.value?.role ?? AppRole.customer;
@@ -74,8 +73,10 @@ class AuthController extends GetxController {
         user.value = AppUser(id: 'demo-customer', email: email, fullName: null);
         return true;
       }
-      final res = await SupabaseService.auth
-          .signInWithPassword(email: email, password: password);
+      final res = await SupabaseService.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
       if (res.user != null) {
         await _loadProfile(res.user!.id, res.user!.email);
         return true;
@@ -98,7 +99,11 @@ class AuthController extends GetxController {
     error.value = '';
     try {
       if (!SupabaseService.isReady) {
-        user.value = AppUser(id: 'demo-customer', email: email, fullName: fullName);
+        user.value = AppUser(
+          id: 'demo-customer',
+          email: email,
+          fullName: fullName,
+        );
         return true;
       }
       final res = await SupabaseService.auth.signUp(

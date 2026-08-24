@@ -52,26 +52,50 @@ void main() {
 
     test('variantSummary handles missing or null variants and sizes', () {
       const line1 = OrderLine(
-        id: '1', productTitle: 'A', sku: 'A', unitPrice: 10, quantity: 1, lineTotal: 10,
-        variantName: 'Red', sizeLabel: 'M',
+        id: '1',
+        productTitle: 'A',
+        sku: 'A',
+        unitPrice: 10,
+        quantity: 1,
+        lineTotal: 10,
+        variantName: 'Red',
+        sizeLabel: 'M',
       );
       expect(line1.variantSummary, 'Red · M');
 
       const line2 = OrderLine(
-        id: '2', productTitle: 'B', sku: 'B', unitPrice: 10, quantity: 1, lineTotal: 10,
-        variantName: 'Red', sizeLabel: null,
+        id: '2',
+        productTitle: 'B',
+        sku: 'B',
+        unitPrice: 10,
+        quantity: 1,
+        lineTotal: 10,
+        variantName: 'Red',
+        sizeLabel: null,
       );
       expect(line2.variantSummary, 'Red');
 
       const line3 = OrderLine(
-        id: '3', productTitle: 'C', sku: 'C', unitPrice: 10, quantity: 1, lineTotal: 10,
-        variantName: null, sizeLabel: 'M',
+        id: '3',
+        productTitle: 'C',
+        sku: 'C',
+        unitPrice: 10,
+        quantity: 1,
+        lineTotal: 10,
+        variantName: null,
+        sizeLabel: 'M',
       );
       expect(line3.variantSummary, 'M');
 
       const line4 = OrderLine(
-        id: '4', productTitle: 'D', sku: 'D', unitPrice: 10, quantity: 1, lineTotal: 10,
-        variantName: null, sizeLabel: null,
+        id: '4',
+        productTitle: 'D',
+        sku: 'D',
+        unitPrice: 10,
+        quantity: 1,
+        lineTotal: 10,
+        variantName: null,
+        sizeLabel: null,
       );
       expect(line4.variantSummary, '');
     });
@@ -99,7 +123,7 @@ void main() {
             'unit_price': 50.0,
             'quantity': 2,
             'line_total': 100.0,
-          }
+          },
         ],
       };
 
@@ -142,20 +166,53 @@ void main() {
 
     test('itemCount sums quantities correctly', () {
       const order = Order(
-        id: '1', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0,
+        id: '1',
+        status: OrderStatus.pending,
+        subtotal: 0,
+        discountTotal: 0,
+        shippingTotal: 0,
+        grandTotal: 0,
         lines: [
-          OrderLine(id: 'l1', productTitle: 'A', sku: 'A', unitPrice: 10, quantity: 2, lineTotal: 20),
-          OrderLine(id: 'l2', productTitle: 'B', sku: 'B', unitPrice: 15, quantity: 3, lineTotal: 45),
+          OrderLine(
+            id: 'l1',
+            productTitle: 'A',
+            sku: 'A',
+            unitPrice: 10,
+            quantity: 2,
+            lineTotal: 20,
+          ),
+          OrderLine(
+            id: 'l2',
+            productTitle: 'B',
+            sku: 'B',
+            unitPrice: 15,
+            quantity: 3,
+            lineTotal: 45,
+          ),
         ],
       );
       expect(order.itemCount, 5);
     });
 
     test('reference returns correct short string based on UUID', () {
-      const order1 = Order(id: '1234567890abcdef', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0);
+      const order1 = Order(
+        id: '1234567890abcdef',
+        status: OrderStatus.pending,
+        subtotal: 0,
+        discountTotal: 0,
+        shippingTotal: 0,
+        grandTotal: 0,
+      );
       expect(order1.reference, '#12345678');
 
-      const order2 = Order(id: 'short', status: OrderStatus.pending, subtotal: 0, discountTotal: 0, shippingTotal: 0, grandTotal: 0);
+      const order2 = Order(
+        id: 'short',
+        status: OrderStatus.pending,
+        subtotal: 0,
+        discountTotal: 0,
+        shippingTotal: 0,
+        grandTotal: 0,
+      );
       expect(order2.reference, '#short');
     });
   });

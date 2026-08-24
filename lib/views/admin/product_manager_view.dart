@@ -29,7 +29,9 @@ class ProductManagerView extends StatelessWidget {
           icon: const Icon(Icons.add, size: 18),
           label: const Text('New product'),
           style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.gold, foregroundColor: AppColors.ink),
+            backgroundColor: AppColors.gold,
+            foregroundColor: AppColors.ink,
+          ),
         ),
       ],
       child: Obx(() {
@@ -53,8 +55,10 @@ class ProductManagerView extends StatelessWidget {
               if (products.isEmpty)
                 const Padding(
                   padding: EdgeInsets.all(AppSpacing.xl),
-                  child: Text('No products yet.',
-                      style: TextStyle(color: AppColors.textMutedOnInk)),
+                  child: Text(
+                    'No products yet.',
+                    style: TextStyle(color: AppColors.textMutedOnInk),
+                  ),
                 ),
             ],
           ),
@@ -64,7 +68,10 @@ class ProductManagerView extends StatelessWidget {
   }
 
   void _openEditor(
-      BuildContext context, AdminController admin, Product? product) {
+    BuildContext context,
+    AdminController admin,
+    Product? product,
+  ) {
     showDialog<void>(
       context: context,
       builder: (_) => ProductEditorDialog(admin: admin, existing: product),
@@ -80,7 +87,9 @@ class ProductManagerView extends StatelessWidget {
         content: Text('“${p.title}” and all its variants will be removed.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () async {
               // Awaited, so a failed delete is reported instead of becoming an
@@ -88,10 +97,13 @@ class ProductManagerView extends StatelessWidget {
               final removed = await admin.deleteProduct(p.id);
               if (ctx.mounted) Navigator.pop(ctx);
               if (!removed) {
-                Get.snackbar('Delete failed', admin.error.value,
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.danger,
-                    colorText: AppColors.textOnInk);
+                Get.snackbar(
+                  'Delete failed',
+                  admin.error.value,
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: AppColors.danger,
+                  colorText: AppColors.textOnInk,
+                );
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
@@ -108,13 +120,14 @@ class _HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context)
-        .textTheme
-        .labelSmall
-        ?.copyWith(color: AppColors.textMutedOnInk);
+    final style = Theme.of(
+      context,
+    ).textTheme.labelSmall?.copyWith(color: AppColors.textMutedOnInk);
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Color(0xFF2A2A30))),
       ),
@@ -149,7 +162,9 @@ class _ProductRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Color(0xFF23232A))),
       ),
@@ -160,32 +175,43 @@ class _ProductRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(product.title,
-                    style: Theme.of(context).textTheme.titleSmall),
                 Text(
-                    '${product.groups.length} colour(s) · ${product.allItems.length} SKU(s)',
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: AppColors.textMutedOnInk)),
+                  product.title,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                Text(
+                  '${product.groups.length} colour(s) · ${product.allItems.length} SKU(s)',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textMutedOnInk,
+                  ),
+                ),
               ],
             ),
           ),
           Expanded(
-              flex: 2,
-              child: Text(product.category ?? '—',
-                  style: Theme.of(context).textTheme.bodyMedium)),
-          Expanded(
-              flex: 2,
-              child: Text(Formatters.priceTrim(product.fromPrice),
-                  style: Theme.of(context).textTheme.bodyMedium)),
+            flex: 2,
+            child: Text(
+              product.category ?? '—',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
           Expanded(
             flex: 2,
-            child: Text('${product.totalStock}',
-                style: TextStyle(
-                    color: product.totalStock <= AppConstants.lowStockThreshold
-                        ? AppColors.warning
-                        : AppColors.textOnInk)),
+            child: Text(
+              Formatters.priceTrim(product.fromPrice),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              '${product.totalStock}',
+              style: TextStyle(
+                color: product.totalStock <= AppConstants.lowStockThreshold
+                    ? AppColors.warning
+                    : AppColors.textOnInk,
+              ),
+            ),
           ),
           Expanded(
             flex: 2,
@@ -200,14 +226,16 @@ class _ProductRow extends StatelessWidget {
             child: Row(
               children: [
                 IconButton(
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    onPressed: onEdit,
-                    tooltip: 'Edit'),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  onPressed: onEdit,
+                  tooltip: 'Edit',
+                ),
                 IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    color: AppColors.danger,
-                    onPressed: onDelete,
-                    tooltip: 'Delete'),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  color: AppColors.danger,
+                  onPressed: onDelete,
+                  tooltip: 'Delete',
+                ),
               ],
             ),
           ),
@@ -245,8 +273,9 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
     _title = TextEditingController(text: p?.title ?? '');
     _slug = TextEditingController(text: p?.slug ?? '');
     _category = TextEditingController(text: p?.category ?? '');
-    _price =
-        TextEditingController(text: (p?.basePrice ?? 0).toStringAsFixed(2));
+    _price = TextEditingController(
+      text: (p?.basePrice ?? 0).toStringAsFixed(2),
+    );
     _description = TextEditingController(text: p?.description ?? '');
     _groups = [...?p?.groups];
   }
@@ -264,8 +293,9 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
 
   Future<void> _save() async {
     final base = double.tryParse(_price.text.trim()) ?? 0;
-    final slug =
-        _slug.text.trim().isEmpty ? _slugify(_title.text) : _slug.text.trim();
+    final slug = _slug.text.trim().isEmpty
+        ? _slugify(_title.text)
+        : _slug.text.trim();
     final product = Product(
       // Postgres keys these by uuid; a 'new-1723...' id is rejected outright
       // with `invalid input syntax for type uuid`.
@@ -335,12 +365,15 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
             children: [
               Row(
                 children: [
-                  Text(widget.existing == null ? 'New product' : 'Edit product',
-                      style: Theme.of(context).textTheme.headlineSmall),
+                  Text(
+                    widget.existing == null ? 'New product' : 'Edit product',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                   const Spacer(),
                   IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close)),
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
@@ -356,7 +389,8 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
                           Expanded(child: _text(_category, 'Category')),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                              child: _text(_price, 'Base price', number: true)),
+                            child: _text(_price, 'Base price', number: true),
+                          ),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.sm),
@@ -366,8 +400,10 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
                       const SizedBox(height: AppSpacing.lg),
                       Row(
                         children: [
-                          Text('Colour groups & variants',
-                              style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            'Colour groups & variants',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                           const Spacer(),
                           TextButton.icon(
                             onPressed: _addGroup,
@@ -381,11 +417,10 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
                         Padding(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           child: Text(
-                              'No colour groups yet. Add a colour, then bulk-generate sizes.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: AppColors.textMutedOnInk)),
+                            'No colour groups yet. Add a colour, then bulk-generate sizes.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.textMutedOnInk),
+                          ),
                         ),
                     ],
                   ),
@@ -396,14 +431,16 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel')),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   ElevatedButton(
                     onPressed: _save,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.gold,
-                        foregroundColor: AppColors.ink),
+                      backgroundColor: AppColors.gold,
+                      foregroundColor: AppColors.ink,
+                    ),
                     child: const Text('Save product'),
                   ),
                 ],
@@ -443,8 +480,9 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
               Text(g.name, style: Theme.of(context).textTheme.titleSmall),
               const Spacer(),
               TextButton(
-                  onPressed: () => _generateVariants(i),
-                  child: const Text('Generate sizes')),
+                onPressed: () => _generateVariants(i),
+                child: const Text('Generate sizes'),
+              ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 18),
                 color: AppColors.danger,
@@ -462,7 +500,9 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
                     label: Text('${item.sizeLabel} · ${item.stockQuantity}'),
                     backgroundColor: AppColors.inkSoft,
                     labelStyle: const TextStyle(
-                        color: AppColors.textOnInk, fontSize: 12),
+                      color: AppColors.textOnInk,
+                      fontSize: 12,
+                    ),
                   ),
               ],
             ),
@@ -471,8 +511,12 @@ class _ProductEditorDialogState extends State<ProductEditorDialog> {
     );
   }
 
-  Widget _text(TextEditingController c, String label,
-      {bool number = false, int maxLines = 1}) {
+  Widget _text(
+    TextEditingController c,
+    String label, {
+    bool number = false,
+    int maxLines = 1,
+  }) {
     return TextField(
       controller: c,
       maxLines: maxLines,
@@ -518,19 +562,21 @@ class _ColorGroupDialogState extends State<_ColorGroupDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-              controller: _name,
-              decoration: const InputDecoration(labelText: 'Colour name')),
+            controller: _name,
+            decoration: const InputDecoration(labelText: 'Colour name'),
+          ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
-              controller: _hex,
-              decoration:
-                  const InputDecoration(labelText: 'Hex (e.g. #1E2A44)')),
+            controller: _hex,
+            decoration: const InputDecoration(labelText: 'Hex (e.g. #1E2A44)'),
+          ),
         ],
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel')),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
         ElevatedButton(
           onPressed: () {
             if (_name.text.trim().isEmpty) return;
@@ -589,38 +635,47 @@ class _BulkVariantDialogState extends State<_BulkVariantDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
-              controller: _prefix,
-              decoration: const InputDecoration(
-                  labelText: 'SKU prefix (e.g. CASH-TURT-BLU)')),
+            controller: _prefix,
+            decoration: const InputDecoration(
+              labelText: 'SKU prefix (e.g. CASH-TURT-BLU)',
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
-              controller: _sizes,
-              decoration:
-                  const InputDecoration(labelText: 'Sizes (comma separated)')),
+            controller: _sizes,
+            decoration: const InputDecoration(
+              labelText: 'Sizes (comma separated)',
+            ),
+          ),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Expanded(
-                  child: TextField(
-                      controller: _stock,
-                      keyboardType: TextInputType.number,
-                      decoration:
-                          const InputDecoration(labelText: 'Stock / size'))),
+                child: TextField(
+                  controller: _stock,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Stock / size'),
+                ),
+              ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                  child: TextField(
-                      controller: _price,
-                      keyboardType: TextInputType.number,
-                      decoration:
-                          const InputDecoration(labelText: 'Price override'))),
+                child: TextField(
+                  controller: _price,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Price override',
+                  ),
+                ),
+              ),
             ],
           ),
         ],
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel')),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
         ElevatedButton(
           onPressed: () {
             final sizes = _sizes.text

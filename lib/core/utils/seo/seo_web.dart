@@ -22,14 +22,16 @@ void applySeo({
 
 void _setMetaByName(String name, String? content) {
   if (content == null || content.isEmpty) return;
-  final el = _document.querySelector('meta[name="$name"]') ??
+  final el =
+      _document.querySelector('meta[name="$name"]') ??
       _appendHead('meta', {'name': name});
   el?.setAttribute('content', content);
 }
 
 void _setMetaByProperty(String property, String? content) {
   if (content == null || content.isEmpty) return;
-  final el = _document.querySelector('meta[property="$property"]') ??
+  final el =
+      _document.querySelector('meta[property="$property"]') ??
       _appendHead('meta', {'property': property});
   el?.setAttribute('content', content);
 }
@@ -38,7 +40,8 @@ void _setCanonical(String path) {
   final href = path.startsWith('http')
       ? path
       : '${_location.origin}${path.startsWith('/') ? '' : '/'}$path';
-  final el = _document.querySelector('link[rel="canonical"]') ??
+  final el =
+      _document.querySelector('link[rel="canonical"]') ??
       _appendHead('link', {'rel': 'canonical'});
   el?.setAttribute('href', href);
 }

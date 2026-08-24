@@ -43,14 +43,19 @@ void main() {
       final item = group.sortedItems.firstWhere((i) => i.inStock);
 
       cart.add(
-          product: knitwear, group: group, item: item, quantity: item.stockQuantity + 50);
+        product: knitwear,
+        group: group,
+        item: item,
+        quantity: item.stockQuantity + 50,
+      );
 
       expect(cart.items.single.quantity, item.stockQuantity);
     });
 
     test('a sold-out variant cannot be added', () {
-      final group = knitwear.sortedGroups
-          .firstWhere((g) => g.items.any((i) => !i.inStock));
+      final group = knitwear.sortedGroups.firstWhere(
+        (g) => g.items.any((i) => !i.inStock),
+      );
       final soldOut = group.items.firstWhere((i) => !i.inStock);
 
       cart.add(product: knitwear, group: group, item: soldOut);
@@ -87,8 +92,10 @@ void main() {
       addFirstInStock(knitwear);
 
       expect(cart.shipping, StoreSettings.flatShippingFee.value);
-      expect(cart.grandTotal,
-          closeTo(cart.subtotal + StoreSettings.flatShippingFee.value, 0.001));
+      expect(
+        cart.grandTotal,
+        closeTo(cart.subtotal + StoreSettings.flatShippingFee.value, 0.001),
+      );
     });
 
     test('an empty bag is charged nothing', () {
@@ -140,21 +147,22 @@ void main() {
     });
 
     test(
-        'a code that stops qualifying is dropped entirely, code included',
-        () async {
-      // FALL20 needs a 150 minimum. Qualify, then fall below it.
-      addFirstInStock(knitwear);
-      await settle();
-      expect(await cart.applyPromo('FALL20'), isTrue);
+      'a code that stops qualifying is dropped entirely, code included',
+      () async {
+        // FALL20 needs a 150 minimum. Qualify, then fall below it.
+        addFirstInStock(knitwear);
+        await settle();
+        expect(await cart.applyPromo('FALL20'), isTrue);
 
-      cart.removeItem(cart.items.single.key);
-      await settle();
+        cart.removeItem(cart.items.single.key);
+        await settle();
 
-      // Both must clear: a lingering code would be sent to `place_order`,
-      // which rejects invalid promotions and fails the whole checkout.
-      expect(cart.discount, 0);
-      expect(cart.appliedCode.value, isNull);
-    });
+        // Both must clear: a lingering code would be sent to `place_order`,
+        // which rejects invalid promotions and fails the whole checkout.
+        expect(cart.discount, 0);
+        expect(cart.appliedCode.value, isNull);
+      },
+    );
 
     test('clearing the bag clears the promotion', () async {
       addFirstInStock(knitwear);
@@ -187,9 +195,14 @@ void main() {
       final lines = cart.promoLines;
 
       expect(lines.length, 2);
-      expect(lines.map((l) => l.category), containsAll(['Knitwear', 'Trousers']));
-      expect(lines.fold<double>(0, (s, l) => s + l.lineTotal),
-          closeTo(cart.subtotal, 0.001));
+      expect(
+        lines.map((l) => l.category),
+        containsAll(['Knitwear', 'Trousers']),
+      );
+      expect(
+        lines.fold<double>(0, (s, l) => s + l.lineTotal),
+        closeTo(cart.subtotal, 0.001),
+      );
     });
 
     test('a demo order snapshots the bag and empties it', () async {

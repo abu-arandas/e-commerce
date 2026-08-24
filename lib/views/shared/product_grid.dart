@@ -18,8 +18,10 @@ class ProductGrid extends StatelessWidget {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
         child: Center(
-          child: Text('No pieces match your filters.',
-              style: TextStyle(color: AppColors.slate)),
+          child: Text(
+            'No pieces match your filters.',
+            style: TextStyle(color: AppColors.slate),
+          ),
         ),
       );
     }

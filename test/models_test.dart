@@ -65,10 +65,21 @@ void main() {
           productId: 'p',
           name: 'Midnight Blue',
           items: const [
-            VariantItem(id: 'a', groupId: 'g', sku: 'A', sizeLabel: 'S', stockQuantity: 2),
             VariantItem(
-                id: 'b', groupId: 'g', sku: 'B', sizeLabel: 'M',
-                stockQuantity: 0, priceOverride: 130),
+              id: 'a',
+              groupId: 'g',
+              sku: 'A',
+              sizeLabel: 'S',
+              stockQuantity: 2,
+            ),
+            VariantItem(
+              id: 'b',
+              groupId: 'g',
+              sku: 'B',
+              sizeLabel: 'M',
+              stockQuantity: 0,
+              priceOverride: 130,
+            ),
           ],
         ),
       ],
@@ -87,9 +98,19 @@ void main() {
 
     test('is out of stock only when every SKU is', () {
       final soldOut = product.copyWith(
-        groups: [product.groups.first.copyWith(items: const [
-          VariantItem(id: 'a', groupId: 'g', sku: 'A', sizeLabel: 'S', stockQuantity: 0),
-        ])],
+        groups: [
+          product.groups.first.copyWith(
+            items: const [
+              VariantItem(
+                id: 'a',
+                groupId: 'g',
+                sku: 'A',
+                sizeLabel: 'S',
+                stockQuantity: 0,
+              ),
+            ],
+          ),
+        ],
       );
       expect(soldOut.inStock, isFalse);
     });
@@ -109,9 +130,18 @@ void main() {
   group('CartItem serialisation', () {
     test('round-trips through JSON for cart persistence', () {
       final item = CartItem(
-        productId: 'p', productSlug: 's', productTitle: 'T', category: 'Knitwear',
-        variantGroupId: 'g', variantItemId: 'v', sku: 'SKU-1',
-        colorName: 'Ecru', sizeLabel: 'M', unitPrice: 245, quantity: 2, maxStock: 5,
+        productId: 'p',
+        productSlug: 's',
+        productTitle: 'T',
+        category: 'Knitwear',
+        variantGroupId: 'g',
+        variantItemId: 'v',
+        sku: 'SKU-1',
+        colorName: 'Ecru',
+        sizeLabel: 'M',
+        unitPrice: 245,
+        quantity: 2,
+        maxStock: 5,
       );
 
       final restored = CartItem.fromJson(item.toJson());
@@ -142,7 +172,10 @@ void main() {
       const order = Order(
         id: 'abcdef12-3456-7890-abcd-ef1234567890',
         status: OrderStatus.pending,
-        subtotal: 1, discountTotal: 0, shippingTotal: 0, grandTotal: 1,
+        subtotal: 1,
+        discountTotal: 0,
+        shippingTotal: 0,
+        grandTotal: 1,
       );
       expect(order.reference, '#ABCDEF12');
     });
@@ -154,8 +187,12 @@ void main() {
 
     test('parses a category off the line', () {
       final line = OrderLine.fromJson(const {
-        'id': 'l', 'product_title': 'T', 'sku': 'S',
-        'unit_price': '10', 'quantity': '2', 'line_total': '20',
+        'id': 'l',
+        'product_title': 'T',
+        'sku': 'S',
+        'unit_price': '10',
+        'quantity': '2',
+        'line_total': '20',
         'category': 'Dresses',
       });
       expect(line.category, 'Dresses');
@@ -174,8 +211,12 @@ void main() {
 
     test('an admin can do everything', () {
       const admin = AppRole.admin;
-      expect(admin.canManageCatalog && admin.canManagePromotions && admin.canManageOrders,
-          isTrue);
+      expect(
+        admin.canManageCatalog &&
+            admin.canManagePromotions &&
+            admin.canManageOrders,
+        isTrue,
+      );
     });
   });
 

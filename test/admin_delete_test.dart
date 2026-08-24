@@ -52,13 +52,17 @@ void main() {
 
     await admin.deleteProduct(target.id);
 
-    expect(admin.totalSkus, skusBefore - target.allItems.length,
-        reason: 'the cached count must drop with the product');
+    expect(
+      admin.totalSkus,
+      skusBefore - target.allItems.length,
+      reason: 'the cached count must drop with the product',
+    );
   });
 
   test('low-stock alerts drop the deleted product too', () async {
-    final target = admin.products
-        .firstWhere((p) => p.allItems.any((i) => i.stockQuantity <= i.lowStockThreshold));
+    final target = admin.products.firstWhere(
+      (p) => p.allItems.any((i) => i.stockQuantity <= i.lowStockThreshold),
+    );
 
     await admin.deleteProduct(target.id);
 

@@ -30,10 +30,14 @@ abstract final class StoreSettings {
           .maybeSingle();
       if (row == null) return;
       final map = Map<String, dynamic>.from(row);
-      flatShippingFee.value =
-          J.toDouble(map['flat_shipping_fee'], Env.flatShippingFee);
-      freeShippingThreshold.value =
-          J.toDouble(map['free_shipping_threshold'], Env.freeShippingThreshold);
+      flatShippingFee.value = J.toDouble(
+        map['flat_shipping_fee'],
+        Env.flatShippingFee,
+      );
+      freeShippingThreshold.value = J.toDouble(
+        map['free_shipping_threshold'],
+        Env.freeShippingThreshold,
+      );
     } catch (_) {
       // Non-fatal: keep the compile-time defaults.
     }

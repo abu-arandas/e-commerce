@@ -31,40 +31,49 @@ abstract final class AppPages {
   static final List<GetPage> routes = [
     // ---- Storefront ----
     GetPage(
-        name: AppRoutes.home,
-        page: () => const HomeView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.home,
+      page: () => const HomeView(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
-        name: AppRoutes.shop,
-        page: () => const ShopView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.shop,
+      page: () => const ShopView(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
-        name: AppRoutes.product,
-        page: () => const ProductDetailView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.product,
+      page: () => const ProductDetailView(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
-        name: AppRoutes.cart,
-        page: () => const CartView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.cart,
+      page: () => const CartView(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
-        name: AppRoutes.checkout,
-        page: () => const CheckoutView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.checkout,
+      page: () => const CheckoutView(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
-        name: AppRoutes.orderConfirmation,
-        page: () => const OrderConfirmationView()),
+      name: AppRoutes.orderConfirmation,
+      page: () => const OrderConfirmationView(),
+    ),
     GetPage(
-        name: AppRoutes.login,
-        page: () => const LoginView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.login,
+      page: () => const LoginView(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
-        name: AppRoutes.account,
-        page: () => const AccountView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.account,
+      page: () => const AccountView(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
-        name: AppRoutes.wishlist,
-        page: () => const WishlistView(),
-        transition: Transition.fadeIn),
+      name: AppRoutes.wishlist,
+      page: () => const WishlistView(),
+      transition: Transition.fadeIn,
+    ),
 
     // ---- Admin (staff-gated) ----
     GetPage(

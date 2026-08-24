@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../core/utils/app_constants.dart';
 import '../core/utils/browser/browser.dart';
 import '../core/utils/demo_data.dart';
+import '../core/utils/json_parse.dart';
 import '../core/utils/store_settings.dart';
 import '../core/utils/supabase_service.dart';
 import '../models/cart_item_model.dart';
@@ -96,9 +97,11 @@ class CartController extends GetxController {
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! List) return;
-      items.assignAll(decoded
-          .whereType<Map>()
-          .map((e) => CartItem.fromJson(Map<String, dynamic>.from(e))));
+      items.assignAll(
+        decoded.whereType<Map>().map(
+          (e) => CartItem.fromJson(Map<String, dynamic>.from(e)),
+        ),
+      );
     } catch (_) {
       Browser.remove(_storageKey);
     }
@@ -110,7 +113,10 @@ class CartController extends GetxController {
       return;
     }
     try {
-      Browser.write(_storageKey, jsonEncode(items.map((c) => c.toJson()).toList()));
+      Browser.write(
+        _storageKey,
+        jsonEncode(items.map((c) => c.toJson()).toList()),
+      );
     } catch (_) {
       // Storage full or blocked; the bag still works for this session.
     }
@@ -131,16 +137,20 @@ class CartController extends GetxController {
 
     final existing = items.firstWhereOrNull((c) => c.key == item.id);
     if (existing != null) {
-      existing.quantity =
-          (existing.quantity + quantity).clamp(1, item.stockQuantity);
+      existing.quantity = (existing.quantity + quantity).clamp(
+        1,
+        item.stockQuantity,
+      );
       items.refresh();
     } else {
-      items.add(CartItem.from(
-        product: product,
-        group: group,
-        item: item,
-        quantity: quantity.clamp(1, item.stockQuantity),
-      ));
+      items.add(
+        CartItem.from(
+          product: product,
+          group: group,
+          item: item,
+          quantity: quantity.clamp(1, item.stockQuantity),
+        ),
+      );
     }
     _refreshPromo();
   }
@@ -338,48 +348,49 @@ class CartController extends GetxController {
   }
 
   Order _orderFromResult(Map<String, dynamic> map, String? email) => Order(
-        id: map['order_id']?.toString() ?? _pseudoId(),
-        status: OrderStatus.pending,
-        subtotal: (map['subtotal'] as num?)?.toDouble() ?? subtotal,
-        discountTotal: (map['discount_total'] as num?)?.toDouble() ?? discount,
-        shippingTotal: (map['shipping_total'] as num?)?.toDouble() ?? shipping,
-        grandTotal: (map['grand_total'] as num?)?.toDouble() ?? grandTotal,
-        promoCode: appliedCode.value,
-        contactEmail: email,
-        createdAt: DateTime.now(),
-        lines: _snapshotLines(),
-      );
+    id: map['order_id']?.toString() ?? _pseudoId(),
+    status: OrderStatus.pending,
+    subtotal: J.toDouble(map['subtotal'], subtotal),
+    discountTotal: J.toDouble(map['discount_total'], discount),
+    shippingTotal: J.toDouble(map['shipping_total'], shipping),
+    grandTotal: J.toDouble(map['grand_total'], grandTotal),
+    promoCode: appliedCode.value,
+    contactEmail: email,
+    createdAt: DateTime.now(),
+    lines: _snapshotLines(),
+  );
 
   Order _demoOrder(String? email) => Order(
-        id: _pseudoId(),
-        status: OrderStatus.pending,
-        subtotal: subtotal,
-        discountTotal: discount,
-        shippingTotal: shipping,
-        grandTotal: grandTotal,
-        promoCode: appliedCode.value,
-        contactEmail: email,
-        createdAt: DateTime.now(),
-        lines: _snapshotLines(),
-      );
+    id: _pseudoId(),
+    status: OrderStatus.pending,
+    subtotal: subtotal,
+    discountTotal: discount,
+    shippingTotal: shipping,
+    grandTotal: grandTotal,
+    promoCode: appliedCode.value,
+    contactEmail: email,
+    createdAt: DateTime.now(),
+    lines: _snapshotLines(),
+  );
 
   List<OrderLine> _snapshotLines() => items
-      .map((c) => OrderLine(
-            id: c.variantItemId,
-            productTitle: c.productTitle,
-            variantName: c.colorName,
-            sizeLabel: c.sizeLabel,
-            sku: c.sku,
-            category: c.category,
-            unitPrice: c.unitPrice,
-            quantity: c.quantity,
-            lineTotal: c.lineTotal,
-          ))
+      .map(
+        (c) => OrderLine(
+          id: c.variantItemId,
+          productTitle: c.productTitle,
+          variantName: c.colorName,
+          sizeLabel: c.sizeLabel,
+          sku: c.sku,
+          category: c.category,
+          unitPrice: c.unitPrice,
+          quantity: c.quantity,
+          lineTotal: c.lineTotal,
+        ),
+      )
       .toList();
 
   String _pseudoId() {
-    final ts = DateTime.now()
-        .microsecondsSinceEpoch
+    final ts = DateTime.now().microsecondsSinceEpoch
         .toRadixString(16)
         .padLeft(12, '0');
     return '$ts-demo-0000-0000-000000000000';

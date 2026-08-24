@@ -24,25 +24,27 @@ void main() {
     String rowClasses = 'gx-0',
   }) async {
     await surface(tester, width);
-    await tester.pumpWidget(MediaQuery(
-      data: MediaQueryData(size: Size(width, 900)),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizedBox(
-          width: width,
-          child: FB5Row(
-            classNames: rowClasses,
-            children: [
-              for (var i = 0; i < count; i++)
-                FB5Col(
-                  classNames: classNames,
-                  child: SizedBox(key: ValueKey('c$i'), height: 10),
-                ),
-            ],
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData(size: Size(width, 900)),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: width,
+            child: FB5Row(
+              classNames: rowClasses,
+              children: [
+                for (var i = 0; i < count; i++)
+                  FB5Col(
+                    classNames: classNames,
+                    child: SizedBox(key: ValueKey('c$i'), height: 10),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     return [
       for (var i = 0; i < count; i++)
@@ -90,36 +92,45 @@ void main() {
   group('grid mechanics', () {
     testWidgets('the split product page is 7/5 at lg', (tester) async {
       await surface(tester, 1200);
-      await tester.pumpWidget(const MediaQuery(
-        data: MediaQueryData(size: Size(1200, 900)),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SizedBox(
-            width: 1200,
-            child: FB5Row(
-              classNames: 'gx-0',
-              children: [
-                FB5Col(
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(size: Size(1200, 900)),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              width: 1200,
+              child: FB5Row(
+                classNames: 'gx-0',
+                children: [
+                  FB5Col(
                     classNames: 'col-12 col-lg-7',
-                    child: SizedBox(key: ValueKey('gallery'), height: 10)),
-                FB5Col(
+                    child: SizedBox(key: ValueKey('gallery'), height: 10),
+                  ),
+                  FB5Col(
                     classNames: 'col-12 col-lg-5',
-                    child: SizedBox(key: ValueKey('details'), height: 10)),
-              ],
+                    child: SizedBox(key: ValueKey('details'), height: 10),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
-      expect(tester.getSize(find.byKey(const ValueKey('gallery'))).width,
-          closeTo(1200 * 7 / 12, 1));
-      expect(tester.getSize(find.byKey(const ValueKey('details'))).width,
-          closeTo(1200 * 5 / 12, 1));
+      expect(
+        tester.getSize(find.byKey(const ValueKey('gallery'))).width,
+        closeTo(1200 * 7 / 12, 1),
+      );
+      expect(
+        tester.getSize(find.byKey(const ValueKey('details'))).width,
+        closeTo(1200 * 5 / 12, 1),
+      );
     });
 
-    testWidgets('a span cascades up from the nearest defined band',
-        (tester) async {
+    testWidgets('a span cascades up from the nearest defined band', (
+      tester,
+    ) async {
       // Only md is declared, so lg and xl inherit it rather than resetting.
       final atMd = await widthsAt(tester, 800, 'col-12 col-md-6');
       final atLg = await widthsAt(tester, 1000, 'col-12 col-md-6');
@@ -128,10 +139,20 @@ void main() {
     });
 
     testWidgets('gutters narrow the column, not the row', (tester) async {
-      final tight = await widthsAt(tester, 1200, 'col-12 col-lg-4',
-          count: 3, rowClasses: 'gx-0');
-      final spaced = await widthsAt(tester, 1200, 'col-12 col-lg-4',
-          count: 3, rowClasses: 'gx-4');
+      final tight = await widthsAt(
+        tester,
+        1200,
+        'col-12 col-lg-4',
+        count: 3,
+        rowClasses: 'gx-0',
+      );
+      final spaced = await widthsAt(
+        tester,
+        1200,
+        'col-12 col-lg-4',
+        count: 3,
+        rowClasses: 'gx-4',
+      );
 
       expect(tight.first, closeTo(400, 1));
       // gx-4 is 24px, split half either side of each column.
@@ -140,23 +161,26 @@ void main() {
 
     testWidgets('an offset pushes the column across', (tester) async {
       await surface(tester, 1200);
-      await tester.pumpWidget(const MediaQuery(
-        data: MediaQueryData(size: Size(1200, 900)),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SizedBox(
-            width: 1200,
-            child: FB5Row(
-              classNames: 'gx-0',
-              children: [
-                FB5Col(
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(size: Size(1200, 900)),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              width: 1200,
+              child: FB5Row(
+                classNames: 'gx-0',
+                children: [
+                  FB5Col(
                     classNames: 'col-4 offset-4',
-                    child: SizedBox(key: ValueKey('centred'), height: 10)),
-              ],
+                    child: SizedBox(key: ValueKey('centred'), height: 10),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       final left = tester.getTopLeft(find.byKey(const ValueKey('centred'))).dx;

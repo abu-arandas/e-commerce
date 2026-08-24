@@ -16,31 +16,67 @@ abstract final class AppTypography {
     final body = GoogleFonts.inter(color: primary, height: 1.5);
 
     return TextTheme(
-      displayLarge: display.copyWith(fontSize: 64, fontWeight: FontWeight.w600, letterSpacing: -1),
-      displayMedium: display.copyWith(fontSize: 48, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+      displayLarge: display.copyWith(
+        fontSize: 64,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -1,
+      ),
+      displayMedium: display.copyWith(
+        fontSize: 48,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.5,
+      ),
       displaySmall: display.copyWith(fontSize: 36, fontWeight: FontWeight.w600),
       headlineLarge: display.copyWith(fontSize: 32),
       headlineMedium: display.copyWith(fontSize: 26),
       headlineSmall: display.copyWith(fontSize: 22),
-      titleLarge: GoogleFonts.inter(color: primary, fontSize: 20, fontWeight: FontWeight.w600),
-      titleMedium: GoogleFonts.inter(color: primary, fontSize: 16, fontWeight: FontWeight.w600),
-      titleSmall: GoogleFonts.inter(color: primary, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+      titleLarge: GoogleFonts.inter(
+        color: primary,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
+      titleMedium: GoogleFonts.inter(
+        color: primary,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      titleSmall: GoogleFonts.inter(
+        color: primary,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.3,
+      ),
       bodyLarge: body.copyWith(fontSize: 16),
       bodyMedium: body.copyWith(fontSize: 14),
       bodySmall: body.copyWith(fontSize: 12.5, color: secondary),
-      labelLarge: GoogleFonts.inter(color: primary, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.4),
-      labelMedium: GoogleFonts.inter(color: secondary, fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0.6),
-      labelSmall: GoogleFonts.inter(color: secondary, fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 1.2),
+      labelLarge: GoogleFonts.inter(
+        color: primary,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.4,
+      ),
+      labelMedium: GoogleFonts.inter(
+        color: secondary,
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.6,
+      ),
+      labelSmall: GoogleFonts.inter(
+        color: secondary,
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 1.2,
+      ),
     );
   }
 
   /// Uppercase "eyebrow" / label used for section kickers and nav.
   static TextStyle eyebrow({Color color = AppColors.gold}) => GoogleFonts.inter(
-        color: color,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 2.4,
-      );
+    color: color,
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 2.4,
+  );
 
   /// Serif brand wordmark style.
   static TextStyle wordmark({Color color = AppColors.ink, double size = 24}) =>

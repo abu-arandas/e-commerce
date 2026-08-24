@@ -26,25 +26,28 @@ enum AppRole {
   }
 
   String get db => switch (this) {
-        AppRole.customer => 'customer',
-        AppRole.catalogManager => 'catalog_manager',
-        AppRole.marketingManager => 'marketing_manager',
-        AppRole.fulfillment => 'fulfillment',
-        AppRole.admin => 'admin',
-      };
+    AppRole.customer => 'customer',
+    AppRole.catalogManager => 'catalog_manager',
+    AppRole.marketingManager => 'marketing_manager',
+    AppRole.fulfillment => 'fulfillment',
+    AppRole.admin => 'admin',
+  };
 
   String get label => switch (this) {
-        AppRole.customer => 'Customer',
-        AppRole.catalogManager => 'Catalog Manager',
-        AppRole.marketingManager => 'Marketing Manager',
-        AppRole.fulfillment => 'Fulfillment Specialist',
-        AppRole.admin => 'Administrator',
-      };
+    AppRole.customer => 'Customer',
+    AppRole.catalogManager => 'Catalog Manager',
+    AppRole.marketingManager => 'Marketing Manager',
+    AppRole.fulfillment => 'Fulfillment Specialist',
+    AppRole.admin => 'Administrator',
+  };
 
   bool get isStaff => this != AppRole.customer;
-  bool get canManageCatalog => this == AppRole.catalogManager || this == AppRole.admin;
-  bool get canManagePromotions => this == AppRole.marketingManager || this == AppRole.admin;
-  bool get canManageOrders => this == AppRole.fulfillment || this == AppRole.admin;
+  bool get canManageCatalog =>
+      this == AppRole.catalogManager || this == AppRole.admin;
+  bool get canManagePromotions =>
+      this == AppRole.marketingManager || this == AppRole.admin;
+  bool get canManageOrders =>
+      this == AppRole.fulfillment || this == AppRole.admin;
 }
 
 class AppUser {
@@ -63,7 +66,9 @@ class AppUser {
   final String? phone;
 
   String get displayName {
-    if (fullName != null && fullName!.trim().isNotEmpty) return fullName!.trim();
+    if (fullName != null && fullName!.trim().isNotEmpty) {
+      return fullName!.trim();
+    }
     final handle = email.split('@').first;
     return handle.isEmpty ? 'Guest' : handle;
   }
@@ -71,33 +76,35 @@ class AppUser {
   String get initials {
     final n = displayName.trim();
     final parts = n.split(RegExp(r'\s+'));
-    if (parts.length >= 2) return (parts.first[0] + parts.last[0]).toUpperCase();
+    if (parts.length >= 2) {
+      return (parts.first[0] + parts.last[0]).toUpperCase();
+    }
     return n.isNotEmpty ? n.substring(0, 1).toUpperCase() : '?';
   }
 
   factory AppUser.fromJson(Map<String, dynamic> json) => AppUser(
-        id: J.str(json['id']),
-        email: J.str(json['email']),
-        fullName: J.strOrNull(json['full_name']),
-        role: AppRole.fromDb(J.strOrNull(json['role'])),
-        phone: J.strOrNull(json['phone']),
-      );
+    id: J.str(json['id']),
+    email: J.str(json['email']),
+    fullName: J.strOrNull(json['full_name']),
+    role: AppRole.fromDb(J.strOrNull(json['role'])),
+    phone: J.strOrNull(json['phone']),
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'email': email,
-        'full_name': fullName,
-        'role': role.db,
-        'phone': phone,
-      };
+    'id': id,
+    'email': email,
+    'full_name': fullName,
+    'role': role.db,
+    'phone': phone,
+  };
 
   AppUser copyWith({String? fullName, AppRole? role, String? phone}) => AppUser(
-        id: id,
-        email: email,
-        fullName: fullName ?? this.fullName,
-        role: role ?? this.role,
-        phone: phone ?? this.phone,
-      );
+    id: id,
+    email: email,
+    fullName: fullName ?? this.fullName,
+    role: role ?? this.role,
+    phone: phone ?? this.phone,
+  );
 }
 
 class Address {
@@ -127,33 +134,37 @@ class Address {
     final parts = <String>[
       line1,
       if (line2 != null && line2!.isNotEmpty) line2!,
-      [city, region, postalCode].where((e) => e != null && e.isNotEmpty).join(', '),
+      [
+        city,
+        region,
+        postalCode,
+      ].where((e) => e != null && e.isNotEmpty).join(', '),
       country,
     ];
     return parts.where((e) => e.trim().isNotEmpty).join('\n');
   }
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(
-        id: J.str(json['id']),
-        label: J.strOrNull(json['label']),
-        line1: J.str(json['line1']),
-        line2: J.strOrNull(json['line2']),
-        city: J.str(json['city']),
-        region: J.strOrNull(json['region']),
-        postalCode: J.strOrNull(json['postal_code']),
-        country: J.str(json['country'], 'US'),
-        isDefault: J.toBool(json['is_default']),
-      );
+    id: J.str(json['id']),
+    label: J.strOrNull(json['label']),
+    line1: J.str(json['line1']),
+    line2: J.strOrNull(json['line2']),
+    city: J.str(json['city']),
+    region: J.strOrNull(json['region']),
+    postalCode: J.strOrNull(json['postal_code']),
+    country: J.str(json['country'], 'US'),
+    isDefault: J.toBool(json['is_default']),
+  );
 
   Map<String, dynamic> toJson() => {
-        if (id.isNotEmpty) 'id': id,
-        'label': label,
-        'line1': line1,
-        'line2': line2,
-        'city': city,
-        'region': region,
-        'postal_code': postalCode,
-        'country': country,
-        'is_default': isDefault,
-      };
+    if (id.isNotEmpty) 'id': id,
+    'label': label,
+    'line1': line1,
+    'line2': line2,
+    'city': city,
+    'region': region,
+    'postal_code': postalCode,
+    'country': country,
+    'is_default': isDefault,
+  };
 }

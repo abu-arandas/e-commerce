@@ -31,11 +31,16 @@ class VariantSelector extends StatelessWidget {
           // ---- Colour (Level 1) ----
           Row(
             children: [
-              Text('COLOUR', style: AppTypography.eyebrow(color: AppColors.slate)),
+              Text(
+                'COLOUR',
+                style: AppTypography.eyebrow(color: AppColors.slate),
+              ),
               const SizedBox(width: AppSpacing.xs),
               if (selectedGroup != null)
-                Text(selectedGroup.name,
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  selectedGroup.name,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -62,12 +67,19 @@ class VariantSelector extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('SIZE', style: AppTypography.eyebrow(color: AppColors.slate)),
+              Text(
+                'SIZE',
+                style: AppTypography.eyebrow(color: AppColors.slate),
+              ),
               InkWell(
                 onTap: () => _showSizeGuide(context),
-                child: Text('Size guide',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.goldDeep, decoration: TextDecoration.underline)),
+                child: Text(
+                  'Size guide',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.goldDeep,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ],
           ),
@@ -80,13 +92,18 @@ class VariantSelector extends StatelessWidget {
                 _SizeChip(
                   item: item,
                   selected: item.id == selectedItem?.id,
-                  onTap: item.inStock ? () => controller.selectSize(item) : null,
+                  onTap: item.inStock
+                      ? () => controller.selectSize(item)
+                      : null,
                 ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           if (selectedItem != null)
-            StockBadge(stock: selectedItem.stockQuantity, threshold: selectedItem.lowStockThreshold),
+            StockBadge(
+              stock: selectedItem.stockQuantity,
+              threshold: selectedItem.lowStockThreshold,
+            ),
         ],
       );
     });
@@ -103,8 +120,10 @@ class VariantSelector extends StatelessWidget {
           children: [
             Text('Size guide', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.sm),
-            Text('Garments run true to size. For an oversized fit, size up.',
-                style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              'Garments run true to size. For an oversized fit, size up.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       ),
@@ -126,7 +145,10 @@ class _SizeChip extends StatelessWidget {
       onTap: onTap,
       child: Container(
         constraints: const BoxConstraints(minWidth: 52),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected ? AppColors.ink : AppColors.surface,
@@ -136,11 +158,11 @@ class _SizeChip extends StatelessWidget {
         child: Text(
           item.sizeLabel,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: soldOut
-                    ? AppColors.mist
-                    : (selected ? AppColors.textOnInk : AppColors.ink),
-                decoration: soldOut ? TextDecoration.lineThrough : null,
-              ),
+            color: soldOut
+                ? AppColors.mist
+                : (selected ? AppColors.textOnInk : AppColors.ink),
+            decoration: soldOut ? TextDecoration.lineThrough : null,
+          ),
         ),
       ),
     );

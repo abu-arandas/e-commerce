@@ -80,7 +80,9 @@ class _ProductCardState extends State<ProductCard> {
                             child: Icon(
                               saved ? Icons.favorite : Icons.favorite_border,
                               size: 18,
-                              color: saved ? Colors.red.shade700 : AppColors.ink,
+                              color: saved
+                                  ? Colors.red.shade700
+                                  : AppColors.ink,
                             ),
                           ),
                         ),
@@ -95,13 +97,19 @@ class _ProductCardState extends State<ProductCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (p.category != null)
-                      Text(p.category!.toUpperCase(),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.slate)),
+                      Text(
+                        p.category!.toUpperCase(),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.slate,
+                        ),
+                      ),
                     const SizedBox(height: 2),
-                    Text(p.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      p.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
@@ -109,7 +117,8 @@ class _ProductCardState extends State<ProductCard> {
                           p.hasPriceRange
                               ? 'From ${Formatters.priceTrim(p.fromPrice)}'
                               : Formatters.priceTrim(p.fromPrice),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.ink),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: AppColors.ink),
                         ),
                         const Spacer(),
                         _swatches(p),
@@ -138,21 +147,29 @@ class _ProductCardState extends State<ProductCard> {
         if (p.groups.length > 4)
           Padding(
             padding: const EdgeInsets.only(left: 4),
-            child: Text('+${p.groups.length - 4}',
-                style: const TextStyle(fontSize: 11, color: AppColors.slate)),
+            child: Text(
+              '+${p.groups.length - 4}',
+              style: const TextStyle(fontSize: 11, color: AppColors.slate),
+            ),
           ),
       ],
     );
   }
 
   Widget _tag(String label, Color color, {bool dark = false}) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
-        decoration: BoxDecoration(color: color, borderRadius: const BorderRadius.all(AppSpacing.rSm)),
-        child: Text(label,
-            style: TextStyle(
-                color: dark ? AppColors.ink : AppColors.textOnInk,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: const BorderRadius.all(AppSpacing.rSm),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(
+        color: dark ? AppColors.ink : AppColors.textOnInk,
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.5,
+      ),
+    ),
+  );
 }

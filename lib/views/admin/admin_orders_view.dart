@@ -35,7 +35,10 @@ class AdminOrdersView extends StatelessWidget {
         if (orders.isEmpty) {
           return const Padding(
             padding: EdgeInsets.all(AppSpacing.xl),
-            child: Text('No orders yet.', style: TextStyle(color: AppColors.textMutedOnInk)),
+            child: Text(
+              'No orders yet.',
+              style: TextStyle(color: AppColors.textMutedOnInk),
+            ),
           );
         }
         return Column(
@@ -65,8 +68,16 @@ class _OrderTile extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-          childrenPadding: const EdgeInsets.fromLTRB(AppSpacing.md, 0, AppSpacing.md, AppSpacing.md),
+          tilePadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
+          childrenPadding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            0,
+            AppSpacing.md,
+            AppSpacing.md,
+          ),
           title: Row(
             children: [
               Expanded(
@@ -74,27 +85,45 @@ class _OrderTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(order.reference, style: Theme.of(context).textTheme.titleSmall),
-                    Text(order.contactEmail ?? '—',
-                        maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),
+                    Text(
+                      order.reference,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    Text(
+                      order.contactEmail ?? '—',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textMutedOnInk,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Expanded(
                 flex: 2,
-                child: Text(order.createdAt != null ? Formatters.date(order.createdAt!) : '—',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),
+                child: Text(
+                  order.createdAt != null
+                      ? Formatters.date(order.createdAt!)
+                      : '—',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textMutedOnInk,
+                  ),
+                ),
               ),
               Expanded(
                 flex: 2,
-                child: Text('${order.itemCount} item(s)',
-                    style: Theme.of(context).textTheme.bodySmall),
+                child: Text(
+                  '${order.itemCount} item(s)',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
               Expanded(
                 flex: 2,
-                child: Text(Formatters.price(order.grandTotal),
-                    style: Theme.of(context).textTheme.titleSmall),
+                child: Text(
+                  Formatters.price(order.grandTotal),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
               _StatusDropdown(order: order, admin: admin),
             ],
@@ -108,12 +137,34 @@ class _OrderTile extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: 4,
-                      child: Text('${line.productTitle} · ${line.variantSummary}',
-                          style: Theme.of(context).textTheme.bodyMedium),
+                      child: Text(
+                        '${line.productTitle} · ${line.variantSummary}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
-                    Expanded(flex: 2, child: Text(line.sku, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.textMutedOnInk))),
-                    Expanded(child: Text('×${line.quantity}', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium)),
-                    Expanded(child: Text(Formatters.price(line.lineTotal), textAlign: TextAlign.right, style: Theme.of(context).textTheme.bodyMedium)),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        line.sku,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textMutedOnInk,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        '×${line.quantity}',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        Formatters.price(line.lineTotal),
+                        textAlign: TextAlign.right,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -130,13 +181,21 @@ class _OrderTile extends StatelessWidget {
                     ),
                   ),
                 if (order.trackingNumber != null)
-                  Text('Tracking: ${order.trackingNumber}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),
+                  Text(
+                    'Tracking: ${order.trackingNumber}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMutedOnInk,
+                    ),
+                  ),
                 const Spacer(),
-                Text('Subtotal ${Formatters.price(order.subtotal)}  ·  '
-                    'Disc ${Formatters.price(order.discountTotal)}  ·  '
-                    'Ship ${order.shippingTotal == 0 ? 'Free' : Formatters.price(order.shippingTotal)}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk)),
+                Text(
+                  'Subtotal ${Formatters.price(order.subtotal)}  ·  '
+                  'Disc ${Formatters.price(order.discountTotal)}  ·  '
+                  'Ship ${order.shippingTotal == 0 ? 'Free' : Formatters.price(order.shippingTotal)}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textMutedOnInk,
+                  ),
+                ),
               ],
             ),
           ],

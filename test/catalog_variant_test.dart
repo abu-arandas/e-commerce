@@ -25,15 +25,19 @@ void main() {
     });
 
     test('honours a deep-linked colour', () async {
-      await catalog.loadProduct('cashmere-turtleneck',
-          preselectColorSlug: 'crimson');
+      await catalog.loadProduct(
+        'cashmere-turtleneck',
+        preselectColorSlug: 'crimson',
+      );
 
       expect(catalog.selectedGroup.value!.name, 'Crimson');
     });
 
     test('falls back to the first colour for an unknown slug', () async {
-      await catalog.loadProduct('cashmere-turtleneck',
-          preselectColorSlug: 'not-a-colour');
+      await catalog.loadProduct(
+        'cashmere-turtleneck',
+        preselectColorSlug: 'not-a-colour',
+      );
 
       expect(catalog.selectedGroup.value!.name, 'Midnight Blue');
     });
@@ -48,22 +52,27 @@ void main() {
       expect(catalog.selectedGroup.value!.id, isNot(previousGroupId));
       // The selected size must belong to the newly selected colour, not to a
       // leftover group from the previous product.
-      expect(catalog.selectedItem.value!.groupId, catalog.selectedGroup.value!.id);
+      expect(
+        catalog.selectedItem.value!.groupId,
+        catalog.selectedGroup.value!.id,
+      );
     });
 
-    test('a missing slug clears the previous product rather than leaving it',
-        () async {
-      await catalog.loadProduct('cashmere-turtleneck');
-      expect(catalog.selected.value, isNotNull);
+    test(
+      'a missing slug clears the previous product rather than leaving it',
+      () async {
+        await catalog.loadProduct('cashmere-turtleneck');
+        expect(catalog.selected.value, isNotNull);
 
-      expect(await catalog.loadProduct('no-such-piece'), isNull);
+        expect(await catalog.loadProduct('no-such-piece'), isNull);
 
-      // All three must clear together; a stale group/size behind a null product
-      // is what made the page render the wrong item.
-      expect(catalog.selected.value, isNull);
-      expect(catalog.selectedGroup.value, isNull);
-      expect(catalog.selectedItem.value, isNull);
-    });
+        // All three must clear together; a stale group/size behind a null product
+        // is what made the page render the wrong item.
+        expect(catalog.selected.value, isNull);
+        expect(catalog.selectedGroup.value, isNull);
+        expect(catalog.selectedItem.value, isNull);
+      },
+    );
   });
 
   group('colour selection', () {
@@ -74,7 +83,10 @@ void main() {
       catalog.selectGroup(oatmeal);
 
       expect(catalog.availableSizes.map((i) => i.sizeLabel), ['M', 'L']);
-      expect(catalog.availableSizes.every((i) => i.groupId == oatmeal.id), isTrue);
+      expect(
+        catalog.availableSizes.every((i) => i.groupId == oatmeal.id),
+        isTrue,
+      );
     });
 
     test('switching colour resets quantity and gallery position', () async {
@@ -122,7 +134,9 @@ void main() {
       await catalog.loadProduct('cashmere-turtleneck');
       final blue = catalog.selected.value!.groupBySlug('midnight-blue')!;
       catalog.selectGroup(blue);
-      final large = blue.items.firstWhere((i) => i.sizeLabel == 'L'); // 3 in stock
+      final large = blue.items.firstWhere(
+        (i) => i.sizeLabel == 'L',
+      ); // 3 in stock
       catalog.selectSize(large);
 
       for (var i = 0; i < 10; i++) {
@@ -148,7 +162,10 @@ void main() {
       catalog.setCategory('Knitwear');
 
       expect(catalog.visibleProducts, isNotEmpty);
-      expect(catalog.visibleProducts.every((p) => p.category == 'Knitwear'), isTrue);
+      expect(
+        catalog.visibleProducts.every((p) => p.category == 'Knitwear'),
+        isTrue,
+      );
     });
 
     test('searches title, category and description', () {
@@ -161,11 +178,15 @@ void main() {
 
     test('sorts by price ascending and descending', () {
       catalog.setSort('price_asc');
-      final ascending = catalog.visibleProducts.map((p) => p.fromPrice).toList();
+      final ascending = catalog.visibleProducts
+          .map((p) => p.fromPrice)
+          .toList();
       expect(ascending, orderedEquals(List.of(ascending)..sort()));
 
       catalog.setSort('price_desc');
-      final descending = catalog.visibleProducts.map((p) => p.fromPrice).toList();
+      final descending = catalog.visibleProducts
+          .map((p) => p.fromPrice)
+          .toList();
       expect(descending.first, greaterThanOrEqualTo(descending.last));
     });
   });

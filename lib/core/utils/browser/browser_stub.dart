@@ -6,3 +6,5 @@ void writeLocal(String key, String value) {}
 void removeLocal(String key) {}
 
 void replaceUrl(String url) {}
+
+void reload() {}

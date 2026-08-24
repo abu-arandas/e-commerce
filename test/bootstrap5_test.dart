@@ -25,13 +25,17 @@ void main() {
 
     testWidgets('classifies device bands from the viewport', (tester) async {
       Future<void> at(double width, void Function(BuildContext) check) async {
-        await tester.pumpWidget(MediaQuery(
-          data: MediaQueryData(size: Size(width, 900)),
-          child: Builder(builder: (context) {
-            check(context);
-            return const SizedBox();
-          }),
-        ));
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(size: Size(width, 900)),
+            child: Builder(
+              builder: (context) {
+                check(context);
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
       }
 
       await at(400, (c) {
@@ -55,17 +59,27 @@ void main() {
   group('responsive value cascade', () {
     /// Bootstrap's mobile-first rule: a value set at a band applies to that
     /// band and every larger one until something overrides it.
-    testWidgets('resolves the nearest declared value at or below the band',
-        (tester) async {
+    testWidgets('resolves the nearest declared value at or below the band', (
+      tester,
+    ) async {
       Future<String> resolveAt(double width) async {
         late String resolved;
-        await tester.pumpWidget(MediaQuery(
-          data: MediaQueryData(size: Size(width, 900)),
-          child: Builder(builder: (context) {
-            resolved = Fb5.value<String>(context, xs: 'xs', md: 'md', xl: 'xl');
-            return const SizedBox();
-          }),
-        ));
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(size: Size(width, 900)),
+            child: Builder(
+              builder: (context) {
+                resolved = Fb5.value<String>(
+                  context,
+                  xs: 'xs',
+                  md: 'md',
+                  xl: 'xl',
+                );
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
         return resolved;
       }
 
@@ -79,7 +93,10 @@ void main() {
   });
 
   group('column spans', () {
-    const col = FB5Col(classNames: 'col-12 col-md-6 col-lg-4 col-xl-3', child: SizedBox());
+    const col = FB5Col(
+      classNames: 'col-12 col-md-6 col-lg-4 col-xl-3',
+      child: SizedBox(),
+    );
 
     test('resolves the span declared at each band', () {
       expect(col.resolveSpan(Fb5Breakpoint.xs), 12);
