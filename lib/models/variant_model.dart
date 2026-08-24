@@ -25,45 +25,52 @@ class VariantItem {
   final int sortOrder;
 
   bool get inStock => stockQuantity > 0;
-  bool get isLowStock => stockQuantity > 0 && stockQuantity <= lowStockThreshold;
+  bool get isLowStock =>
+      stockQuantity > 0 && stockQuantity <= lowStockThreshold;
 
   /// Effective unit price given the parent product's [basePrice].
   double effectivePrice(double basePrice) => priceOverride ?? basePrice;
 
   factory VariantItem.fromJson(Map<String, dynamic> json) => VariantItem(
-        id: J.str(json['id']),
-        groupId: J.str(json['group_id']),
-        sku: J.str(json['sku']),
-        sizeLabel: J.str(json['size_label']),
-        priceOverride: J.toDoubleOrNull(json['price_override']),
-        stockQuantity: J.toInt(json['stock_quantity']),
-        lowStockThreshold:
-            J.toInt(json['low_stock_threshold'], AppConstants.lowStockThreshold),
-        sortOrder: J.toInt(json['sort_order']),
-      );
+    id: J.str(json['id']),
+    groupId: J.str(json['group_id']),
+    sku: J.str(json['sku']),
+    sizeLabel: J.str(json['size_label']),
+    priceOverride: J.toDoubleOrNull(json['price_override']),
+    stockQuantity: J.toInt(json['stock_quantity']),
+    lowStockThreshold: J.toInt(
+      json['low_stock_threshold'],
+      AppConstants.lowStockThreshold,
+    ),
+    sortOrder: J.toInt(json['sort_order']),
+  );
 
   Map<String, dynamic> toJson() => {
-        if (id.isNotEmpty) 'id': id,
-        'group_id': groupId,
-        'sku': sku,
-        'size_label': sizeLabel,
-        'price_override': priceOverride,
-        'stock_quantity': stockQuantity,
-        'low_stock_threshold': lowStockThreshold,
-        'sort_order': sortOrder,
-      };
+    if (id.isNotEmpty) 'id': id,
+    'group_id': groupId,
+    'sku': sku,
+    'size_label': sizeLabel,
+    'price_override': priceOverride,
+    'stock_quantity': stockQuantity,
+    'low_stock_threshold': lowStockThreshold,
+    'sort_order': sortOrder,
+  };
 
-  VariantItem copyWith({int? stockQuantity, double? priceOverride, String? sizeLabel, String? sku}) =>
-      VariantItem(
-        id: id,
-        groupId: groupId,
-        sku: sku ?? this.sku,
-        sizeLabel: sizeLabel ?? this.sizeLabel,
-        priceOverride: priceOverride ?? this.priceOverride,
-        stockQuantity: stockQuantity ?? this.stockQuantity,
-        lowStockThreshold: lowStockThreshold,
-        sortOrder: sortOrder,
-      );
+  VariantItem copyWith({
+    int? stockQuantity,
+    double? priceOverride,
+    String? sizeLabel,
+    String? sku,
+  }) => VariantItem(
+    id: id,
+    groupId: groupId,
+    sku: sku ?? this.sku,
+    sizeLabel: sizeLabel ?? this.sizeLabel,
+    priceOverride: priceOverride ?? this.priceOverride,
+    stockQuantity: stockQuantity ?? this.stockQuantity,
+    lowStockThreshold: lowStockThreshold,
+    sortOrder: sortOrder,
+  );
 }
 
 /// Level 1 (PRD §5.2) — a colour group holding colour-specific imagery and the
@@ -88,7 +95,8 @@ class VariantGroup {
   final int sortOrder;
 
   /// URL-safe slug for deep-linking a colour (`?color=midnight-blue`).
-  String get slug => name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
+  String get slug =>
+      name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-');
 
   String? get primaryImage => groupImages.isNotEmpty ? groupImages.first : null;
 
@@ -114,27 +122,26 @@ class VariantGroup {
   }
 
   Map<String, dynamic> toJson() => {
-        if (id.isNotEmpty) 'id': id,
-        'product_id': productId,
-        'name': name,
-        'color_hex': colorHex,
-        'group_images': groupImages,
-        'sort_order': sortOrder,
-      };
+    if (id.isNotEmpty) 'id': id,
+    'product_id': productId,
+    'name': name,
+    'color_hex': colorHex,
+    'group_images': groupImages,
+    'sort_order': sortOrder,
+  };
 
   VariantGroup copyWith({
     String? name,
     String? colorHex,
     List<String>? groupImages,
     List<VariantItem>? items,
-  }) =>
-      VariantGroup(
-        id: id,
-        productId: productId,
-        name: name ?? this.name,
-        colorHex: colorHex ?? this.colorHex,
-        groupImages: groupImages ?? this.groupImages,
-        items: items ?? this.items,
-        sortOrder: sortOrder,
-      );
+  }) => VariantGroup(
+    id: id,
+    productId: productId,
+    name: name ?? this.name,
+    colorHex: colorHex ?? this.colorHex,
+    groupImages: groupImages ?? this.groupImages,
+    items: items ?? this.items,
+    sortOrder: sortOrder,
+  );
 }

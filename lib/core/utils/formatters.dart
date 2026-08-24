@@ -2,8 +2,10 @@ import 'package:intl/intl.dart';
 
 /// Shared display formatters (currency, dates, stock text).
 abstract final class Formatters {
-  static final NumberFormat _usd =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$');
+  static final NumberFormat _usd = NumberFormat.currency(
+    locale: 'en_US',
+    symbol: '\$',
+  );
   static final NumberFormat _compact = NumberFormat.compact();
   static final DateFormat _date = DateFormat('MMM d, yyyy');
   static final DateFormat _dateTime = DateFormat('MMM d, yyyy · h:mm a');
@@ -22,7 +24,11 @@ abstract final class Formatters {
 
   /// Stock wording. [compact] drops the leading qualifier for tight spaces
   /// ("3 left" rather than "Only 3 left").
-  static String stockLabel(int qty, {int lowThreshold = 5, bool compact = false}) {
+  static String stockLabel(
+    int qty, {
+    int lowThreshold = 5,
+    bool compact = false,
+  }) {
     if (qty <= 0) return 'Sold out';
     if (qty <= lowThreshold) return compact ? '$qty left' : 'Only $qty left';
     return 'In stock';

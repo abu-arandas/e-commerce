@@ -39,19 +39,26 @@ void main() {
   group('eligibility rules', () {
     test('rejects an unknown code', () {
       expect(DemoData.validatePromo('NOPE', [knitwear]).valid, isFalse);
-      expect(DemoData.validatePromo('NOPE', [knitwear]).reason, 'Code not found');
+      expect(
+        DemoData.validatePromo('NOPE', [knitwear]).reason,
+        'Code not found',
+      );
     });
 
     test('enforces the minimum order against the whole bag', () {
-      final result = DemoData.validatePromo(
-          'FALL20', const [PromoLine(category: 'Knitwear', lineTotal: 100)]);
+      final result = DemoData.validatePromo('FALL20', const [
+        PromoLine(category: 'Knitwear', lineTotal: 100),
+      ]);
 
       expect(result.valid, isFalse);
       expect(result.reason, contains('minimum order'));
     });
 
     test('matches codes case-insensitively', () {
-      expect(DemoData.validatePromo('fall20', [knitwear, trousers]).valid, isTrue);
+      expect(
+        DemoData.validatePromo('fall20', [knitwear, trousers]).valid,
+        isTrue,
+      );
     });
 
     test('free shipping sets the flag rather than a discount', () {
@@ -65,8 +72,9 @@ void main() {
 
   group('discount arithmetic', () {
     test('a fixed amount never exceeds the eligible base', () {
-      final result = DemoData.validatePromo(
-          'WELCOME15', const [PromoLine(category: 'Knitwear', lineTotal: 80)]);
+      final result = DemoData.validatePromo('WELCOME15', const [
+        PromoLine(category: 'Knitwear', lineTotal: 80),
+      ]);
 
       expect(result.discountAmount, closeTo(15, 0.001));
       expect(result.discountAmount, lessThanOrEqualTo(80));
@@ -74,8 +82,9 @@ void main() {
 
     test('rounds to two decimal places', () {
       // 33.33% of nothing in particular — just check we never emit a long tail.
-      final result = DemoData.validatePromo(
-          'FALL20', const [PromoLine(category: 'Knitwear', lineTotal: 333.33)]);
+      final result = DemoData.validatePromo('FALL20', const [
+        PromoLine(category: 'Knitwear', lineTotal: 333.33),
+      ]);
 
       final cents = (result.discountAmount * 100).round();
       expect(result.discountAmount * 100, closeTo(cents, 0.0001));
@@ -85,8 +94,11 @@ void main() {
       for (final code in ['FALL20', 'WELCOME15', 'KNIT25']) {
         final result = DemoData.validatePromo('FALL20', [knitwear, trousers]);
         if (result.valid) {
-          expect(result.discountAmount, lessThanOrEqualTo(434),
-              reason: 'code $code');
+          expect(
+            result.discountAmount,
+            lessThanOrEqualTo(434),
+            reason: 'code $code',
+          );
         }
       }
     });

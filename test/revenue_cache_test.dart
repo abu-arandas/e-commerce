@@ -16,34 +16,38 @@ void main() {
     c.products.clear();
     c.orders.clear();
     for (var i = 0; i < products; i++) {
-      c.products.add(Product(
-        id: 'p$i',
-        slug: 'slug-$i',
-        title: 'Product $i',
-        category: 'Category ${i % 5}',
-        basePrice: 10,
-      ));
+      c.products.add(
+        Product(
+          id: 'p$i',
+          slug: 'slug-$i',
+          title: 'Product $i',
+          category: 'Category ${i % 5}',
+          basePrice: 10,
+        ),
+      );
     }
     for (var i = 0; i < orders; i++) {
-      c.orders.add(Order(
-        id: 'o$i',
-        status: OrderStatus.paid,
-        subtotal: 50,
-        discountTotal: 0,
-        shippingTotal: 0,
-        grandTotal: 50,
-        lines: [
-          for (var j = 0; j < 5; j++)
-            OrderLine(
-              id: 'l$i-$j',
-              productTitle: 'Product ${(i + j) % products}',
-              sku: 'SKU',
-              unitPrice: 10,
-              quantity: 1,
-              lineTotal: 10,
-            ),
-        ],
-      ));
+      c.orders.add(
+        Order(
+          id: 'o$i',
+          status: OrderStatus.paid,
+          subtotal: 50,
+          discountTotal: 0,
+          shippingTotal: 0,
+          grandTotal: 50,
+          lines: [
+            for (var j = 0; j < 5; j++)
+              OrderLine(
+                id: 'l$i-$j',
+                productTitle: 'Product ${(i + j) % products}',
+                sku: 'SKU',
+                unitPrice: 10,
+                quantity: 1,
+                lineTotal: 10,
+              ),
+          ],
+        ),
+      );
     }
     return c;
   }
@@ -62,24 +66,26 @@ void main() {
     final c = build();
     final before = Map<String, double>.from(c.revenueByCategory);
 
-    c.orders.add(const Order(
-      id: 'extra',
-      status: OrderStatus.paid,
-      subtotal: 10,
-      discountTotal: 0,
-      shippingTotal: 0,
-      grandTotal: 10,
-      lines: [
-        OrderLine(
-          id: 'lx',
-          productTitle: 'Product 0',
-          sku: 'SKU',
-          unitPrice: 10,
-          quantity: 1,
-          lineTotal: 10,
-        ),
-      ],
-    ));
+    c.orders.add(
+      const Order(
+        id: 'extra',
+        status: OrderStatus.paid,
+        subtotal: 10,
+        discountTotal: 0,
+        shippingTotal: 0,
+        grandTotal: 10,
+        lines: [
+          OrderLine(
+            id: 'lx',
+            productTitle: 'Product 0',
+            sku: 'SKU',
+            unitPrice: 10,
+            quantity: 1,
+            lineTotal: 10,
+          ),
+        ],
+      ),
+    );
 
     final after = c.revenueByCategory;
     expect(identical(before, after), isFalse, reason: 'cache must be dropped');
@@ -90,26 +96,43 @@ void main() {
     final c = build();
     final before = c.revenueByCategory;
 
-    c.products.add(const Product(
-        id: 'new', slug: 'new', title: 'Product 0', basePrice: 1));
+    c.products.add(
+      const Product(id: 'new', slug: 'new', title: 'Product 0', basePrice: 1),
+    );
 
     expect(identical(before, c.revenueByCategory), isFalse);
   });
 
   test('revenue is attributed to the right categories', () {
     final c = build(products: 5, orders: 0);
-    c.orders.add(const Order(
-      id: 'o',
-      status: OrderStatus.paid,
-      subtotal: 30,
-      discountTotal: 0,
-      shippingTotal: 0,
-      grandTotal: 30,
-      lines: [
-        OrderLine(id: 'a', productTitle: 'Product 0', sku: 'S', unitPrice: 10, quantity: 1, lineTotal: 10),
-        OrderLine(id: 'b', productTitle: 'Product 1', sku: 'S', unitPrice: 20, quantity: 1, lineTotal: 20),
-      ],
-    ));
+    c.orders.add(
+      const Order(
+        id: 'o',
+        status: OrderStatus.paid,
+        subtotal: 30,
+        discountTotal: 0,
+        shippingTotal: 0,
+        grandTotal: 30,
+        lines: [
+          OrderLine(
+            id: 'a',
+            productTitle: 'Product 0',
+            sku: 'S',
+            unitPrice: 10,
+            quantity: 1,
+            lineTotal: 10,
+          ),
+          OrderLine(
+            id: 'b',
+            productTitle: 'Product 1',
+            sku: 'S',
+            unitPrice: 20,
+            quantity: 1,
+            lineTotal: 20,
+          ),
+        ],
+      ),
+    );
 
     final revenue = c.revenueByCategory;
     expect(revenue['Category 0'], 10);

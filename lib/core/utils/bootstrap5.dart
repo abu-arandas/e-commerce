@@ -117,8 +117,9 @@ const Map<int, double> _gutterScale = {0: 0, 1: 4, 2: 8, 3: 16, 4: 24, 5: 48};
 const double _kDefaultGutter = 24; // Bootstrap default = 1.5rem
 
 final RegExp _colRe = RegExp(r'\bcol-(?:(xs|sm|md|lg|xl|xxl)-)?(\d{1,2})\b');
-final RegExp _offsetRe =
-    RegExp(r'\boffset-(?:(xs|sm|md|lg|xl|xxl)-)?(\d{1,2})\b');
+final RegExp _offsetRe = RegExp(
+  r'\boffset-(?:(xs|sm|md|lg|xl|xxl)-)?(\d{1,2})\b',
+);
 final RegExp _gutterRe = RegExp(r'\bg([xy]?)-(\d)\b');
 
 Fb5Breakpoint _bpFromToken(String? token) {
@@ -143,8 +144,9 @@ final _spanCache = <String, Map<Fb5Breakpoint, int>>{};
 final _offsetCache = <String, Map<Fb5Breakpoint, int>>{};
 
 Map<Fb5Breakpoint, int> _parseSpans(String classNames, RegExp re) {
-  final Map<String, Map<Fb5Breakpoint, int>>? cache =
-      re == _colRe ? _spanCache : (re == _offsetRe ? _offsetCache : null);
+  final Map<String, Map<Fb5Breakpoint, int>>? cache = re == _colRe
+      ? _spanCache
+      : (re == _offsetRe ? _offsetCache : null);
 
   if (cache != null && cache.containsKey(classNames)) {
     return cache[classNames]!;

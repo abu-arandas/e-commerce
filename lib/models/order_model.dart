@@ -17,14 +17,14 @@ enum OrderStatus {
   }
 
   String get label => switch (this) {
-        OrderStatus.pending => 'Pending',
-        OrderStatus.paid => 'Paid',
-        OrderStatus.processing => 'Processing',
-        OrderStatus.shipped => 'Shipped',
-        OrderStatus.delivered => 'Delivered',
-        OrderStatus.cancelled => 'Cancelled',
-        OrderStatus.refunded => 'Refunded',
-      };
+    OrderStatus.pending => 'Pending',
+    OrderStatus.paid => 'Paid',
+    OrderStatus.processing => 'Processing',
+    OrderStatus.shipped => 'Shipped',
+    OrderStatus.delivered => 'Delivered',
+    OrderStatus.cancelled => 'Cancelled',
+    OrderStatus.refunded => 'Refunded',
+  };
 
   /// Ordered pipeline used by the fulfillment grid's status stepper.
   static const List<OrderStatus> pipeline = [
@@ -62,21 +62,22 @@ class OrderLine {
   final int quantity;
   final double lineTotal;
 
-  String get variantSummary => [variantName, sizeLabel]
-      .where((e) => e != null && e.isNotEmpty)
-      .join(' · ');
+  String get variantSummary => [
+    variantName,
+    sizeLabel,
+  ].where((e) => e != null && e.isNotEmpty).join(' · ');
 
   factory OrderLine.fromJson(Map<String, dynamic> json) => OrderLine(
-        id: J.str(json['id']),
-        productTitle: J.str(json['product_title']),
-        variantName: J.strOrNull(json['variant_name']),
-        sizeLabel: J.strOrNull(json['size_label']),
-        sku: J.str(json['sku']),
-        category: J.strOrNull(json['category']),
-        unitPrice: J.toDouble(json['unit_price']),
-        quantity: J.toInt(json['quantity']),
-        lineTotal: J.toDouble(json['line_total']),
-      );
+    id: J.str(json['id']),
+    productTitle: J.str(json['product_title']),
+    variantName: J.strOrNull(json['variant_name']),
+    sizeLabel: J.strOrNull(json['size_label']),
+    sku: J.str(json['sku']),
+    category: J.strOrNull(json['category']),
+    unitPrice: J.toDouble(json['unit_price']),
+    quantity: J.toInt(json['quantity']),
+    lineTotal: J.toDouble(json['line_total']),
+  );
 }
 
 class Order {

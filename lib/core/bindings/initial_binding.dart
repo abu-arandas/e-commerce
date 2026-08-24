@@ -26,4 +26,3 @@ class InitialBinding extends Bindings {
     Get.lazyPut<AdminController>(() => AdminController(), fenix: true);
   }
 }
-

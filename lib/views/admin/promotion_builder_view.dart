@@ -27,7 +27,9 @@ class PromotionBuilderView extends StatelessWidget {
           icon: const Icon(Icons.add, size: 18),
           label: const Text('New promotion'),
           style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.gold, foregroundColor: AppColors.ink),
+            backgroundColor: AppColors.gold,
+            foregroundColor: AppColors.ink,
+          ),
         ),
       ],
       child: Obx(() {
@@ -35,8 +37,10 @@ class PromotionBuilderView extends StatelessWidget {
         if (promos.isEmpty) {
           return const Padding(
             padding: EdgeInsets.all(AppSpacing.xl),
-            child: Text('No promotions yet.',
-                style: TextStyle(color: AppColors.textMutedOnInk)),
+            child: Text(
+              'No promotions yet.',
+              style: TextStyle(color: AppColors.textMutedOnInk),
+            ),
           );
         }
         return Wrap(
@@ -52,10 +56,13 @@ class PromotionBuilderView extends StatelessWidget {
                   onDelete: () async {
                     final removed = await admin.deletePromotion(p.id);
                     if (!removed) {
-                      Get.snackbar('Delete failed', admin.error.value,
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: AppColors.danger,
-                          colorText: AppColors.textOnInk);
+                      Get.snackbar(
+                        'Delete failed',
+                        admin.error.value,
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: AppColors.danger,
+                        colorText: AppColors.textOnInk,
+                      );
                     }
                   },
                 ),
@@ -67,7 +74,10 @@ class PromotionBuilderView extends StatelessWidget {
   }
 
   void _openEditor(
-      BuildContext context, AdminController admin, Promotion? promo) {
+    BuildContext context,
+    AdminController admin,
+    Promotion? promo,
+  ) {
     showDialog<void>(
       context: context,
       builder: (_) => PromotionEditorDialog(admin: admin, existing: promo),
@@ -76,8 +86,11 @@ class PromotionBuilderView extends StatelessWidget {
 }
 
 class _PromoCard extends StatelessWidget {
-  const _PromoCard(
-      {required this.promo, required this.onEdit, required this.onDelete});
+  const _PromoCard({
+    required this.promo,
+    required this.onEdit,
+    required this.onDelete,
+  });
   final Promotion promo;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -90,9 +103,10 @@ class _PromoCard extends StatelessWidget {
         color: AppColors.inkSoft,
         borderRadius: const BorderRadius.all(AppSpacing.rMd),
         border: Border.all(
-            color: promo.isLive
-                ? AppColors.gold.withValues(alpha: 0.4)
-                : const Color(0xFF2A2A30)),
+          color: promo.isLive
+              ? AppColors.gold.withValues(alpha: 0.4)
+              : const Color(0xFF2A2A30),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,17 +115,22 @@ class _PromoCard extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm, vertical: 4),
+                  horizontal: AppSpacing.sm,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.ink,
                   borderRadius: const BorderRadius.all(AppSpacing.rSm),
                   border: Border.all(color: const Color(0xFF2A2A30)),
                 ),
-                child: Text(promo.code,
-                    style: const TextStyle(
-                        color: AppColors.gold,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1)),
+                child: Text(
+                  promo.code,
+                  style: const TextStyle(
+                    color: AppColors.gold,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                  ),
+                ),
               ),
               const Spacer(),
               _liveDot(promo.isLive),
@@ -120,24 +139,27 @@ class _PromoCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(promo.valueLabel, style: Theme.of(context).textTheme.titleLarge),
           if (promo.description != null)
-            Text(promo.description!,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.textMutedOnInk)),
+            Text(
+              promo.description!,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textMutedOnInk),
+            ),
           const SizedBox(height: AppSpacing.sm),
           _meta(
-              context,
-              'Min order',
-              promo.minOrderValue > 0
-                  ? Formatters.priceTrim(promo.minOrderValue)
-                  : 'None'),
+            context,
+            'Min order',
+            promo.minOrderValue > 0
+                ? Formatters.priceTrim(promo.minOrderValue)
+                : 'None',
+          ),
           _meta(
-              context,
-              'Usage',
-              promo.usageLimit == null
-                  ? '${promo.usageCount} (∞)'
-                  : '${promo.usageCount}/${promo.usageLimit}'),
+            context,
+            'Usage',
+            promo.usageLimit == null
+                ? '${promo.usageCount} (∞)'
+                : '${promo.usageCount}/${promo.usageLimit}',
+          ),
           if (promo.includedCategories.isNotEmpty)
             _meta(context, 'Only', promo.includedCategories.join(', ')),
           if (promo.validUntil != null)
@@ -146,14 +168,16 @@ class _PromoCard extends StatelessWidget {
           Row(
             children: [
               TextButton.icon(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit_outlined, size: 16),
-                  label: const Text('Edit')),
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_outlined, size: 16),
+                label: const Text('Edit'),
+              ),
               const Spacer(),
               IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  color: AppColors.danger,
-                  onPressed: onDelete),
+                icon: const Icon(Icons.delete_outline, size: 18),
+                color: AppColors.danger,
+                onPressed: onDelete,
+              ),
             ],
           ),
         ],
@@ -162,35 +186,40 @@ class _PromoCard extends StatelessWidget {
   }
 
   Widget _meta(BuildContext context, String k, String v) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 1),
-        child: Row(
-          children: [
-            Text('$k: ',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelSmall
-                    ?.copyWith(color: AppColors.textMutedOnInk)),
-            Expanded(
-                child: Text(v, style: Theme.of(context).textTheme.bodySmall)),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 1),
+    child: Row(
+      children: [
+        Text(
+          '$k: ',
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: AppColors.textMutedOnInk),
         ),
-      );
+        Expanded(child: Text(v, style: Theme.of(context).textTheme.bodySmall)),
+      ],
+    ),
+  );
 
   Widget _liveDot(bool live) => Row(
-        children: [
-          Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                  color: live ? AppColors.success : AppColors.slate,
-                  shape: BoxShape.circle)),
-          const SizedBox(width: 4),
-          Text(live ? 'Live' : 'Off',
-              style: TextStyle(
-                  color: live ? AppColors.success : AppColors.slate,
-                  fontSize: 11)),
-        ],
-      );
+    children: [
+      Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: live ? AppColors.success : AppColors.slate,
+          shape: BoxShape.circle,
+        ),
+      ),
+      const SizedBox(width: 4),
+      Text(
+        live ? 'Live' : 'Off',
+        style: TextStyle(
+          color: live ? AppColors.success : AppColors.slate,
+          fontSize: 11,
+        ),
+      ),
+    ],
+  );
 }
 
 class PromotionEditorDialog extends StatefulWidget {
@@ -219,10 +248,12 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
     final p = widget.existing;
     _code = TextEditingController(text: p?.code ?? '');
     _description = TextEditingController(text: p?.description ?? '');
-    _value =
-        TextEditingController(text: (p?.discountValue ?? 0).toStringAsFixed(0));
-    _minOrder =
-        TextEditingController(text: (p?.minOrderValue ?? 0).toStringAsFixed(0));
+    _value = TextEditingController(
+      text: (p?.discountValue ?? 0).toStringAsFixed(0),
+    );
+    _minOrder = TextEditingController(
+      text: (p?.minOrderValue ?? 0).toStringAsFixed(0),
+    );
     _usageLimit = TextEditingController(text: p?.usageLimit?.toString() ?? '');
     _type = p?.discountType ?? DiscountType.percentage;
     _active = p?.isActive ?? true;
@@ -242,8 +273,9 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
     final promo = Promotion(
       id: widget.existing?.id ?? Uuid.v4(),
       code: _code.text.trim().toUpperCase(),
-      description:
-          _description.text.trim().isEmpty ? null : _description.text.trim(),
+      description: _description.text.trim().isEmpty
+          ? null
+          : _description.text.trim(),
       discountType: _type,
       discountValue: double.tryParse(_value.text.trim()) ?? 0,
       minOrderValue: double.tryParse(_minOrder.text.trim()) ?? 0,
@@ -275,14 +307,16 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
               Row(
                 children: [
                   Text(
-                      widget.existing == null
-                          ? 'New promotion'
-                          : 'Edit promotion',
-                      style: Theme.of(context).textTheme.headlineSmall),
+                    widget.existing == null
+                        ? 'New promotion'
+                        : 'Edit promotion',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                   const Spacer(),
                   IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close)),
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
@@ -295,25 +329,30 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
                         controller: _code,
                         textCapitalization: TextCapitalization.characters,
                         decoration: const InputDecoration(
-                            labelText: 'Code (e.g. FALL20)'),
+                          labelText: 'Code (e.g. FALL20)',
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       TextField(
-                          controller: _description,
-                          decoration:
-                              const InputDecoration(labelText: 'Description')),
+                        controller: _description,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                        ),
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       DropdownButtonFormField<DiscountType>(
                         initialValue: _type,
-                        decoration:
-                            const InputDecoration(labelText: 'Discount type'),
+                        decoration: const InputDecoration(
+                          labelText: 'Discount type',
+                        ),
                         dropdownColor: AppColors.ink,
                         items: [
                           for (final t in DiscountType.values)
                             DropdownMenuItem(value: t, child: Text(t.label)),
                         ],
                         onChanged: (v) => setState(
-                            () => _type = v ?? DiscountType.percentage),
+                          () => _type = v ?? DiscountType.percentage,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Row(
@@ -336,7 +375,8 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
                               controller: _minOrder,
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
-                                  labelText: 'Min order (\$)'),
+                                labelText: 'Min order (\$)',
+                              ),
                             ),
                           ),
                         ],
@@ -349,7 +389,8 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
                               controller: _usageLimit,
                               keyboardType: TextInputType.number,
                               decoration: const InputDecoration(
-                                  labelText: 'Usage limit (blank = ∞)'),
+                                labelText: 'Usage limit (blank = ∞)',
+                              ),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
@@ -357,21 +398,26 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
                             child: OutlinedButton.icon(
                               onPressed: _pickEndDate,
                               icon: const Icon(Icons.event, size: 18),
-                              label: Text(_validUntil == null
-                                  ? 'End date'
-                                  : Formatters.date(_validUntil!)),
+                              label: Text(
+                                _validUntil == null
+                                    ? 'End date'
+                                    : Formatters.date(_validUntil!),
+                              ),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.textOnInk,
-                                side:
-                                    const BorderSide(color: Color(0xFF2A2A30)),
+                                side: const BorderSide(
+                                  color: Color(0xFF2A2A30),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Text('Restrict to categories (optional)',
-                          style: Theme.of(context).textTheme.labelMedium),
+                      Text(
+                        'Restrict to categories (optional)',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
                       const SizedBox(height: AppSpacing.xs),
                       Wrap(
                         spacing: AppSpacing.xs,
@@ -404,14 +450,16 @@ class _PromotionEditorDialogState extends State<PromotionEditorDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel')),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   ElevatedButton(
                     onPressed: _save,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.gold,
-                        foregroundColor: AppColors.ink),
+                      backgroundColor: AppColors.gold,
+                      foregroundColor: AppColors.ink,
+                    ),
                     child: const Text('Save'),
                   ),
                 ],

@@ -36,7 +36,8 @@ class Product {
   Iterable<VariantItem> get allItems => groups.expand((g) => g.items);
 
   bool get hasVariants => groups.isNotEmpty;
-  bool get inStock => allItems.any((i) => i.inStock) || (!hasVariants && isActive);
+  bool get inStock =>
+      allItems.any((i) => i.inStock) || (!hasVariants && isActive);
   int get totalStock => allItems.fold(0, (sum, i) => sum + i.stockQuantity);
 
   /// Computes the min and max prices in a single pass to avoid repeated iteration.
@@ -94,21 +95,23 @@ class Product {
       isFeatured: J.toBool(json['is_featured']),
       createdAt: J.dateOrNull(json['created_at']),
       groups: rawGroups
-          .map((e) => VariantGroup.fromJson(Map<String, dynamic>.from(e as Map)))
+          .map(
+            (e) => VariantGroup.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        if (id.isNotEmpty) 'id': id,
-        'slug': slug,
-        'title': title,
-        'description': description,
-        'category': category,
-        'base_price': basePrice,
-        'is_active': isActive,
-        'is_featured': isFeatured,
-      };
+    if (id.isNotEmpty) 'id': id,
+    'slug': slug,
+    'title': title,
+    'description': description,
+    'category': category,
+    'base_price': basePrice,
+    'is_active': isActive,
+    'is_featured': isFeatured,
+  };
 
   Product copyWith({
     String? title,
@@ -118,17 +121,16 @@ class Product {
     bool? isActive,
     bool? isFeatured,
     List<VariantGroup>? groups,
-  }) =>
-      Product(
-        id: id,
-        slug: slug,
-        title: title ?? this.title,
-        description: description ?? this.description,
-        category: category ?? this.category,
-        basePrice: basePrice ?? this.basePrice,
-        isActive: isActive ?? this.isActive,
-        isFeatured: isFeatured ?? this.isFeatured,
-        groups: groups ?? this.groups,
-        createdAt: createdAt,
-      );
+  }) => Product(
+    id: id,
+    slug: slug,
+    title: title ?? this.title,
+    description: description ?? this.description,
+    category: category ?? this.category,
+    basePrice: basePrice ?? this.basePrice,
+    isActive: isActive ?? this.isActive,
+    isFeatured: isFeatured ?? this.isFeatured,
+    groups: groups ?? this.groups,
+    createdAt: createdAt,
+  );
 }

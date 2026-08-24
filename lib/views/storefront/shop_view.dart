@@ -67,11 +67,12 @@ class _ShopViewState extends State<ShopView> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${list.length} piece(s)',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppColors.slate)),
+                    Text(
+                      '${list.length} piece(s)',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppColors.slate),
+                    ),
                     const SizedBox(height: AppSpacing.md),
                     ProductGrid(products: list),
                   ],
@@ -124,34 +125,40 @@ class _FilterBar extends StatelessWidget {
         ),
         FB5Col(
           classNames: 'col-4 col-lg-2',
-          child: Obx(() => DropdownButtonFormField<String>(
-                initialValue: catalog.sort.value,
-                isExpanded: true,
-                decoration: const InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
-                items: const [
-                  DropdownMenuItem(value: 'featured', child: Text('Featured')),
-                  DropdownMenuItem(value: 'price_asc', child: Text('Price ↑')),
-                  DropdownMenuItem(value: 'price_desc', child: Text('Price ↓')),
-                  DropdownMenuItem(value: 'newest', child: Text('Newest')),
-                ],
-                onChanged: (v) => catalog.setSort(v ?? 'featured'),
-              )),
+          child: Obx(
+            () => DropdownButtonFormField<String>(
+              initialValue: catalog.sort.value,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'featured', child: Text('Featured')),
+                DropdownMenuItem(value: 'price_asc', child: Text('Price ↑')),
+                DropdownMenuItem(value: 'price_desc', child: Text('Price ↓')),
+                DropdownMenuItem(value: 'newest', child: Text('Newest')),
+              ],
+              onChanged: (v) => catalog.setSort(v ?? 'featured'),
+            ),
+          ),
         ),
       ],
     );
   }
 
   Widget _chip(String label, bool selected, VoidCallback onTap) => Padding(
-        padding: const EdgeInsets.only(right: AppSpacing.xs),
-        child: ChoiceChip(
-          label: Text(label),
-          selected: selected,
-          onSelected: (_) => onTap(),
-          selectedColor: AppColors.ink,
-          labelStyle:
-              TextStyle(color: selected ? AppColors.textOnInk : AppColors.ink),
-        ),
-      );
+    padding: const EdgeInsets.only(right: AppSpacing.xs),
+    child: ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      selectedColor: AppColors.ink,
+      labelStyle: TextStyle(
+        color: selected ? AppColors.textOnInk : AppColors.ink,
+      ),
+    ),
+  );
 }

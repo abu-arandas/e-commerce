@@ -59,18 +59,17 @@ void main() {
       DateTime? until,
       int? limit,
       int used = 0,
-    }) =>
-        Promotion(
-          id: 'p',
-          code: 'CODE',
-          discountType: DiscountType.percentage,
-          discountValue: 10,
-          isActive: isActive,
-          validFrom: from,
-          validUntil: until,
-          usageLimit: limit,
-          usageCount: used,
-        );
+    }) => Promotion(
+      id: 'p',
+      code: 'CODE',
+      discountType: DiscountType.percentage,
+      discountValue: 10,
+      isActive: isActive,
+      validFrom: from,
+      validUntil: until,
+      usageLimit: limit,
+      usageCount: used,
+    );
 
     final past = DateTime.now().subtract(const Duration(days: 2));
     final future = DateTime.now().add(const Duration(days: 2));
@@ -103,23 +102,40 @@ void main() {
 
     test('the value label reads correctly per discount type', () {
       expect(
-          const Promotion(id: 'a', code: 'C', discountType: DiscountType.percentage, discountValue: 25)
-              .valueLabel,
-          '25% off');
+        const Promotion(
+          id: 'a',
+          code: 'C',
+          discountType: DiscountType.percentage,
+          discountValue: 25,
+        ).valueLabel,
+        '25% off',
+      );
       expect(
-          const Promotion(id: 'b', code: 'C', discountType: DiscountType.fixedAmount, discountValue: 15)
-              .valueLabel,
-          '\$15 off');
+        const Promotion(
+          id: 'b',
+          code: 'C',
+          discountType: DiscountType.fixedAmount,
+          discountValue: 15,
+        ).valueLabel,
+        '\$15 off',
+      );
       expect(
-          const Promotion(id: 'c', code: 'C', discountType: DiscountType.freeShipping, discountValue: 0)
-              .valueLabel,
-          'Free shipping');
+        const Promotion(
+          id: 'c',
+          code: 'C',
+          discountType: DiscountType.freeShipping,
+          discountValue: 0,
+        ).valueLabel,
+        'Free shipping',
+      );
     });
   });
 
   group('user display', () {
-    AppUser user({String? fullName, String email = 'ada.lovelace@example.com'}) =>
-        AppUser(id: 'u', email: email, fullName: fullName);
+    AppUser user({
+      String? fullName,
+      String email = 'ada.lovelace@example.com',
+    }) => AppUser(id: 'u', email: email, fullName: fullName);
 
     test('a full name wins over the email handle', () {
       expect(user(fullName: 'Ada Lovelace').displayName, 'Ada Lovelace');

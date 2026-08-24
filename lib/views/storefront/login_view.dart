@@ -38,8 +38,11 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final ok = _isSignUp
-        ? await auth.signUp(_email.text.trim(), _password.text,
-            fullName: _name.text.trim())
+        ? await auth.signUp(
+            _email.text.trim(),
+            _password.text,
+            fullName: _name.text.trim(),
+          )
         : await auth.signIn(_email.text.trim(), _password.text);
     if (ok) {
       Get.offNamed(auth.isStaff ? AppRoutes.adminDashboard : AppRoutes.account);
@@ -52,7 +55,9 @@ class _LoginViewState extends State<LoginView> {
       showFooter: false,
       child: Container(
         padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.xxl, horizontal: AppSpacing.md),
+          vertical: AppSpacing.xxl,
+          horizontal: AppSpacing.md,
+        ),
         constraints: const BoxConstraints(minHeight: 560),
         child: FB5Container(
           alignment: Alignment.topCenter,
@@ -80,8 +85,9 @@ class _LoginViewState extends State<LoginView> {
                     if (_isSignUp) ...[
                       TextFormField(
                         controller: _name,
-                        decoration:
-                            const InputDecoration(labelText: 'Full name'),
+                        decoration: const InputDecoration(
+                          labelText: 'Full name',
+                        ),
                         validator: (v) =>
                             (v ?? '').trim().isEmpty ? 'Required' : null,
                       ),
@@ -91,7 +97,12 @@ class _LoginViewState extends State<LoginView> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(labelText: 'Email'),
-                      validator: (v) => RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch((v ?? '').trim()) ? null : 'Enter a valid email',
+                      validator: (v) =>
+                          RegExp(
+                            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                          ).hasMatch((v ?? '').trim())
+                          ? null
+                          : 'Enter a valid email',
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextFormField(
@@ -108,31 +119,37 @@ class _LoginViewState extends State<LoginView> {
                       }
                       return Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Text(auth.error.value,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.danger)),
+                        child: Text(
+                          auth.error.value,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.danger),
+                        ),
                       );
                     }),
-                    Obx(() => GoldButton(
-                          label: _isSignUp ? 'Create account' : 'Sign in',
-                          expand: true,
-                          loading: auth.isLoading.value,
-                          onPressed: _submit,
-                        )),
+                    Obx(
+                      () => GoldButton(
+                        label: _isSignUp ? 'Create account' : 'Sign in',
+                        expand: true,
+                        loading: auth.isLoading.value,
+                        onPressed: _submit,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
                       onPressed: () => setState(() => _isSignUp = !_isSignUp),
-                      child: Text(_isSignUp
-                          ? 'Have an account? Sign in'
-                          : "New here? Create an account"),
+                      child: Text(
+                        _isSignUp
+                            ? 'Have an account? Sign in'
+                            : "New here? Create an account",
+                      ),
                     ),
                     if (!SupabaseService.isReady) ...[
                       const Divider(height: AppSpacing.xl),
-                      Text('Explore back-office (demo)',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.labelMedium),
+                      Text(
+                        'Explore back-office (demo)',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       Wrap(
                         alignment: WrapAlignment.center,
@@ -157,11 +174,11 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Widget _demoChip(String label, AppRole role) => ActionChip(
-        label: Text(label),
-        avatar: const Icon(Icons.badge_outlined, size: 16),
-        onPressed: () {
-          auth.previewAs(role);
-          Get.offNamed(AppRoutes.adminDashboard);
-        },
-      );
+    label: Text(label),
+    avatar: const Icon(Icons.badge_outlined, size: 16),
+    onPressed: () {
+      auth.previewAs(role);
+      Get.offNamed(AppRoutes.adminDashboard);
+    },
+  );
 }

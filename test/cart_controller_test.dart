@@ -22,11 +22,7 @@ void main() {
         basePrice: 100,
       );
 
-      dummyGroup = const VariantGroup(
-        id: 'g1',
-        productId: 'p1',
-        name: 'Black',
-      );
+      dummyGroup = const VariantGroup(id: 'g1', productId: 'p1', name: 'Black');
 
       dummyItem = const VariantItem(
         id: 'i1',

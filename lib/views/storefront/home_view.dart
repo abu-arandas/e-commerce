@@ -35,10 +35,7 @@ class HomeView extends StatelessWidget {
         children: [
           const _AnnouncementBar(),
           const _Hero(),
-          _sectionWrap(
-            context,
-            child: const _CategoryStrip(),
-          ),
+          _sectionWrap(context, child: const _CategoryStrip()),
           _sectionWrap(
             context,
             background: AppColors.surfaceAlt,
@@ -79,8 +76,11 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _sectionWrap(BuildContext context,
-      {required Widget child, Color? background}) {
+  Widget _sectionWrap(
+    BuildContext context, {
+    required Widget child,
+    Color? background,
+  }) {
     final v = AppSpacing.section(MediaQuery.sizeOf(context).width);
     return Container(
       color: background,
@@ -102,8 +102,9 @@ class _AnnouncementBar extends StatelessWidget {
       child: Text(
         'Complimentary shipping over \$150  ·  Use code FALL20 for 20% off',
         textAlign: TextAlign.center,
-        style: AppTypography.eyebrow(color: AppColors.goldSoft)
-            .copyWith(letterSpacing: 1.6),
+        style: AppTypography.eyebrow(
+          color: AppColors.goldSoft,
+        ).copyWith(letterSpacing: 1.6),
       ),
     );
   }
@@ -122,7 +123,8 @@ class _Hero extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           const VfImage(
-              url: 'https://picsum.photos/seed/vf-hero-editorial/1800/1200'),
+            url: 'https://picsum.photos/seed/vf-hero-editorial/1800/1200',
+          ),
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -144,27 +146,26 @@ class _Hero extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('AUTUMN / WINTER',
-                          style:
-                              AppTypography.eyebrow(color: AppColors.goldSoft)),
+                      Text(
+                        'AUTUMN / WINTER',
+                        style: AppTypography.eyebrow(color: AppColors.goldSoft),
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         'Quiet luxury,\nengineered to last.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayLarge
+                        style: Theme.of(context).textTheme.displayLarge
                             ?.copyWith(
-                                color: AppColors.textOnInk,
-                                fontSize: isMobile ? 44 : 64),
+                              color: AppColors.textOnInk,
+                              fontSize: isMobile ? 44 : 64,
+                            ),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
                         'A tightly-edited collection of cashmere, silk, and tailored '
                         'outerwear — cut for the modern wardrobe.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge
-                            ?.copyWith(color: AppColors.textMutedOnInk),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textMutedOnInk,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Row(
@@ -214,8 +215,9 @@ class _CategoryStrip extends StatelessWidget {
                 child: Stack(
                   children: [
                     VfImage(
-                        url: 'https://picsum.photos/seed/$seed/600/700',
-                        aspectRatio: 4 / 5),
+                      url: 'https://picsum.photos/seed/$seed/600/700',
+                      aspectRatio: 4 / 5,
+                    ),
                     Positioned.fill(
                       child: Container(
                         alignment: Alignment.bottomLeft,
@@ -227,9 +229,13 @@ class _CategoryStrip extends StatelessWidget {
                             colors: [Colors.transparent, Color(0xAA0E0E10)],
                           ),
                         ),
-                        child: Text(name,
-                            style: AppTypography.wordmark(
-                                color: AppColors.textOnInk, size: 20)),
+                        child: Text(
+                          name,
+                          style: AppTypography.wordmark(
+                            color: AppColors.textOnInk,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -256,8 +262,9 @@ class _EditorialBand extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.all(AppSpacing.rMd),
             child: VfImage(
-                url: 'https://picsum.photos/seed/vf-editorial-craft/1000/800',
-                aspectRatio: 5 / 4),
+              url: 'https://picsum.photos/seed/vf-editorial-craft/1000/800',
+              aspectRatio: 5 / 4,
+            ),
           ),
         ),
         FB5Col(
@@ -266,15 +273,16 @@ class _EditorialBand extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SectionHeading(
-                  eyebrow: 'Our craft', title: 'Made to be kept'),
+                eyebrow: 'Our craft',
+                title: 'Made to be kept',
+              ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'Every piece is developed with heritage mills and finished by hand. We favour '
                 'natural fibres, considered construction, and colours that endure beyond a single season.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge
-                    ?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton(

@@ -52,7 +52,7 @@ class _CheckoutViewState extends State<CheckoutView> {
       _city,
       _region,
       _postal,
-      _country
+      _country,
     ]) {
       c.dispose();
     }
@@ -80,13 +80,14 @@ class _CheckoutViewState extends State<CheckoutView> {
       Get.offNamed(AppRoutes.orderConfirmation, arguments: order);
     } else {
       Get.snackbar(
-          'Checkout failed',
-          cart.promoError.value.isNotEmpty
-              ? cart.promoError.value
-              : 'Please try again',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.danger,
-          colorText: Colors.white);
+        'Checkout failed',
+        cart.promoError.value.isNotEmpty
+            ? cart.promoError.value
+            : 'Please try again',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.danger,
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -95,7 +96,9 @@ class _CheckoutViewState extends State<CheckoutView> {
     return StorefrontScaffold(
       child: Container(
         padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+          vertical: AppSpacing.xl,
+          horizontal: AppSpacing.md,
+        ),
         child: FB5Container(
           child: Obx(() {
             if (cart.isEmpty) {
@@ -104,40 +107,47 @@ class _CheckoutViewState extends State<CheckoutView> {
                 title: 'Nothing to check out',
                 message: 'Your bag is empty.',
                 action: GoldButton(
-                    label: 'Shop now',
-                    onPressed: () => Get.toNamed(AppRoutes.shop)),
+                  label: 'Shop now',
+                  onPressed: () => Get.toNamed(AppRoutes.shop),
+                ),
               );
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SectionHeading(
-                    eyebrow: 'Almost yours', title: 'Checkout'),
+                  eyebrow: 'Almost yours',
+                  title: 'Checkout',
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 FB5Row(
                   classNames: 'gx-5 gy-4',
                   children: [
                     FB5Col(
-                        classNames: 'col-12 col-lg-7', child: _form(context)),
+                      classNames: 'col-12 col-lg-7',
+                      child: _form(context),
+                    ),
                     FB5Col(
                       classNames: 'col-12 col-lg-5',
                       child: Column(
                         children: [
                           OrderSummaryPanel(cart: cart),
                           const SizedBox(height: AppSpacing.md),
-                          Obx(() => GoldButton(
-                                label: 'Place order',
-                                expand: true,
-                                gold: true,
-                                loading: cart.isPlacingOrder.value,
-                                onPressed: _placeOrder,
-                              )),
+                          Obx(
+                            () => GoldButton(
+                              label: 'Place order',
+                              expand: true,
+                              gold: true,
+                              loading: cart.isPlacingOrder.value,
+                              onPressed: _placeOrder,
+                            ),
+                          ),
                           const SizedBox(height: AppSpacing.xs),
-                          Text('Demo checkout — no payment is captured.',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: AppColors.mist)),
+                          Text(
+                            'Demo checkout — no payment is captured.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.mist),
+                          ),
                         ],
                       ),
                     ),
@@ -168,8 +178,10 @@ class _CheckoutViewState extends State<CheckoutView> {
             const SizedBox(height: AppSpacing.sm),
             _field(_email, 'Email address', required: true, email: true),
             const SizedBox(height: AppSpacing.lg),
-            Text('Shipping address',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Shipping address',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: AppSpacing.sm),
             _field(_name, 'Full name', required: true),
             const SizedBox(height: AppSpacing.sm),
@@ -181,14 +193,17 @@ class _CheckoutViewState extends State<CheckoutView> {
               classNames: 'gx-3 gy-3',
               children: [
                 FB5Col(
-                    classNames: 'col-12 col-sm-6',
-                    child: _field(_city, 'City', required: true)),
+                  classNames: 'col-12 col-sm-6',
+                  child: _field(_city, 'City', required: true),
+                ),
                 FB5Col(
-                    classNames: 'col-6 col-sm-3',
-                    child: _field(_region, 'State')),
+                  classNames: 'col-6 col-sm-3',
+                  child: _field(_region, 'State'),
+                ),
                 FB5Col(
-                    classNames: 'col-6 col-sm-3',
-                    child: _field(_postal, 'ZIP', required: true)),
+                  classNames: 'col-6 col-sm-3',
+                  child: _field(_postal, 'ZIP', required: true),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -199,8 +214,12 @@ class _CheckoutViewState extends State<CheckoutView> {
     );
   }
 
-  Widget _field(TextEditingController c, String label,
-      {bool required = false, bool email = false}) {
+  Widget _field(
+    TextEditingController c,
+    String label, {
+    bool required = false,
+    bool email = false,
+  }) {
     return TextFormField(
       controller: c,
       decoration: InputDecoration(labelText: label),
@@ -208,7 +227,13 @@ class _CheckoutViewState extends State<CheckoutView> {
       validator: (v) {
         final value = (v ?? '').trim();
         if (required && value.isEmpty) return 'Required';
-        if (email && value.isNotEmpty && !RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) return 'Enter a valid email';
+        if (email &&
+            value.isNotEmpty &&
+            !RegExp(
+              r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+            ).hasMatch(value)) {
+          return 'Enter a valid email';
+        }
         return null;
       },
     );

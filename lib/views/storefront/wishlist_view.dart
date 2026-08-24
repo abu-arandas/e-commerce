@@ -19,7 +19,10 @@ class WishlistView extends StatelessWidget {
 
     return StorefrontScaffold(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.xl,
+          horizontal: AppSpacing.md,
+        ),
         child: FB5Container(
           child: Obx(() {
             final items = wishlist.savedProducts;
@@ -29,7 +32,8 @@ class WishlistView extends StatelessWidget {
               return EmptyState(
                 icon: Icons.favorite_border,
                 title: 'Your wishlist is empty',
-                message: 'Save your favorite pieces here to review or purchase later.',
+                message:
+                    'Save your favorite pieces here to review or purchase later.',
                 action: GoldButton(
                   label: 'Explore collection',
                   onPressed: () => Get.toNamed(AppRoutes.shop),
@@ -53,10 +57,9 @@ class WishlistView extends StatelessWidget {
                     unavailable == 1
                         ? '1 saved piece is no longer available.'
                         : '$unavailable saved pieces are no longer available.',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: AppColors.slate),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: AppColors.slate),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.xl),

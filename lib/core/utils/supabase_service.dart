@@ -40,7 +40,7 @@ abstract final class SupabaseService {
     }
     await Supabase.initialize(
       url: Env.supabaseUrl,
-      anonKey: Env.supabaseAnonKey,
+      publishableKey: Env.supabaseAnonKey,
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
       ),
@@ -53,8 +53,6 @@ abstract final class SupabaseService {
     if (!_ready) return null;
     // Named via AppConstants so the bucket lives in one place, which is the
     // reason that constant exists — this call used to hardcode it.
-    return client.storage
-        .from(AppConstants.storageBucket)
-        .getPublicUrl(path);
+    return client.storage.from(AppConstants.storageBucket).getPublicUrl(path);
   }
 }

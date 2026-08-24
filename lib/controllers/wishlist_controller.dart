@@ -66,8 +66,9 @@ class WishlistController extends GetxController {
       // as someone else. Dropping a response that outlived its owner keeps a
       // slow request for the previous user from overwriting the current one.
       if (Get.find<AuthController>().user.value?.id != user.id) return;
-      wishlistProductIds
-          .assignAll((rows as List).map((r) => r['product_id'].toString()));
+      wishlistProductIds.assignAll(
+        (rows as List).map((r) => r['product_id'].toString()),
+      );
     } catch (_) {
       // Keep whatever is already saved on a network failure.
     } finally {
@@ -90,16 +91,18 @@ class WishlistController extends GetxController {
         if (wishlistProductIds.contains(p.id)) p.id: p,
     };
 
-    final missing =
-        wishlistProductIds.where((id) => !byId.containsKey(id)).toList();
+    final missing = wishlistProductIds
+        .where((id) => !byId.containsKey(id))
+        .toList();
     if (missing.isNotEmpty) {
       for (final p in await _lookup(missing)) {
         byId[p.id] = p;
       }
     }
 
-    savedProducts
-        .assignAll(wishlistProductIds.map((id) => byId[id]).whereType<Product>());
+    savedProducts.assignAll(
+      wishlistProductIds.map((id) => byId[id]).whereType<Product>(),
+    );
     unavailableCount.value = wishlistProductIds.length - savedProducts.length;
   }
 
@@ -143,9 +146,10 @@ class WishlistController extends GetxController {
             .eq('user_id', user.id)
             .eq('product_id', product.id);
       } else {
-        await SupabaseService.client
-            .from(AppConstants.tblWishlists)
-            .insert({'user_id': user.id, 'product_id': product.id});
+        await SupabaseService.client.from(AppConstants.tblWishlists).insert({
+          'user_id': user.id,
+          'product_id': product.id,
+        });
       }
     } catch (_) {
       // Put the optimistic change back the way it was.

@@ -17,34 +17,38 @@ void main() {
     c.orders.clear();
 
     for (var i = 0; i < 500; i++) {
-      c.products.add(Product(
-        id: 'p$i',
-        slug: 'slug-$i',
-        title: 'Product $i',
-        category: 'Category ${i % 5}',
-        basePrice: 10,
-      ));
+      c.products.add(
+        Product(
+          id: 'p$i',
+          slug: 'slug-$i',
+          title: 'Product $i',
+          category: 'Category ${i % 5}',
+          basePrice: 10,
+        ),
+      );
     }
     for (var i = 0; i < 500; i++) {
-      c.orders.add(Order(
-        id: 'o$i',
-        status: OrderStatus.paid,
-        subtotal: 50,
-        discountTotal: 0,
-        shippingTotal: 0,
-        grandTotal: 50,
-        lines: [
-          for (var j = 0; j < 5; j++)
-            OrderLine(
-              id: 'l$i-$j',
-              productTitle: 'Product ${(i + j) % 500}',
-              sku: 'SKU',
-              unitPrice: 10,
-              quantity: 1,
-              lineTotal: 10,
-            ),
-        ],
-      ));
+      c.orders.add(
+        Order(
+          id: 'o$i',
+          status: OrderStatus.paid,
+          subtotal: 50,
+          discountTotal: 0,
+          shippingTotal: 0,
+          grandTotal: 50,
+          lines: [
+            for (var j = 0; j < 5; j++)
+              OrderLine(
+                id: 'l$i-$j',
+                productTitle: 'Product ${(i + j) % 500}',
+                sku: 'SKU',
+                unitPrice: 10,
+                quantity: 1,
+                lineTotal: 10,
+              ),
+          ],
+        ),
+      );
     }
 
     final firstRevenue = c.revenueByCategory;

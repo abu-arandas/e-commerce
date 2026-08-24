@@ -38,6 +38,14 @@ void replaceUrl(String url) {
   }
 }
 
+void reload() {
+  try {
+    _location.reload();
+  } catch (_) {
+    // A sandboxed frame may block navigation; leave the error screen visible.
+  }
+}
+
 // ---- Minimal typed interop bindings (no package:web dependency) ----
 
 @JS('localStorage')
@@ -45,6 +53,9 @@ external _Storage get _localStorage;
 
 @JS('history')
 external _History get _history;
+
+@JS('location')
+external _Location get _location;
 
 extension type _Storage._(JSObject _) implements JSObject {
   external String? getItem(String key);
@@ -54,4 +65,8 @@ extension type _Storage._(JSObject _) implements JSObject {
 
 extension type _History._(JSObject _) implements JSObject {
   external void replaceState(JSAny? data, String title, String url);
+}
+
+extension type _Location._(JSObject _) implements JSObject {
+  external void reload();
 }

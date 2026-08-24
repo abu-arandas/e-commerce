@@ -10,14 +10,14 @@ void main() {
   late OrdersController orders;
 
   Order order(String id, {OrderStatus status = OrderStatus.pending}) => Order(
-        id: id,
-        status: status,
-        subtotal: 100,
-        discountTotal: 0,
-        shippingTotal: 0,
-        grandTotal: 100,
-        createdAt: DateTime.now(),
-      );
+    id: id,
+    status: status,
+    subtotal: 100,
+    discountTotal: 0,
+    shippingTotal: 0,
+    grandTotal: 100,
+    createdAt: DateTime.now(),
+  );
 
   setUp(() => orders = OrdersController());
 
@@ -31,8 +31,11 @@ void main() {
     orders.record(order('first'));
     orders.record(order('second'));
 
-    expect(orders.orders.first.id, 'second',
-        reason: 'the newest order leads the list');
+    expect(
+      orders.orders.first.id,
+      'second',
+      reason: 'the newest order leads the list',
+    );
     expect(orders.orders.length, 2);
   });
 
@@ -46,17 +49,23 @@ void main() {
     expect(orders.error.value, isEmpty);
   });
 
-  test('history does not survive a clear, so it cannot leak to the next account',
-      () async {
-    orders.record(order('previous-account'));
-    orders.clear();
+  test(
+    'history does not survive a clear, so it cannot leak to the next account',
+    () async {
+      orders.record(order('previous-account'));
+      orders.clear();
 
-    // Demo mode replays session orders on fetch; after clear there are none.
-    await orders.fetch();
+      // Demo mode replays session orders on fetch; after clear there are none.
+      await orders.fetch();
 
-    expect(orders.orders, isEmpty,
-        reason: "a cleared session must not replay the previous account's orders");
-  });
+      expect(
+        orders.orders,
+        isEmpty,
+        reason:
+            "a cleared session must not replay the previous account's orders",
+      );
+    },
+  );
 
   test('demo fetch replays what was recorded this session', () async {
     orders.record(order('x'));

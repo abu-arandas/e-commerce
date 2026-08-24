@@ -67,12 +67,15 @@ class CatalogController extends GetxController {
         );
       } else {
         await Future<void>.delayed(
-            const Duration(milliseconds: 250)); // demo shimmer
+          const Duration(milliseconds: 250),
+        ); // demo shimmer
         products.assignAll(DemoData.products());
       }
     } catch (e) {
       error.value = 'Could not load products: $e';
-      if (!SupabaseService.isReady && products.isEmpty) { products.assignAll(DemoData.products()); }
+      if (!SupabaseService.isReady && products.isEmpty) {
+        products.assignAll(DemoData.products());
+      }
     } finally {
       isLoading.value = false;
     }
@@ -108,8 +111,11 @@ class CatalogController extends GetxController {
         list.sort((a, b) => b.fromPrice.compareTo(a.fromPrice));
         break;
       case 'newest':
-        list.sort((a, b) =>
-            (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+        list.sort(
+          (a, b) => (b.createdAt ?? DateTime(0)).compareTo(
+            a.createdAt ?? DateTime(0),
+          ),
+        );
         break;
       case 'featured':
       default:
@@ -134,8 +140,10 @@ class CatalogController extends GetxController {
   /// Load a product by slug (from the in-memory list, else fetch it), then seed
   /// the variant selection. [preselectColorSlug] supports deep links
   /// (`?color=midnight-blue`).
-  Future<Product?> loadProduct(String slug,
-      {String? preselectColorSlug}) async {
+  Future<Product?> loadProduct(
+    String slug, {
+    String? preselectColorSlug,
+  }) async {
     Product? product = products.firstWhereOrNull((p) => p.slug == slug);
 
     if (product == null && SupabaseService.isReady) {
@@ -165,7 +173,8 @@ class CatalogController extends GetxController {
       return null;
     }
 
-    final group = (preselectColorSlug != null
+    final group =
+        (preselectColorSlug != null
             ? product.groupBySlug(preselectColorSlug)
             : null) ??
         product.sortedGroups.firstOrNull;

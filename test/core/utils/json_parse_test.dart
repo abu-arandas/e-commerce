@@ -182,8 +182,10 @@ void main() {
       });
 
       test('parses ISO8601 string', () {
-        expect(J.dateOrNull('2020-01-01T00:00:00Z'),
-            DateTime.parse('2020-01-01T00:00:00Z'));
+        expect(
+          J.dateOrNull('2020-01-01T00:00:00Z'),
+          DateTime.parse('2020-01-01T00:00:00Z'),
+        );
       });
 
       test('returns null on invalid string format', () {
@@ -197,8 +199,10 @@ void main() {
       });
 
       test('parses ISO8601 string', () {
-        expect(J.date('2020-01-01T00:00:00.000Z'),
-            DateTime.parse('2020-01-01T00:00:00.000Z'));
+        expect(
+          J.date('2020-01-01T00:00:00.000Z'),
+          DateTime.parse('2020-01-01T00:00:00.000Z'),
+        );
       });
 
       test('returns epoch 0 on invalid string format', () {

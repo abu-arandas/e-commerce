@@ -8,10 +8,9 @@ abstract final class SeoService {
     required String title,
     String? description,
     String? canonicalPath,
-  }) =>
-      impl.applySeo(
-        title: title,
-        description: description,
-        canonicalPath: canonicalPath,
-      );
+  }) => impl.applySeo(
+    title: title,
+    description: description,
+    canonicalPath: canonicalPath,
+  );
 }
