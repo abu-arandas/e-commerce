@@ -47,6 +47,7 @@ insert into auth.users (id, email) values
 do $$
 declare
   v_role public.app_role;
+  v_name text;
   v_rejected boolean := false;
 begin
   set local role authenticated;
@@ -58,12 +59,67 @@ begin
   exception when insufficient_privilege then
     v_rejected := true;
   end;
+  update public.profiles
+     set full_name = 'Browser Test Customer'
+   where id = '22222222-bbbb-4bbb-8bbb-222222222222';
   reset role;
-  select role into v_role from public.profiles
+  select role, full_name into v_role, v_name from public.profiles
     where id = '22222222-bbbb-4bbb-8bbb-222222222222';
   perform assert_eq(v_rejected, true, 'customer role update rejected');
   perform assert_eq(v_role, 'customer'::public.app_role,
                     'customer role remains customer');
+  perform assert_eq(v_name, 'Browser Test Customer',
+                    'customer safe profile update remains allowed');
+end $$;
+
+-- Public RPCs must reject oversized or malformed JSON before any expensive
+-- expansion or transaction work begins.
+do $$
+declare
+  v_res jsonb;
+  v_items jsonb;
+  v_err text;
+  v_group uuid;
+begin
+  v_res := public.validate_promotion(
+    'FALL20',
+    (select jsonb_agg(jsonb_build_object('category', 'Knitwear', 'line_total', 1))
+       from generate_series(1, 101))
+  );
+  perform assert_eq(v_res ->> 'reason', 'Promotion basket is too large',
+                    'promotion basket size is bounded');
+
+  v_res := public.validate_promotion(
+    'FALL20', jsonb_build_array(jsonb_build_object('line_total', 'not-money'))
+  );
+  perform assert_eq(v_res ->> 'reason', 'Invalid promotion basket',
+                    'promotion money input is validated');
+
+  v_items := (select jsonb_agg(jsonb_build_object(
+      'variant_item_id', gen_random_uuid(), 'quantity', 1))
+    from generate_series(1, 101));
+  begin
+    perform public.place_order(v_items, null, null, null);
+    raise exception 'FAIL oversized order was accepted';
+  exception when others then
+    get stacked diagnostics v_err = message_text;
+    if v_err like 'FAIL%' then raise; end if;
+    perform assert_eq(v_err, 'Order contains too many line items',
+                      'order line count is bounded');
+  end;
+
+  select id into v_group from public.variant_groups limit 1;
+  begin
+    insert into public.variant_items (group_id, sku, size_label, low_stock_threshold)
+    values (v_group, 'AUDIT-NEGATIVE-THRESHOLD', 'ONE', -1);
+    raise exception 'FAIL negative low-stock threshold was accepted';
+  exception when check_violation then
+    perform assert_eq(true, true, 'low-stock threshold cannot be negative');
+  when others then
+    get stacked diagnostics v_err = message_text;
+    if v_err like 'FAIL%' then raise; end if;
+    raise;
+  end;
 end $$;
 
 do $$

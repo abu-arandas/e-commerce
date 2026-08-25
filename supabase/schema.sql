@@ -13,7 +13,9 @@
 -- Idempotent: every statement is CREATE IF NOT EXISTS / CREATE OR REPLACE /
 -- DROP POLICY IF EXISTS, so re-running is safe.
 --
--- Provenance: 0001_init_schema, 0002_functions, 0003_rls, 0004_hardening.
+-- Provenance: 0001_init_schema, 0002_functions, 0003_rls, 0004_hardening,
+-- 0005_integrity, 0006_rls_performance, 0007_write_paths,
+-- 0008_profile_update_least_privilege, 0009_rpc_input_hardening.
 -- The numbered migrations remain the upgrade path for databases already
 -- deployed; this file is the source of truth for a fresh install.
 --
@@ -26,6 +28,7 @@
 --   6. Back-office RPCs
 --   7. Row-Level Security
 --   8. Execute grants
+--   9. Public RPC input hardening and function search paths
 -- ============================================================================
 
 \set ON_ERROR_STOP on
@@ -99,7 +102,9 @@ create table if not exists public.variant_items (
   stock_quantity      integer not null default 0 check (stock_quantity >= 0),
   low_stock_threshold integer not null default 5,
   sort_order          integer not null default 0,
-  created_at          timestamptz not null default now()
+  created_at          timestamptz not null default now(),
+  constraint variant_items_low_stock_threshold_check
+    check (low_stock_threshold >= 0)
 );
 create index if not exists variant_items_group_idx on public.variant_items (group_id);
 create index if not exists variant_items_low_stock_idx
@@ -272,7 +277,7 @@ create trigger trg_orders_updated  before update on public.orders
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer set search_path = pg_catalog, public, extensions, pg_temp
 as $$
 begin
   insert into public.profiles (id, email, full_name)
@@ -304,7 +309,7 @@ create or replace function public.current_app_role()
 returns app_role
 language sql
 stable
-security definer set search_path = public
+security definer set search_path = pg_catalog, public, extensions, pg_temp
 as $$
   select coalesce(
     (select role from public.profiles where id = auth.uid()),
@@ -316,7 +321,7 @@ create or replace function public.is_staff()
 returns boolean
 language sql
 stable
-security definer set search_path = public
+security definer set search_path = pg_catalog, public, extensions, pg_temp
 as $$
   select public.current_app_role() in
     ('catalog_manager', 'marketing_manager', 'fulfillment', 'admin');
@@ -363,7 +368,7 @@ returns jsonb
 language plpgsql
 stable
 security definer
-set search_path = public, extensions
+set search_path = pg_catalog, public, extensions, pg_temp
 as $$
 declare
   promo           public.promotions%rowtype;
@@ -376,6 +381,28 @@ declare
 begin
   if p_code is null or btrim(p_code) = '' then
     return jsonb_build_object('valid', false, 'reason', 'Enter a promo code');
+  end if;
+
+  if length(btrim(p_code)) > 100 then
+    return jsonb_build_object('valid', false, 'reason', 'Promo code is too long');
+  end if;
+
+  if p_lines is null or jsonb_typeof(v_lines) <> 'array' then
+    return jsonb_build_object('valid', false, 'reason', 'Invalid promotion basket');
+  end if;
+
+  if jsonb_array_length(v_lines) > 100 then
+    return jsonb_build_object('valid', false, 'reason', 'Promotion basket is too large');
+  end if;
+
+  if exists (
+    select 1
+      from jsonb_array_elements(v_lines) l
+     where jsonb_typeof(l) <> 'object'
+        or not (l ? 'line_total')
+        or (l ->> 'line_total') !~ '^(0|[1-9][0-9]{0,7})(\.[0-9]{1,2})?$'
+  ) then
+    return jsonb_build_object('valid', false, 'reason', 'Invalid promotion basket');
   end if;
 
   select * into promo
@@ -484,7 +511,7 @@ create function public.place_order(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public, extensions
+set search_path = pg_catalog, public, extensions, pg_temp
 as $$
 declare
   v_order_id  uuid := gen_random_uuid();
@@ -506,8 +533,38 @@ declare
   v_grand     numeric;
   v_claimed   integer;
 begin
-  if p_items is null or jsonb_array_length(p_items) = 0 then
+  if p_items is null or jsonb_typeof(p_items) <> 'array' then
+    raise exception 'Order items must be a JSON array';
+  end if;
+
+  if jsonb_array_length(p_items) = 0 then
     raise exception 'Cannot place an empty order';
+  end if;
+
+  if jsonb_array_length(p_items) > 100 then
+    raise exception 'Order contains too many line items';
+  end if;
+
+  if exists (
+    select 1
+      from jsonb_array_elements(p_items) item
+     where jsonb_typeof(item) <> 'object'
+        or not (item ? 'variant_item_id')
+        or (item ->> 'variant_item_id') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+        or not (item ? 'quantity')
+        or (item ->> 'quantity') !~ '^([1-9][0-9]{0,2}|1000)$'
+  ) then
+    raise exception 'Invalid order items';
+  end if;
+
+  if p_contact_email is not null and length(p_contact_email) > 320 then
+    raise exception 'Contact email is too long';
+  end if;
+
+  if p_shipping_address is not null
+     and (jsonb_typeof(p_shipping_address) <> 'object'
+          or pg_column_size(p_shipping_address) > 16384) then
+    raise exception 'Invalid shipping address';
   end if;
 
   select * into v_settings from public.store_settings limit 1;
@@ -635,7 +692,7 @@ create or replace function public.restock_order(p_order_id uuid)
 returns void
 language plpgsql
 security definer
-set search_path = public, extensions
+set search_path = pg_catalog, public, extensions, pg_temp
 as $$
 declare
   v_claimed integer;
@@ -684,7 +741,7 @@ create or replace function public.save_product(p_product jsonb)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public, extensions
+set search_path = pg_catalog, public, extensions, pg_temp
 as $$
 declare
   v_product_id uuid;
@@ -810,7 +867,7 @@ returns jsonb
 language plpgsql
 stable
 security definer
-set search_path = public, extensions
+set search_path = pg_catalog, public, extensions, pg_temp
 as $$
 declare
   v_total          integer := 0;
@@ -1081,5 +1138,7 @@ grant execute on function public.admin_stats() to authenticated;
 grant execute on function public.restock_order(uuid) to authenticated;
 
 -- Storefront-facing: guests must be able to price a basket and check out.
+revoke execute on function public.validate_promotion(text, jsonb) from public;
 grant execute on function public.validate_promotion(text, jsonb) to anon, authenticated;
+revoke execute on function public.place_order(jsonb, text, jsonb, text) from public;
 grant execute on function public.place_order(jsonb, text, jsonb, text) to anon, authenticated;
