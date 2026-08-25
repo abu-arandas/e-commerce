@@ -112,15 +112,18 @@ are safe.
 **Already-deployed database — incremental:** apply the numbered migrations in
 [`supabase/migrations/`](supabase/migrations/) in order. `0004_hardening.sql`
 supersedes the `place_order`, `validate_promotion` and `restock_order`
-definitions from `0002`, and tightens two policies from `0003`.
+definitions from `0002`, and tightens two policies from `0003`. Migrations
+`0008_profile_update_least_privilege.sql` and `0009_rpc_input_hardening.sql`
+then restrict profile writes, bound public RPC inputs, harden SECURITY DEFINER
+search paths, and enforce a non-negative low-stock threshold.
 
 Both paths produce an identical database — verified by building each and
-diffing all 248 tables, columns, functions, policies, indexes and RLS flags.
+diffing all schema objects, functions, policies, indexes, grants, and RLS flags.
 
 **Verifying:** [`supabase/tests/`](supabase/tests/) holds a behavioural suite
-(36 assertions) covering category-targeted discounts, server-side shipping,
-concurrent usage-limit claims, duplicate-line stock checks, restock idempotency
-and the staff gates:
+(52 assertions) covering category-targeted discounts, server-side shipping,
+concurrent usage-limit claims, duplicate-line stock checks, restock idempotency,
+role-escalation rejection, public RPC input bounds, and the staff gates:
 
 ```bash
 psql -f supabase/tests/00_shim.sql   # only when running against plain Postgres
@@ -130,10 +133,12 @@ psql -f supabase/schema.sql -f supabase/seed.sql -f supabase/tests/10_tests.sql
 Deploy the promo-validation Edge Function:
 
 ```bash
+supabase secrets set ALLOWED_ORIGIN=https://vanguard.fashion
 supabase functions deploy validate-promo
 ```
-
-Grant a user staff access by setting their `profiles.role` (e.g.
+The function accepts at most 100 basket lines and a 64 KiB request body. Set
+`ALLOWED_ORIGIN` to the actual storefront origin; requests from other browser
+origins are rejected. Grant a user staff access by setting their `profiles.role` (e.g.
 `catalog_manager`, `marketing_manager`, `fulfillment`, `admin`).
 
 Storage: create a public `products` bucket and upload `.webp` imagery; the seed
