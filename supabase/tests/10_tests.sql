@@ -39,6 +39,33 @@ insert into auth.users (id, email) values
 update public.profiles set role = 'admin'
   where id = '11111111-aaaa-4aaa-8aaa-111111111111';
 
+-- A customer may edit safe profile fields, but the public authenticated role
+-- must not be able to alter the authorization-bearing role column.
+insert into auth.users (id, email) values
+  ('22222222-bbbb-4bbb-8bbb-222222222222', 'customer@vanguard.test')
+  on conflict do nothing;
+do $$
+declare
+  v_role public.app_role;
+  v_rejected boolean := false;
+begin
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub',
+                     '22222222-bbbb-4bbb-8bbb-222222222222', true);
+  begin
+    update public.profiles set role = 'admin'
+      where id = '22222222-bbbb-4bbb-8bbb-222222222222';
+  exception when insufficient_privilege then
+    v_rejected := true;
+  end;
+  reset role;
+  select role into v_role from public.profiles
+    where id = '22222222-bbbb-4bbb-8bbb-222222222222';
+  perform assert_eq(v_rejected, true, 'customer role update rejected');
+  perform assert_eq(v_role, 'customer'::public.app_role,
+                    'customer role remains customer');
+end $$;
+
 do $$
 declare
   v_knit_sku   uuid;

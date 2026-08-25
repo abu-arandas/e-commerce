@@ -1020,6 +1020,13 @@ create policy profiles_self_read on public.profiles
   for select using (id = (select auth.uid()) or (select public.is_staff()));
 
 drop policy if exists profiles_self_update on public.profiles;
+-- Customers may edit only safe profile fields. In particular, role is not
+-- updateable through the public API because current_app_role()/is_staff() use it
+-- as an authorization attribute. Role changes belong to an owner/service-role
+-- or dedicated admin path.
+revoke update on table public.profiles from anon, authenticated;
+grant update (email, full_name, phone) on table public.profiles to authenticated;
+
 create policy profiles_self_update on public.profiles
   for update using (id = (select auth.uid()))
   with check (id = (select auth.uid()));
